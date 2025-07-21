@@ -1,15 +1,5 @@
 import { factories } from '@strapi/strapi';
-import Decimal from 'decimal.js';
-
-// 简单的邀请码生成函数
-function generateInviteCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
+import { generateInviteCode } from '../../../../utils/invite';
 
 export default factories.createCoreController(
   'plugin::users-permissions.user',
@@ -17,41 +7,42 @@ export default factories.createCoreController(
     async inviteRegister(ctx) {
       const { username, email, password, inviteCode } = ctx.request.body;
 
-      try {
-        // ① 找到上级
-        const shangji = await strapi
-          .query('plugin::users-permissions.user')
-          .findOne({ where: { yaoqingMa: inviteCode } });
-        if (!shangji) return ctx.badRequest('邀请码无效');
+      /* ① 校验上级邀请码 ------------------------------------------------ */
+      const referrer = await strapi
+        .query('plugin::users-permissions.user')
+        .findOne({ where: { yaoqingMa: inviteCode } });
+      if (!referrer) return ctx.badRequest('邀请码无效');
 
-        // ② 生成邀请码
-        const yaoqingMa = generateInviteCode();
+      /* ② 生成自己的邀请码 ---------------------------------------------- */
+      const yaoqingMa = generateInviteCode();
 
-        // ③ 创建用户
-        const user = await strapi
-          .plugin('users-permissions')
-          .service('user')
-          .add({
-            username,
-            email,
-            password,
-            shangji: shangji.id,
-            yaoqingMa: yaoqingMa,
-            confirmed: true, // 自动确认用户
-            blocked: false,
-            role: 1, // 自动分配 Authenticated 角色
-          });
+      /* ③ 获取 Authenticated 角色 ID ------------------------------------ */
+      const authRole = await strapi
+        .plugin('users-permissions')
+        .service('role')
+        .getAuthenticatedRole();
 
-        // ④ 创建钱包
-        await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
-          data: { yonghu: user.id },
+      /* ④ 调官方 register —— 一步写全字段 ----------------------------- */
+      const newUser = await strapi
+        .plugin('users-permissions')
+        .service('user')
+        .register({
+          username,
+          email,
+          password,
+          role: authRole.id,
+          provider: 'local',        // 可不写，register 默认就是 local
+          confirmed: true,          // 若要邮件确认改成 false
+          yaoqingMa,                // 自己的邀请码
+          shangji: referrer.id,     // 上级
         });
 
-        ctx.body = { userId: user.id, success: true };
-      } catch (e) {
-        console.error('邀请码注册错误:', e);
-        ctx.throw(500, '注册失败，请重试');
-      }
+      /* ⑤ 创建钱包 ------------------------------------------------------ */
+      await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
+        data: { yonghu: newUser.id },
+      });
+
+      ctx.body = { userId: newUser.id, success: true };
     },
   })
 ); 
