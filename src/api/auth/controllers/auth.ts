@@ -22,25 +22,21 @@ export default factories.createCoreController(
           if (!hit) { myCode = code; break; }
         }
 
-        /* 3. 先测试基础注册（不添加自定义字段） --------------------------- */
+        /* 3. 使用 add 方法创建用户（包含自定义字段） --------------------- */
         const newUser = await strapi.plugin('users-permissions')
           .service('user')
-          .register({
+          .add({
             username,
             email,
             password,
             role: 1,  // 直接硬编码
             provider: 'local',
             confirmed: true,
-          });
-
-        /* 4. 注册成功后，再更新自定义字段 -------------------------------- */
-        await strapi.entityService.update('plugin::users-permissions.user', newUser.id, {
-          data: {
             yaoqingMa: myCode,
             shangji: referrer.id,
-          }
-        });
+          });
+
+        /* 4. 用户创建成功，无需额外更新字段 ------------------------------ */
 
         /* 5. 创建钱包 ------------------------------------------------------ */
         await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
