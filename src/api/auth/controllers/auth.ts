@@ -1,5 +1,5 @@
 import { factories } from '@strapi/strapi';
-import { generateInviteCode } from '../../../utils/invite';
+import { generateInviteCode } from '../../../../utils/invite';
 
 export default factories.createCoreController(
   'plugin::users-permissions.user',
