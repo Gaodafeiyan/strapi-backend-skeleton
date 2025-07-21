@@ -53,7 +53,9 @@ export default factories.createCoreService(
     },
 
     /** 到期赎回 */
-    async redeem(orderId: number) {
+    async redeem(orderId: number, options: { force?: boolean; testMode?: boolean } = {}) {
+      const { force = false, testMode = false } = options;
+      
       const order = await strapi.entityService.findOne(
         'api::dinggou-dingdan.dinggou-dingdan',
         orderId,
@@ -68,8 +70,27 @@ export default factories.createCoreService(
         throw new Error('订单状态不允许赎回');
       }
       
-      if (new Date() < order.jieshuShiJian) {
-        throw new Error('订单尚未到期');
+      const now = new Date();
+      const isExpired = now >= order.jieshuShiJian;
+      
+      if (!isExpired && !force && !testMode) {
+        const remainingMs = order.jieshuShiJian.getTime() - now.getTime();
+        const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+        const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
+        const remainingMinutes = Math.ceil(remainingMs / (1000 * 60));
+        
+        let timeMessage = '';
+        if (remainingDays > 0) {
+          timeMessage = `还需等待 ${remainingDays} 天`;
+        } else if (remainingHours > 0) {
+          timeMessage = `还需等待 ${remainingHours} 小时`;
+        } else if (remainingMinutes > 0) {
+          timeMessage = `还需等待 ${remainingMinutes} 分钟`;
+        } else {
+          timeMessage = '即将到期';
+        }
+        
+        throw new Error(`订单尚未到期，${timeMessage}`);
       }
 
       const jihua = order.jihua;
@@ -77,20 +98,35 @@ export default factories.createCoreService(
         throw new Error('关联的投资计划不存在');
       }
 
-      const staticUSDT = new Decimal(order.benjinUSDT).mul(jihua.jingtaiBili).div(100).toFixed(2);
-      const aiQty = new Decimal(order.benjinUSDT).mul(jihua.aiBili).div(100).toFixed(8);
+      // 计算收益
+      let staticUSDT, aiQty;
+      
+      if (isExpired || force || testMode) {
+        // 正常到期或强制赎回：按计划比例计算
+        staticUSDT = new Decimal(order.benjinUSDT).mul(jihua.jingtaiBili).div(100).toFixed(2);
+        aiQty = new Decimal(order.benjinUSDT).mul(jihua.aiBili).div(100).toFixed(8);
+      } else {
+        // 未到期赎回：按实际时间比例计算
+        const totalMs = order.jieshuShiJian.getTime() - order.kaishiShiJian.getTime();
+        const actualMs = now.getTime() - order.kaishiShiJian.getTime();
+        const ratio = Math.max(0, actualMs / totalMs);
+        
+        staticUSDT = new Decimal(order.benjinUSDT).mul(jihua.jingtaiBili).div(100).mul(ratio).toFixed(2);
+        aiQty = new Decimal(order.benjinUSDT).mul(jihua.aiBili).div(100).mul(ratio).toFixed(8);
+      }
 
-      // 使用事务确保数据一致性
-      await strapi.db.connection.transaction(async (trx) => {
+      try {
         // ① 钱包加钱
         await strapi
           .service('api::qianbao-yue.qianbao-yue')
           .addBalance(order.yonghu.id, staticUSDT, aiQty);
 
-        // ② 计算邀请奖励
-        await strapi
-          .service('api::yaoqing-jiangli.yaoqing-jiangli')
-          .createReferralReward(order);
+        // ② 计算邀请奖励（仅到期时）
+        if (isExpired || force) {
+          await strapi
+            .service('api::yaoqing-jiangli.yaoqing-jiangli')
+            .createReferralReward(order);
+        }
 
         // ③ 更新订单
         await strapi.entityService.update('api::dinggou-dingdan.dinggou-dingdan', orderId, {
@@ -100,7 +136,25 @@ export default factories.createCoreService(
             aiShuliang: aiQty,
           },
         });
-      });
+
+        return {
+          success: true,
+          data: {
+            orderId,
+            benjinUSDT: order.benjinUSDT,
+            staticUSDT,
+            aiQty,
+            isExpired,
+            force,
+            testMode,
+            startTime: order.kaishiShiJian,
+            endTime: order.jieshuShiJian,
+            currentTime: now
+          }
+        };
+      } catch (error) {
+        throw new Error(`赎回失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      }
     },
   })
 ); 
