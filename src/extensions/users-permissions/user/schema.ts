@@ -13,6 +13,10 @@ const YonghuSchema = {
                   target: 'api::qianbao-yue.qianbao-yue', configurable: false },
     dinggouOrders : { type: 'relation', relation: 'oneToMany',
                       target: 'api::dinggou-dingdan.dinggou-dingdan', mappedBy: 'yonghu' },
+    tuijianJiangli : { type: 'relation', relation: 'oneToMany',
+                       target: 'api::yaoqing-jiangli.yaoqing-jiangli', mappedBy: 'tuijianRen' },
+    laiyuanJiangli : { type: 'relation', relation: 'oneToMany',
+                       target: 'api::yaoqing-jiangli.yaoqing-jiangli', mappedBy: 'laiyuanRen' },
   },
 };
 export default YonghuSchema; 
