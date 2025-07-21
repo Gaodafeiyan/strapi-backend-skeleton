@@ -2,7 +2,12 @@ export default ({ env }: { env: any }) => ({
   host: env('HOST', '0.0.0.0'),
   port: env.int('PORT', 1337),
   app: {
-    keys: env.array('APP_KEYS', ['toBeModified1', 'toBeModified2']),
+    keys: env.array('APP_KEYS', [
+      'strapi-backend-skeleton-key-1',
+      'strapi-backend-skeleton-key-2',
+      'strapi-backend-skeleton-key-3',
+      'strapi-backend-skeleton-key-4'
+    ]),
   },
   cron: {
     enabled: true,
