@@ -1,6 +1,4 @@
-import type { Schema } from '@strapi/strapi/lib/types-utils';
-
-const YonghuSchema: Schema = {
+const YonghuSchema: any = {
   info: { singularName: 'user', pluralName: 'users', displayName: '用户扩展' },
   options: { draftAndPublish: false },
   attributes: {
