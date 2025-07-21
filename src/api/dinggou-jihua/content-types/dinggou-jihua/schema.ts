@@ -1,4 +1,4 @@
-const JihuaSchema: any = {
+const JihuaSchema = {
   info: { singularName: 'dinggou-jihua', pluralName: 'dinggou-jihuas', displayName: '认购计划' },
   options: { draftAndPublish: false },
   attributes: {

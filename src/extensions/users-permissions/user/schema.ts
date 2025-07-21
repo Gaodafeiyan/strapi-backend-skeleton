@@ -1,4 +1,4 @@
-const YonghuSchema: any = {
+const YonghuSchema = {
   info: { singularName: 'user', pluralName: 'users', displayName: '用户扩展' },
   options: { draftAndPublish: false },
   attributes: {

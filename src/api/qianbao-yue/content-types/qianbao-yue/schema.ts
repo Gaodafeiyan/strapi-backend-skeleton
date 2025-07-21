@@ -1,4 +1,4 @@
-const QianbaoSchema: any = {
+const QianbaoSchema = {
   info: { singularName: 'qianbao-yue', pluralName: 'qianbao-yues', displayName: '钱包余额' },
   options: { draftAndPublish: false },
   attributes: {

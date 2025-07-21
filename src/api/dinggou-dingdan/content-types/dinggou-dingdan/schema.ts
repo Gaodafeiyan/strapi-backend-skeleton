@@ -1,4 +1,4 @@
-const DingdanSchema: any = {
+const DingdanSchema = {
   info: { singularName: 'dinggou-dingdan', pluralName: 'dinggou-dingdans', displayName: '认购订单' },
   options: { draftAndPublish: false },
   attributes: {

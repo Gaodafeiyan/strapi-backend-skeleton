@@ -1,4 +1,4 @@
-const JiangliSchema: any = {
+const JiangliSchema = {
   info: { singularName: 'yaoqing-jiangli', pluralName: 'yaoqing-jianglis', displayName: '邀请奖励' },
   options: { draftAndPublish: false },
   attributes: {
