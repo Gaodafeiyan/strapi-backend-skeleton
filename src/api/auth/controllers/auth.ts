@@ -1,5 +1,8 @@
 import { factories } from '@strapi/strapi';
 import Decimal from 'decimal.js';
+import { customAlphabet } from 'nanoid';
+
+const nanoid8 = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789', 8);
 
 export default factories.createCoreController(
   'plugin::users-permissions.user',
@@ -14,7 +17,10 @@ export default factories.createCoreController(
           .findOne({ where: { yaoqingMa: inviteCode } });
         if (!shangji) return ctx.badRequest('邀请码无效');
 
-        // ② 创建用户
+        // ② 生成邀请码
+        const yaoqingMa = nanoid8();
+
+        // ③ 创建用户
         const user = await strapi
           .plugin('users-permissions')
           .service('user')
@@ -23,9 +29,12 @@ export default factories.createCoreController(
             email,
             password,
             shangji: shangji.id,
+            yaoqingMa: yaoqingMa,
+            confirmed: true, // 自动确认用户
+            blocked: false,
           });
 
-        // ③ 创建钱包
+        // ④ 创建钱包
         await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
           data: { yonghu: user.id },
         });
