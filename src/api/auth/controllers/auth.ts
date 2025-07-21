@@ -51,7 +51,7 @@ export default factories.createCoreController(
         if (!referrer) return ctx.badRequest('邀请码无效');
 
         /* 2. 生成唯一邀请码 ------------------------------------------------ */
-        let myCode: string;
+        let myCode: string | null = null;
         let attempts = 0;
         const maxAttempts = 10;
         
@@ -113,7 +113,7 @@ export default factories.createCoreController(
         };
       } catch (error) {
         console.error('邀请码注册错误:', error);
-        ctx.throw(500, `注册失败: ${error.message}`);
+        ctx.throw(500, `注册失败: ${error instanceof Error ? error.message : '未知错误'}`);
       }
     },
   })

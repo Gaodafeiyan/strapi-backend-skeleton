@@ -34,12 +34,12 @@ export default {
         for (let i = 0; i < dueOrders.length; i += concurrency) {
           const batch = dueOrders.slice(i, i + concurrency);
           await Promise.all(
-            batch.map(async (order) => {
+            batch.map(async (order: any) => {
               try {
                 await strapi.service('api::dinggou-dingdan.dinggou-dingdan').redeem(order.id);
                 console.log(`订单 ${order.id} 赎回成功`);
               } catch (error) {
-                console.error(`订单 ${order.id} 赎回失败:`, error.message);
+                console.error(`订单 ${order.id} 赎回失败:`, error instanceof Error ? error.message : '未知错误');
               }
             })
           );

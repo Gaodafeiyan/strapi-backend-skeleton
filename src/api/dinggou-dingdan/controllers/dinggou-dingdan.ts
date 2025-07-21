@@ -24,7 +24,7 @@ export default factories.createCoreController(
         ctx.body = { success: true, data: order };
       } catch (error) {
         console.error('创建订单错误:', error);
-        ctx.throw(500, error.message || '创建订单失败');
+        ctx.throw(500, error instanceof Error ? error.message : '创建订单失败');
       }
     },
 
@@ -61,7 +61,7 @@ export default factories.createCoreController(
         ctx.body = { success: true, message: '赎回成功' };
       } catch (error) {
         console.error('赎回订单错误:', error);
-        ctx.throw(500, error.message || '赎回失败');
+        ctx.throw(500, error instanceof Error ? error.message : '赎回失败');
       }
     },
   })
