@@ -1,4 +1,6 @@
 const JiangliSchema = {
+  kind: 'collectionType',
+  pluginOptions: { 'content-api': { enabled: true } },
   info: { singularName: 'yaoqing-jiangli', pluralName: 'yaoqing-jianglis', displayName: '邀请奖励' },
   options: { draftAndPublish: false },
   attributes: {

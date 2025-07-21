@@ -384,6 +384,11 @@ export interface ApiDinggouDingdanDinggouDingdan
   options: {
     draftAndPublish: false;
   };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
   attributes: {
     aiShuliang: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     benjinUSDT: Schema.Attribute.Decimal & Schema.Attribute.Required;
@@ -431,6 +436,11 @@ export interface ApiDinggouJihuaDinggouJihua
   options: {
     draftAndPublish: false;
   };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
   attributes: {
     aiBili: Schema.Attribute.Decimal & Schema.Attribute.Required;
     benjinUSDT: Schema.Attribute.Decimal & Schema.Attribute.Required;
@@ -471,6 +481,11 @@ export interface ApiQianbaoYueQianbaoYue extends Struct.CollectionTypeSchema {
   options: {
     draftAndPublish: false;
   };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
   attributes: {
     aiYue: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     createdAt: Schema.Attribute.DateTime;
@@ -504,6 +519,11 @@ export interface ApiYaoqingJiangliYaoqingJiangli
   };
   options: {
     draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
   };
   attributes: {
     createdAt: Schema.Attribute.DateTime;

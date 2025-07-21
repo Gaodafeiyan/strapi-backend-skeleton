@@ -1,4 +1,6 @@
 const YonghuSchema = {
+  kind: 'collectionType',
+  pluginOptions: { 'content-api': { enabled: true } },
   info: { singularName: 'user', pluralName: 'users', displayName: '用户扩展' },
   options: { draftAndPublish: false },
   attributes: {
