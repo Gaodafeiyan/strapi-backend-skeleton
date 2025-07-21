@@ -59,7 +59,14 @@ export default factories.createCoreService(
       const order = await strapi.entityService.findOne(
         'api::dinggou-dingdan.dinggou-dingdan',
         orderId,
-        { populate: ['jihua', 'yonghu'] }
+        { 
+          populate: {
+            jihua: true,
+            yonghu: {
+              populate: ['shangji']
+            }
+          }
+        }
       ) as any;
       
       if (!order) {
@@ -126,9 +133,23 @@ export default factories.createCoreService(
 
         // ② 计算邀请奖励（仅到期时）
         if (isExpired || force) {
-          await strapi
-            .service('api::yaoqing-jiangli.yaoqing-jiangli')
-            .createReferralReward(order);
+          try {
+            console.log('开始创建邀请奖励，订单ID:', orderId);
+            console.log('用户信息:', {
+              userId: order.yonghu.id,
+              username: order.yonghu.username,
+              shangji: order.yonghu.shangji
+            });
+            
+            await strapi
+              .service('api::yaoqing-jiangli.yaoqing-jiangli')
+              .createReferralReward(order);
+              
+            console.log('邀请奖励创建成功');
+          } catch (rewardError) {
+            console.error('邀请奖励创建失败:', rewardError);
+            // 邀请奖励失败不影响主流程
+          }
         }
 
         // ③ 更新订单
