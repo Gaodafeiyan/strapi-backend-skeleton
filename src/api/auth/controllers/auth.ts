@@ -1,5 +1,5 @@
 import { factories } from '@strapi/strapi';
-import { generateInviteCode } from '../../../../utils/invite';
+import { generateInviteCode } from '../../../utils/invite';
 
 export default factories.createCoreController(
   'plugin::users-permissions.user',
@@ -7,37 +7,46 @@ export default factories.createCoreController(
     async inviteRegister(ctx) {
       const { username, email, password, inviteCode } = ctx.request.body;
 
-      /* ① 校验上级邀请码 ------------------------------------------------ */
-      const referrer = await strapi
-        .query('plugin::users-permissions.user')
+      /* 1. 找上级 -------------------------------------------------------- */
+      const referrer = await strapi.db.query('plugin::users-permissions.user')
         .findOne({ where: { yaoqingMa: inviteCode } });
       if (!referrer) return ctx.badRequest('邀请码无效');
 
-      /* ② 生成自己的邀请码 ---------------------------------------------- */
-      const yaoqingMa = generateInviteCode();
+      /* 2. 生成唯一邀请码 ------------------------------------------------ */
+      let myCode: string;
+      while (true) {
+        const code = generateInviteCode();
+        const hit = await strapi.db.query('plugin::users-permissions.user')
+          .findOne({ where: { yaoqingMa: code } });
+        if (!hit) { myCode = code; break; }
+      }
 
-      /* ③ 直接使用 Authenticated 角色 ID ------------------------------------ */
-      // const authRole = await strapi
-      //   .plugin('users-permissions')
-      //   .service('role')
-      //   .getAuthenticatedRole();
+      /* 3. 取 Authenticated 角色 ---------------------------------------- */
+      let authRole;
+      if (strapi.plugin('users-permissions').service('role').getAuthenticatedRole) {
+        authRole = await strapi.plugin('users-permissions')
+          .service('role')
+          .getAuthenticatedRole();
+      } else {
+        authRole = await strapi.db.query('plugin::users-permissions.role')
+          .findOne({ where: { type: 'authenticated' } });
+      }
 
-      /* ④ 调官方 register —— 一步写全字段 ----------------------------- */
-      const newUser = await strapi
-        .plugin('users-permissions')
+      /* 4. 官方注册（可带自定义字段） ----------------------------------- */
+      const newUser = await strapi.plugin('users-permissions')
         .service('user')
         .register({
           username,
           email,
           password,
-          role: 1,                  // 直接使用角色ID 1 (Authenticated)
-          provider: 'local',        // 可不写，register 默认就是 local
-          confirmed: true,          // 若要邮件确认改成 false
-          yaoqingMa,                // 自己的邀请码
-          shangji: referrer.id,     // 上级
+          role: authRole.id,
+          provider: 'local',
+          confirmed: true,
+          yaoqingMa: myCode,
+          shangji: referrer.id,
         });
 
-      /* ⑤ 创建钱包 ------------------------------------------------------ */
+      /* 5. 创建钱包 ------------------------------------------------------ */
       await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
         data: { yonghu: newUser.id },
       });
