@@ -16,11 +16,11 @@ export default factories.createCoreController(
       /* ② 生成自己的邀请码 ---------------------------------------------- */
       const yaoqingMa = generateInviteCode();
 
-      /* ③ 获取 Authenticated 角色 ID ------------------------------------ */
-      const authRole = await strapi
-        .plugin('users-permissions')
-        .service('role')
-        .getAuthenticatedRole();
+      /* ③ 直接使用 Authenticated 角色 ID ------------------------------------ */
+      // const authRole = await strapi
+      //   .plugin('users-permissions')
+      //   .service('role')
+      //   .getAuthenticatedRole();
 
       /* ④ 调官方 register —— 一步写全字段 ----------------------------- */
       const newUser = await strapi
@@ -30,7 +30,7 @@ export default factories.createCoreController(
           username,
           email,
           password,
-          role: authRole.id,
+          role: 1,                  // 直接使用角色ID 1 (Authenticated)
           provider: 'local',        // 可不写，register 默认就是 local
           confirmed: true,          // 若要邮件确认改成 false
           yaoqingMa,                // 自己的邀请码
