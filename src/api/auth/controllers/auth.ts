@@ -39,6 +39,7 @@ export default factories.createCoreController(
             yaoqingMa: yaoqingMa,
             confirmed: true, // 自动确认用户
             blocked: false,
+            role: 1, // 自动分配 Authenticated 角色
           });
 
         // ④ 创建钱包
