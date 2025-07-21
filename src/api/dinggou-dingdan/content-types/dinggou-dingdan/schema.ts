@@ -1,6 +1,4 @@
-import type { Schema } from '@strapi/types';
-
-const DingdanSchema: Schema = {
+const DingdanSchema = {
   info: { singularName: 'dinggou-dingdan', pluralName: 'dinggou-dingdans', displayName: '认购订单' },
   options: { draftAndPublish: false },
   attributes: {

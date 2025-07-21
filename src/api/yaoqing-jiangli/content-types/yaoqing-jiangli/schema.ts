@@ -1,6 +1,4 @@
-import type { Schema } from '@strapi/types';
-
-const JiangliSchema: Schema = {
+const JiangliSchema = {
   info: { singularName: 'yaoqing-jiangli', pluralName: 'yaoqing-jianglis', displayName: '邀请奖励' },
   options: { draftAndPublish: false },
   attributes: {
