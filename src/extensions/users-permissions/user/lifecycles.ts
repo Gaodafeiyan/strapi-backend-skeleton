@@ -1,9 +1,9 @@
 import { customAlphabet } from 'nanoid';
-import type { Lifecycles } from '@strapi/strapi';
+import type { Lifecycle } from '@strapi/types';
 
 const nanoid8 = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789', 8);
 
-const YonghuLife: Lifecycles = {
+const YonghuLife: Lifecycle = {
   async beforeCreate({ params }) {
     params.data.yaoqingMa = nanoid8();
   },

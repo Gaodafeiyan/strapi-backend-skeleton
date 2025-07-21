@@ -14,7 +14,7 @@
     "noImplicitThis": true,
     "outDir": "dist",
     "rootDir": ".",
-    "types": ["@strapi/strapi", "node"]
+    "types": ["@strapi/types", "node"]
   },
   "include": [
     // Include root files

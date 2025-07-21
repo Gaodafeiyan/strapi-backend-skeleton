@@ -1,4 +1,4 @@
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 const QianbaoSchema: Schema = {
   info: { singularName: 'qianbao-yue', pluralName: 'qianbao-yues', displayName: '钱包余额' },
