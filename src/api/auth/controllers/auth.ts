@@ -22,26 +22,47 @@ export default factories.createCoreController(
           if (!hit) { myCode = code; break; }
         }
 
-        /* 3. 使用 add 方法创建用户（包含自定义字段） --------------------- */
-        const newUser = await strapi.plugin('users-permissions')
-          .service('user')
-          .add({
-            username,
-            email,
-            password,
-            role: 1,  // 直接硬编码
-            provider: 'local',
-            confirmed: true,
-            yaoqingMa: myCode,
-            shangji: referrer.id,
+        /* 3. 智能获取 Authenticated 角色 --------------------------------- */
+        let authRole;
+        try {
+          if (strapi.plugin('users-permissions').service('role').getAuthenticatedRole) {
+            authRole = await strapi.plugin('users-permissions')
+              .service('role')
+              .getAuthenticatedRole();
+          } else {
+            authRole = await strapi.db.query('plugin::users-permissions.role')
+              .findOne({ where: { type: 'authenticated' } });
+          }
+        } catch (error) {
+          console.error('获取角色失败，使用默认角色ID 1:', error);
+          authRole = { id: 1 };
+        }
+
+        /* 4. 使用事务创建用户和钱包 -------------------------------------- */
+        const result = await strapi.db.connection.transaction(async (trx) => {
+          // 创建用户
+          const newUser = await strapi.plugin('users-permissions')
+            .service('user')
+            .add({
+              username,
+              email,
+              password,
+              role: authRole.id,
+              provider: 'local',
+              confirmed: true,
+              yaoqingMa: myCode,
+              shangji: referrer.id,
+            });
+
+          // 创建钱包
+          await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
+            data: { yonghu: newUser.id },
           });
 
-        /* 4. 用户创建成功，无需额外更新字段 ------------------------------ */
-
-        /* 5. 创建钱包 ------------------------------------------------------ */
-        await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
-          data: { yonghu: newUser.id },
+          return newUser;
         });
+
+        const newUser = result;
 
         ctx.body = { userId: newUser.id, success: true };
       } catch (error) {
