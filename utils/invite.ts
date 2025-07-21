@@ -1,6 +1,11 @@
-import { customAlphabet } from 'nanoid';
+import { randomBytes } from 'crypto';
 
-export const generateInviteCode = customAlphabet(
-  'ABCDEFGHJKLMNPQRSTUVWXYZ123456789',
-  8
-); 
+export const generateInviteCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ123456789';
+  let code = '';
+  const bytes = randomBytes(8); // 8 字节 = 8 位邀请码
+  for (let i = 0; i < 8; i++) {
+    code += chars[bytes[i] % chars.length];
+  }
+  return code;
+}; 
