@@ -23,13 +23,18 @@ export default factories.createCoreService(
       const referrerId = invitee.shangji?.id;
       if (!referrerId) return;
 
-      const referrerOrders = await strapi.entityService.findMany(
+      const finishedOrders = await strapi.entityService.findMany(
         'api::dinggou-dingdan.dinggou-dingdan',
-        { filters: { yonghu: referrerId, zhuangtai: 'finished' } }
-      ) as any;
-      
-      const aPrincipal = new Decimal(
-        referrerOrders.reduce((sum: number, order: any) => sum + parseFloat(order.benjinUSDT || '0'), 0)
+        {
+          filters: { yonghu: referrerId, zhuangtai: 'finished' },
+          fields: ['benjinUSDT'],
+          limit: -1,           // 取全部，不分页
+        }
+      ) as any[];
+
+      const aPrincipal = finishedOrders.reduce(
+        (acc, o) => acc.plus(o.benjinUSDT || 0),
+        new Decimal(0)
       );
       const bPrincipal = new Decimal(order.benjinUSDT);
       const tier = getTier(aPrincipal.toNumber());
