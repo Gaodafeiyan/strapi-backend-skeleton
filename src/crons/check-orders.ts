@@ -1,5 +1,5 @@
 export default {
-  '*/10 * * * *': async ({ strapi }) => {
+  '*/10 * * * *': async ({ strapi }: any) => {
     const dueOrders = await strapi.entityService.findMany(
       'api::dinggou-dingdan.dinggou-dingdan',
       {

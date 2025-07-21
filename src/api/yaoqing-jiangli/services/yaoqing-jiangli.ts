@@ -1,4 +1,5 @@
 import { factories } from '@strapi/strapi';
+import Decimal from 'decimal.js';
 
 const RATE_TABLE = {
   500:  { static: 6, rebate: 100 },
@@ -22,19 +23,22 @@ export default factories.createCoreService(
       const referrerId = invitee.shangji?.id;
       if (!referrerId) return;
 
-      const referrerOrders = await strapi
-        .query('api::dinggou-dingdan.dinggou-dingdan')
-        .sum('benjinUSDT', { where: { yonghu: referrerId, zhuangtai: 'finished' } });
-
-      const aPrincipal = parseFloat(referrerOrders || '0');
-      const bPrincipal = parseFloat(order.benjinUSDT);
-      const tier = getTier(aPrincipal);
+      const { sum } = await strapi.db.query('api::dinggou-dingdan.dinggou-dingdan').aggregate({
+        sum: { benjinUSDT: true },
+        where: { yonghu: referrerId, zhuangtai: 'finished' },
+      });
+      const aPrincipal = new Decimal(sum?.benjinUSDT ?? 0);
+      const bPrincipal = new Decimal(order.benjinUSDT);
+      const tier = getTier(aPrincipal.toNumber());
       const { static: rate, rebate } = RATE_TABLE[tier as keyof typeof RATE_TABLE];
 
-      const reward = Math.min(aPrincipal, bPrincipal) * rate * rebate / 10000; // 两次百分比
+      const reward = Decimal.min(aPrincipal, bPrincipal)
+        .mul(rate)
+        .mul(rebate)
+        .div(10000); // 两次百分比
       const rewardStr = reward.toFixed(2);
 
-      if (reward <= 0) return;
+      if (reward.isZero()) return;
 
       // ① 写奖励记录
       await strapi.entityService.create('api::yaoqing-jiangli.yaoqing-jiangli', {

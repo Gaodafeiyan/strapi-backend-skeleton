@@ -1,5 +1,4 @@
 import { factories } from '@strapi/strapi';
-import type { Controller } from '@strapi/strapi';
 import Decimal from 'decimal.js';
 
 export default factories.createCoreController(

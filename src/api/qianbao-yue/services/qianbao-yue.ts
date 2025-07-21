@@ -1,4 +1,5 @@
 import { factories } from '@strapi/strapi';
+import Decimal from 'decimal.js';
 
 export default factories.createCoreService(
   'api::qianbao-yue.qianbao-yue',
@@ -7,11 +8,11 @@ export default factories.createCoreService(
       await strapi.db.connection.transaction(async (trx) => {
         const wallet = await strapi.entityService.findMany(
           'api::qianbao-yue.qianbao-yue',
-          { filters: { yonghu: userId }, populate: ['yonghu'], transaction: trx }
-        );
+          { filters: { yonghu: { id: userId } }, populate: ['yonghu'], transaction: trx }
+        ) as any;
 
-        const newUsdt = (parseFloat(wallet[0].usdtYue || '0') + parseFloat(usdt)).toFixed(2);
-        const newAi = (parseFloat(wallet[0].aiYue || '0') + parseFloat(ai)).toFixed(8);
+        const newUsdt = new Decimal(wallet[0].usdtYue || 0).plus(usdt).toFixed(2);
+        const newAi = new Decimal(wallet[0].aiYue || 0).plus(ai).toFixed(8);
 
         await strapi.entityService.update(
           'api::qianbao-yue.qianbao-yue',
@@ -25,17 +26,17 @@ export default factories.createCoreService(
       await strapi.db.connection.transaction(async (trx) => {
         const wallet = await strapi.entityService.findMany(
           'api::qianbao-yue.qianbao-yue',
-          { filters: { yonghu: userId }, populate: ['yonghu'], transaction: trx }
-        );
+          { filters: { yonghu: { id: userId } }, populate: ['yonghu'], transaction: trx }
+        ) as any;
 
-        const currentUsdt = parseFloat(wallet[0].usdtYue || '0');
-        const deductAmount = parseFloat(usdt);
+        const currentUsdt = new Decimal(wallet[0].usdtYue || 0);
+        const deductAmount = new Decimal(usdt);
         
-        if (currentUsdt < deductAmount) {
+        if (currentUsdt.lessThan(deductAmount)) {
           throw new Error('余额不足');
         }
 
-        const newUsdt = (currentUsdt - deductAmount).toFixed(2);
+        const newUsdt = currentUsdt.minus(deductAmount).toFixed(2);
 
         await strapi.entityService.update(
           'api::qianbao-yue.qianbao-yue',

@@ -1,4 +1,5 @@
 import { factories } from '@strapi/strapi';
+import Decimal from 'decimal.js';
 
 export default factories.createCoreService(
   'api::dinggou-dingdan.dinggou-dingdan',
@@ -8,7 +9,7 @@ export default factories.createCoreService(
       const jihua = await strapi.entityService.findOne(
         'api::dinggou-jihua.dinggou-jihua',
         jihuaId
-      );
+      ) as any;
       const { benjinUSDT, zhouQiTian, jingtaiBili, aiBili, choujiangCi } = jihua;
 
       // ① 扣钱包本金
@@ -37,14 +38,15 @@ export default factories.createCoreService(
         'api::dinggou-dingdan.dinggou-dingdan',
         orderId,
         { populate: ['jihua', 'yonghu'] }
-      );
-      if (order.zhuangtai !== 'active') return;
+      ) as any;
+      
+      if (!order || order.zhuangtai !== 'active') return;
       if (new Date() < order.jieshuShiJian) return;
 
       const jihua = order.jihua;
-      const staticUSDT = (parseFloat(order.benjinUSDT) * parseFloat(jihua.jingtaiBili) / 100).toFixed(2);
+      const staticUSDT = new Decimal(order.benjinUSDT).mul(jihua.jingtaiBili).div(100).toFixed(2);
 
-      const aiQty = (parseFloat(order.benjinUSDT) * parseFloat(jihua.aiBili) / 100).toFixed(8);
+      const aiQty = new Decimal(order.benjinUSDT).mul(jihua.aiBili).div(100).toFixed(8);
 
       // ① 钱包加钱
       await strapi
