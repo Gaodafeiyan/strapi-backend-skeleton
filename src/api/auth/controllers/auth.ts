@@ -1,5 +1,6 @@
 import { factories } from '@strapi/strapi';
 import { generateInviteCode } from '../../../../utils/invite';
+import { validateEmail, validateUsername, validatePassword, validateInviteCode, sanitizeInput } from '../../../../utils/validation';
 
 export default factories.createCoreController(
   'plugin::users-permissions.user',
@@ -8,18 +9,65 @@ export default factories.createCoreController(
       const { username, email, password, inviteCode } = ctx.request.body;
 
       try {
+        // 输入验证和清理
+        const cleanUsername = sanitizeInput(username);
+        const cleanEmail = sanitizeInput(email);
+        const cleanInviteCode = sanitizeInput(inviteCode);
+        
+        if (!validateUsername(cleanUsername)) {
+          return ctx.badRequest('用户名至少3个字符，最多20个字符');
+        }
+        
+        if (!validateEmail(cleanEmail)) {
+          return ctx.badRequest('邮箱格式无效');
+        }
+        
+        if (!validatePassword(password)) {
+          return ctx.badRequest('密码至少6个字符');
+        }
+        
+        if (!validateInviteCode(cleanInviteCode)) {
+          return ctx.badRequest('邀请码格式无效');
+        }
+
+        // 检查用户名和邮箱是否已存在
+        const existingUser = await strapi.db.query('plugin::users-permissions.user')
+          .findOne({ 
+            where: { 
+              $or: [
+                { username: cleanUsername },
+                { email: cleanEmail }
+              ]
+            } 
+          });
+        
+        if (existingUser) {
+          return ctx.badRequest('用户名或邮箱已存在');
+        }
+
         /* 1. 找上级 -------------------------------------------------------- */
         const referrer = await strapi.db.query('plugin::users-permissions.user')
-          .findOne({ where: { yaoqingMa: inviteCode } });
+          .findOne({ where: { yaoqingMa: cleanInviteCode } });
         if (!referrer) return ctx.badRequest('邀请码无效');
 
         /* 2. 生成唯一邀请码 ------------------------------------------------ */
         let myCode: string;
-        while (true) {
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        while (attempts < maxAttempts) {
           const code = generateInviteCode();
           const hit = await strapi.db.query('plugin::users-permissions.user')
             .findOne({ where: { yaoqingMa: code } });
-          if (!hit) { myCode = code; break; }
+          if (!hit) { 
+            myCode = code; 
+            break; 
+          }
+          attempts++;
+        }
+        
+        if (!myCode) {
+          return ctx.internalServerError('生成邀请码失败，请重试');
         }
 
         /* 3. 智能获取 Authenticated 角色 --------------------------------- */
@@ -42,8 +90,8 @@ export default factories.createCoreController(
         const newUser = await strapi.plugin('users-permissions')
           .service('user')
           .add({
-            username,
-            email,
+            username: cleanUsername,
+            email: cleanEmail,
             password,
             role: authRole.id,
             provider: 'local',
@@ -57,7 +105,12 @@ export default factories.createCoreController(
           data: { yonghu: newUser.id },
         });
 
-        ctx.body = { userId: newUser.id, success: true };
+        ctx.body = { 
+          success: true, 
+          userId: newUser.id,
+          message: '注册成功',
+          inviteCode: myCode
+        };
       } catch (error) {
         console.error('邀请码注册错误:', error);
         ctx.throw(500, `注册失败: ${error.message}`);
