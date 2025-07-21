@@ -71,10 +71,13 @@ export default factories.createCoreService(
       }
       
       const now = new Date();
-      const isExpired = now >= order.jieshuShiJian;
+      // 确保时间字段是Date对象
+      const startTime = new Date(order.kaishiShiJian);
+      const endTime = new Date(order.jieshuShiJian);
+      const isExpired = now >= endTime;
       
       if (!isExpired && !force && !testMode) {
-        const remainingMs = order.jieshuShiJian.getTime() - now.getTime();
+        const remainingMs = endTime.getTime() - now.getTime();
         const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
         const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
         const remainingMinutes = Math.ceil(remainingMs / (1000 * 60));
@@ -107,8 +110,8 @@ export default factories.createCoreService(
         aiQty = new Decimal(order.benjinUSDT).mul(jihua.aiBili).div(100).toFixed(8);
       } else {
         // 未到期赎回：按实际时间比例计算
-        const totalMs = order.jieshuShiJian.getTime() - order.kaishiShiJian.getTime();
-        const actualMs = now.getTime() - order.kaishiShiJian.getTime();
+        const totalMs = endTime.getTime() - startTime.getTime();
+        const actualMs = now.getTime() - startTime.getTime();
         const ratio = Math.max(0, actualMs / totalMs);
         
         staticUSDT = new Decimal(order.benjinUSDT).mul(jihua.jingtaiBili).div(100).mul(ratio).toFixed(2);
@@ -147,8 +150,8 @@ export default factories.createCoreService(
             isExpired,
             force,
             testMode,
-            startTime: order.kaishiShiJian,
-            endTime: order.jieshuShiJian,
+            startTime: startTime,
+            endTime: endTime,
             currentTime: now
           }
         };
