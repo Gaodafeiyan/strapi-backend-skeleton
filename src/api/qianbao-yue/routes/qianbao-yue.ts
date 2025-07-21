@@ -1,6 +1,30 @@
 export default {
   type: 'content-api',
   routes: [
-    // 继承默认的CRUD路由
+    {
+      method: 'GET',
+      path: '/qianbao-yues',
+      handler: 'qianbao-yue.find',
+    },
+    {
+      method: 'GET',
+      path: '/qianbao-yues/:id',
+      handler: 'qianbao-yue.findOne',
+    },
+    {
+      method: 'POST',
+      path: '/qianbao-yues',
+      handler: 'qianbao-yue.create',
+    },
+    {
+      method: 'PUT',
+      path: '/qianbao-yues/:id',
+      handler: 'qianbao-yue.update',
+    },
+    {
+      method: 'DELETE',
+      path: '/qianbao-yues/:id',
+      handler: 'qianbao-yue.delete',
+    },
   ],
 }; 
