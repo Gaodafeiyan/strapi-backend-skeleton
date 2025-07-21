@@ -11,6 +11,8 @@ const YonghuSchema = {
                   target: 'plugin::users-permissions.user', mappedBy: 'shangji' },
     qianbao   : { type: 'relation', relation: 'oneToOne',
                   target: 'api::qianbao-yue.qianbao-yue', configurable: false },
+    dinggouOrders : { type: 'relation', relation: 'oneToMany',
+                      target: 'api::dinggou-dingdan.dinggou-dingdan', mappedBy: 'yonghu' },
   },
 };
 export default YonghuSchema; 
