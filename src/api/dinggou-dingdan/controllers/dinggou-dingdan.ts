@@ -31,6 +31,7 @@ export default factories.createCoreController(
     async redeem(ctx) {
       try {
         const { id } = ctx.params;
+        const { force, testMode } = ctx.request.body || {};
         
         // 输入验证
         if (!id || isNaN(Number(id)) || Number(id) <= 0) {
@@ -57,11 +58,22 @@ export default factories.createCoreController(
           return ctx.forbidden('无权操作此订单');
         }
         
-        await strapi.service('api::dinggou-dingdan.dinggou-dingdan').redeem(Number(id));
-        ctx.body = { success: true, message: '赎回成功' };
+        const result = await strapi.service('api::dinggou-dingdan.dinggou-dingdan').redeem(Number(id), { force, testMode });
+        ctx.body = { success: true, data: result };
       } catch (error) {
         console.error('赎回订单错误:', error);
-        ctx.throw(500, error instanceof Error ? error.message : '赎回失败');
+        
+        // 区分业务逻辑错误和系统错误
+        const errorMessage = error instanceof Error ? error.message : '赎回失败';
+        
+        if (errorMessage.includes('订单尚未到期') || 
+            errorMessage.includes('订单不存在') || 
+            errorMessage.includes('订单状态不允许') ||
+            errorMessage.includes('投资计划不存在')) {
+          return ctx.badRequest(errorMessage);
+        }
+        
+        ctx.throw(500, errorMessage);
       }
     },
   })
