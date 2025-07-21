@@ -1,8 +1,15 @@
 import { factories } from '@strapi/strapi';
 import Decimal from 'decimal.js';
-import { customAlphabet } from 'nanoid';
 
-const nanoid8 = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789', 8);
+// 简单的邀请码生成函数
+function generateInviteCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789';
+  let result = '';
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
 
 export default factories.createCoreController(
   'plugin::users-permissions.user',
@@ -18,7 +25,7 @@ export default factories.createCoreController(
         if (!shangji) return ctx.badRequest('邀请码无效');
 
         // ② 生成邀请码
-        const yaoqingMa = nanoid8();
+        const yaoqingMa = generateInviteCode();
 
         // ③ 创建用户
         const user = await strapi
