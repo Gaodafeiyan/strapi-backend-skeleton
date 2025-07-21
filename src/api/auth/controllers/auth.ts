@@ -38,31 +38,24 @@ export default factories.createCoreController(
           authRole = { id: 1 };
         }
 
-        /* 4. 使用事务创建用户和钱包 -------------------------------------- */
-        const result = await strapi.db.connection.transaction(async (trx) => {
-          // 创建用户
-          const newUser = await strapi.plugin('users-permissions')
-            .service('user')
-            .add({
-              username,
-              email,
-              password,
-              role: authRole.id,
-              provider: 'local',
-              confirmed: true,
-              yaoqingMa: myCode,
-              shangji: referrer.id,
-            });
-
-          // 创建钱包
-          await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
-            data: { yonghu: newUser.id },
+        /* 4. 创建用户 ------------------------------------------------------ */
+        const newUser = await strapi.plugin('users-permissions')
+          .service('user')
+          .add({
+            username,
+            email,
+            password,
+            role: authRole.id,
+            provider: 'local',
+            confirmed: true,
+            yaoqingMa: myCode,
+            shangji: referrer.id,
           });
 
-          return newUser;
+        /* 5. 创建钱包 ------------------------------------------------------ */
+        await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
+          data: { yonghu: newUser.id },
         });
-
-        const newUser = result;
 
         ctx.body = { userId: newUser.id, success: true };
       } catch (error) {
