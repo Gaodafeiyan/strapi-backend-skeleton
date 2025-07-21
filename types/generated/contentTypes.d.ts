@@ -373,6 +373,168 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiDinggouDingdanDinggouDingdan
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'dinggou-dingdan';
+  info: {
+    displayName: '\u8BA4\u8D2D\u8BA2\u5355';
+    pluralName: 'dinggou-dingdans';
+    singularName: 'dinggou-dingdan';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    aiShuliang: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    benjinUSDT: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    jiangli: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::yaoqing-jiangli.yaoqing-jiangli'
+    >;
+    jieshuShiJian: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    jihua: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::dinggou-jihua.dinggou-jihua'
+    >;
+    jingtaiShouyi: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    kaishiShiJian: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::dinggou-dingdan.dinggou-dingdan'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    yonghu: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    zhuangtai: Schema.Attribute.Enumeration<['active', 'finished']> &
+      Schema.Attribute.DefaultTo<'active'>;
+  };
+}
+
+export interface ApiDinggouJihuaDinggouJihua
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'dinggou-jihua';
+  info: {
+    displayName: '\u8BA4\u8D2D\u8BA1\u5212';
+    pluralName: 'dinggou-jihuas';
+    singularName: 'dinggou-jihua';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    aiBili: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    benjinUSDT: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    choujiangCi: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<3>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dingdanList: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::dinggou-dingdan.dinggou-dingdan'
+    >;
+    jihuaCode: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    jingtaiBili: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    kaiqi: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::dinggou-jihua.dinggou-jihua'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    zhouQiTian: Schema.Attribute.Integer & Schema.Attribute.Required;
+  };
+}
+
+export interface ApiQianbaoYueQianbaoYue extends Struct.CollectionTypeSchema {
+  collectionName: 'qianbao-yue';
+  info: {
+    displayName: '\u94B1\u5305\u4F59\u989D';
+    pluralName: 'qianbao-yues';
+    singularName: 'qianbao-yue';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    aiYue: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::qianbao-yue.qianbao-yue'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    usdtYue: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    yonghu: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::users-permissions.user'
+    >;
+  };
+}
+
+export interface ApiYaoqingJiangliYaoqingJiangli
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'yaoqing-jiangli';
+  info: {
+    displayName: '\u9080\u8BF7\u5956\u52B1';
+    pluralName: 'yaoqing-jianglis';
+    singularName: 'yaoqing-jiangli';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    laiyuanDan: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::dinggou-dingdan.dinggou-dingdan'
+    >;
+    laiyuanRen: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::yaoqing-jiangli.yaoqing-jiangli'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    shouyiUSDT: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    tuijianRen: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface PluginContentReleasesRelease
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_releases';
@@ -821,14 +983,13 @@ export interface PluginUsersPermissionsUser
   collectionName: 'up_users';
   info: {
     description: '';
-    displayName: 'User';
+    displayName: '\u7528\u6237\u6269\u5C55';
     name: 'user';
     pluralName: 'users';
     singularName: 'user';
   };
   options: {
     draftAndPublish: false;
-    timestamps: true;
   };
   attributes: {
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -837,6 +998,10 @@ export interface PluginUsersPermissionsUser
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    dinggouOrders: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::dinggou-dingdan.dinggou-dingdan'
+    >;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
@@ -855,10 +1020,18 @@ export interface PluginUsersPermissionsUser
       }>;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    qianbao: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::qianbao-yue.qianbao-yue'
+    >;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
     role: Schema.Attribute.Relation<
       'manyToOne',
       'plugin::users-permissions.role'
+    >;
+    shangji: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
     >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -868,6 +1041,16 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.Unique &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 3;
+      }>;
+    xiaji: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::users-permissions.user'
+    >;
+    yaoqingMa: Schema.Attribute.String &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 9;
+        minLength: 9;
       }>;
   };
 }
@@ -882,6 +1065,10 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::dinggou-dingdan.dinggou-dingdan': ApiDinggouDingdanDinggouDingdan;
+      'api::dinggou-jihua.dinggou-jihua': ApiDinggouJihuaDinggouJihua;
+      'api::qianbao-yue.qianbao-yue': ApiQianbaoYueQianbaoYue;
+      'api::yaoqing-jiangli.yaoqing-jiangli': ApiYaoqingJiangliYaoqingJiangli;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

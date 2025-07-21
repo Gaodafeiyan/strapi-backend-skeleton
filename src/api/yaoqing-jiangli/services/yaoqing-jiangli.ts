@@ -23,11 +23,14 @@ export default factories.createCoreService(
       const referrerId = invitee.shangji?.id;
       if (!referrerId) return;
 
-      const { sum } = await strapi.db.query('api::dinggou-dingdan.dinggou-dingdan').aggregate({
-        sum: { benjinUSDT: true },
-        where: { yonghu: referrerId, zhuangtai: 'finished' },
-      });
-      const aPrincipal = new Decimal(sum?.benjinUSDT ?? 0);
+      const referrerOrders = await strapi.entityService.findMany(
+        'api::dinggou-dingdan.dinggou-dingdan',
+        { filters: { yonghu: referrerId, zhuangtai: 'finished' } }
+      ) as any;
+      
+      const aPrincipal = new Decimal(
+        referrerOrders.reduce((sum: number, order: any) => sum + parseFloat(order.benjinUSDT || '0'), 0)
+      );
       const bPrincipal = new Decimal(order.benjinUSDT);
       const tier = getTier(aPrincipal.toNumber());
       const { static: rate, rebate } = RATE_TABLE[tier as keyof typeof RATE_TABLE];
