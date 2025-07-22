@@ -118,7 +118,43 @@ class QueueProcessor {
   
   // 处理签名任务
   async processSignJob(data) {
-    const { withdrawId, userId, amount, toAddress } = data;
+    // 添加数据验证和错误处理
+    if (!data) {
+      throw new Error('Job data is undefined or null');
+    }
+    
+    // 尝试从不同格式的数据中提取信息
+    let withdrawId, userId, amount, toAddress;
+    
+    if (data.withdrawId) {
+      // 标准格式
+      ({ withdrawId, userId, amount, toAddress } = data);
+    } else if (data.withdrawal_id) {
+      // 备用格式
+      withdrawId = data.withdrawal_id;
+      userId = data.user_id;
+      amount = data.amount;
+      toAddress = data.wallet_address;
+    } else if (data.id) {
+      // 从Strapi返回的数据格式
+      withdrawId = data.id;
+      userId = data.attributes?.yonghu;
+      amount = data.attributes?.usdtJine;
+      toAddress = data.attributes?.toAddress;
+    } else {
+      throw new Error('Invalid job data format: missing required fields');
+    }
+    
+    // 验证必需字段
+    if (!withdrawId) {
+      throw new Error('Missing withdrawId in job data');
+    }
+    if (!amount) {
+      throw new Error('Missing amount in job data');
+    }
+    if (!toAddress) {
+      throw new Error('Missing toAddress in job data');
+    }
     
     logger.info('Processing sign job', {
       withdrawId,
@@ -173,7 +209,35 @@ class QueueProcessor {
   
   // 处理广播任务
   async processBroadcastJob(data) {
-    const { withdrawId, userId, amount, toAddress, signedTx } = data;
+    // 添加数据验证和错误处理
+    if (!data) {
+      throw new Error('Job data is undefined or null');
+    }
+    
+    // 尝试从不同格式的数据中提取信息
+    let withdrawId, userId, amount, toAddress, signedTx;
+    
+    if (data.withdrawId) {
+      // 标准格式
+      ({ withdrawId, userId, amount, toAddress, signedTx } = data);
+    } else if (data.withdrawal_id) {
+      // 备用格式
+      withdrawId = data.withdrawal_id;
+      userId = data.user_id;
+      amount = data.amount;
+      toAddress = data.wallet_address;
+      signedTx = data.signedTx;
+    } else {
+      throw new Error('Invalid job data format: missing required fields');
+    }
+    
+    // 验证必需字段
+    if (!withdrawId) {
+      throw new Error('Missing withdrawId in job data');
+    }
+    if (!signedTx) {
+      throw new Error('Missing signedTx in job data');
+    }
     
     logger.info('Processing broadcast job', {
       withdrawId,
@@ -225,7 +289,35 @@ class QueueProcessor {
   
   // 处理确认任务
   async processConfirmJob(data) {
-    const { withdrawId, userId, amount, toAddress, txHash } = data;
+    // 添加数据验证和错误处理
+    if (!data) {
+      throw new Error('Job data is undefined or null');
+    }
+    
+    // 尝试从不同格式的数据中提取信息
+    let withdrawId, userId, amount, toAddress, txHash;
+    
+    if (data.withdrawId) {
+      // 标准格式
+      ({ withdrawId, userId, amount, toAddress, txHash } = data);
+    } else if (data.withdrawal_id) {
+      // 备用格式
+      withdrawId = data.withdrawal_id;
+      userId = data.user_id;
+      amount = data.amount;
+      toAddress = data.wallet_address;
+      txHash = data.txHash;
+    } else {
+      throw new Error('Invalid job data format: missing required fields');
+    }
+    
+    // 验证必需字段
+    if (!withdrawId) {
+      throw new Error('Missing withdrawId in job data');
+    }
+    if (!txHash) {
+      throw new Error('Missing txHash in job data');
+    }
     
     logger.info('Processing confirm job', {
       withdrawId,
