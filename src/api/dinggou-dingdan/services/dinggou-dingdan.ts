@@ -73,7 +73,8 @@ export default factories.createCoreService(
         throw new Error('订单不存在');
       }
       
-      if (order.zhuangtai !== 'active') {
+      // 允许 active 和 redeemable 状态赎回
+      if (order.zhuangtai !== 'active' && order.zhuangtai !== 'redeemable') {
         throw new Error('订单状态不允许赎回');
       }
       
@@ -83,6 +84,15 @@ export default factories.createCoreService(
       const endTime = new Date(order.jieshuShiJian);
       const isExpired = now >= endTime;
       
+      // 如果订单状态是 active 但已过期，自动标记为 redeemable
+      if (order.zhuangtai === 'active' && isExpired && !force && !testMode) {
+        await strapi.entityService.update('api::dinggou-dingdan.dinggou-dingdan', orderId, {
+          data: { zhuangtai: 'redeemable' }
+        });
+        throw new Error('订单已到期，请重新点击赎回');
+      }
+      
+      // 如果订单未到期且不是强制赎回，则不允许赎回
       if (!isExpired && !force && !testMode) {
         const remainingMs = endTime.getTime() - now.getTime();
         const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));

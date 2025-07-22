@@ -29,20 +29,18 @@ export default {
         
         console.log(`处理 ${dueOrders.length} 个到期订单...`);
         
-        // 并发处理订单，但限制并发数
-        const concurrency = 5;
-        for (let i = 0; i < dueOrders.length; i += concurrency) {
-          const batch = dueOrders.slice(i, i + concurrency);
-          await Promise.all(
-            batch.map(async (order: any) => {
-              try {
-                await strapi.service('api::dinggou-dingdan.dinggou-dingdan').redeem(order.id);
-                console.log(`订单 ${order.id} 赎回成功`);
-              } catch (error) {
-                console.error(`订单 ${order.id} 赎回失败:`, error instanceof Error ? error.message : '未知错误');
-              }
-            })
-          );
+        // 标记到期订单为可赎回状态
+        for (const order of dueOrders) {
+          try {
+            await strapi.entityService.update(
+              'api::dinggou-dingdan.dinggou-dingdan',
+              order.id,
+              { data: { zhuangtai: 'redeemable' } }
+            );
+            console.log(`订单 ${order.id} 已标记为可赎回状态`);
+          } catch (error) {
+            console.error(`订单 ${order.id} 标记失败:`, error instanceof Error ? error.message : '未知错误');
+          }
         }
         
         offset += batchSize;

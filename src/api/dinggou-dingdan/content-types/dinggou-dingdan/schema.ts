@@ -5,7 +5,7 @@ const DingdanSchema = {
   options: { draftAndPublish: false },
   attributes: {
     benjinUSDT    : { type: 'decimal', required: true },
-    zhuangtai     : { type: 'enumeration', enum: ['active','finished'], default: 'active' },
+    zhuangtai     : { type: 'enumeration', enum: ['active','redeemable','finished'], default: 'active' },
     kaishiShiJian : { type: 'datetime', required: true },
     jieshuShiJian : { type: 'datetime', required: true },
     jingtaiShouyi : { type: 'decimal', default: 0 },
