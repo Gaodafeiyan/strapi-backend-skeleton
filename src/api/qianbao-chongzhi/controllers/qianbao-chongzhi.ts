@@ -25,7 +25,9 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
     const { id } = ctx.params;
     
     try {
-      const recharge = await strapi.entityService.findOne('api::qianbao-chongzhi.qianbao-chongzhi', id);
+      const recharge = await strapi.entityService.findOne('api::qianbao-chongzhi.qianbao-chongzhi', id, {
+        populate: ['yonghu']
+      });
       
       if (!recharge) {
         return ctx.notFound('充值记录不存在');
@@ -42,8 +44,8 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
       
       // 增加用户余额
       await strapi.service('api::qianbao-yue.qianbao-yue').addBalance(
-        recharge.yonghu.id, 
-        recharge.usdtJine.toString()
+        (recharge as any).yonghu.id, 
+        (recharge as any).usdtJine.toString()
       );
       
       ctx.body = { success: true, message: '充值确认成功' };

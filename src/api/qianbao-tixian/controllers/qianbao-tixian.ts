@@ -32,13 +32,15 @@ export default factories.createCoreController('api::qianbao-tixian.qianbao-tixia
     const { txHash } = ctx.request.body;
     
     try {
-      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian', id);
+      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian', id, {
+        populate: ['yonghu']
+      });
       
       if (!withdrawal) {
         return ctx.notFound('提现记录不存在');
       }
       
-      if (withdrawal.zhuangtai !== 'pending') {
+      if ((withdrawal as any).zhuangtai !== 'pending') {
         return ctx.badRequest('提现状态不允许广播');
       }
       
