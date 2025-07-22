@@ -1,12 +1,15 @@
 export default {
-  '*/10 * * * *': async ({ strapi }: any) => {
+  '0 0 * * *': async ({ strapi }: any) => {
     try {
+      console.log('=== 定时任务开始执行 ===');
+      console.log('执行时间:', new Date().toISOString());
       console.log('开始检查到期订单...');
       
       // 分批处理，避免一次性加载太多数据
       const batchSize = 50;
       let offset = 0;
       let hasMore = true;
+      let totalProcessed = 0;
       
       while (hasMore) {
         const dueOrders = await strapi.entityService.findMany(
@@ -37,9 +40,10 @@ export default {
               order.id,
               { data: { zhuangtai: 'redeemable' } }
             );
-            console.log(`订单 ${order.id} 已标记为可赎回状态`);
+            console.log(`✅ 订单 ${order.id} 已标记为可赎回状态`);
+            totalProcessed++;
           } catch (error) {
-            console.error(`订单 ${order.id} 标记失败:`, error instanceof Error ? error.message : '未知错误');
+            console.error(`❌ 订单 ${order.id} 标记失败:`, error instanceof Error ? error.message : '未知错误');
           }
         }
         
@@ -51,9 +55,11 @@ export default {
         }
       }
       
-      console.log('到期订单检查完成');
+      console.log(`=== 定时任务执行完成 ===`);
+      console.log(`总共处理了 ${totalProcessed} 个订单`);
+      console.log(`执行时间: ${new Date().toISOString()}`);
     } catch (error) {
-      console.error('定时任务执行错误:', error);
+      console.error('❌ 定时任务执行错误:', error);
     }
   },
 }; 

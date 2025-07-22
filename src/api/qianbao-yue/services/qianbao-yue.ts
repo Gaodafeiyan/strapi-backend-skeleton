@@ -51,5 +51,16 @@ export default factories.createCoreService(
         { data: { usdtYue: newUsdt } }
       );
     },
+
+    // 新增：支持事务的余额操作方法（简化版本）
+    async addBalanceWithTransaction(userId: number, usdt: number) {
+      // 使用现有的addBalance方法，传入字符串格式
+      await this.addBalance(userId, usdt.toString());
+    },
+
+    async deductBalanceWithTransaction(userId: number, usdt: number) {
+      // 使用现有的deductBalance方法，传入字符串格式
+      await this.deductBalance(userId, usdt.toString());
+    },
   })
 ); 
