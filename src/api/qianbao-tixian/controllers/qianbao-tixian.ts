@@ -1,23 +1,17 @@
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreController('api::qianbao-tixian.qianbao-tixian', ({ strapi }) => ({
-  // 标准create方法
+export default factories.createCoreController('api::qianbao-tixian.qianbao-tixian' as any, ({ strapi }) => ({
+  // 标准create方法 - 使用队列系统
   async create(ctx) {
     const { data } = ctx.request.body;
     
     try {
-      // 检查用户余额
-      await strapi.service('api::qianbao-yue.qianbao-yue').deductBalance(
+      // 使用队列服务创建提现
+      const withdrawal = await strapi.service('api::qianbao-tixian.qianbao-tixian').requestWithdraw(
         data.yonghu, 
-        data.usdtJine.toString()
+        data.usdtJine,
+        data.toAddress
       );
-      
-      const withdrawal = await strapi.entityService.create('api::qianbao-tixian.qianbao-tixian', {
-        data: {
-          ...data,
-          zhuangtai: 'pending'
-        }
-      });
       
       ctx.body = { data: withdrawal };
     } catch (error) {
@@ -28,7 +22,7 @@ export default factories.createCoreController('api::qianbao-tixian.qianbao-tixia
   // 标准find方法
   async find(ctx) {
     try {
-      const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
+      const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian' as any, {
         ...ctx.query,
         populate: ['yonghu']
       });
@@ -62,7 +56,7 @@ export default factories.createCoreController('api::qianbao-tixian.qianbao-tixia
     const { txHash } = ctx.request.body;
     
     try {
-      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian', id, {
+      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian' as any, id, {
         populate: ['yonghu']
       });
       
@@ -75,7 +69,7 @@ export default factories.createCoreController('api::qianbao-tixian.qianbao-tixia
       }
       
       // 更新状态为已广播
-      await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian', id, {
+      await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian' as any, id, {
         data: { 
           zhuangtai: 'broadcasted',
           txHash
