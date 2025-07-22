@@ -19,6 +19,20 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
     }
   },
 
+  // 标准find方法
+  async find(ctx) {
+    try {
+      const recharges = await strapi.entityService.findMany('api::qianbao-chongzhi.qianbao-chongzhi', {
+        ...ctx.query,
+        populate: ['yonghu']
+      });
+      
+      ctx.body = { data: recharges };
+    } catch (error) {
+      ctx.throw(500, `查询充值记录失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  },
+
   // 自定义方法可以在这里添加
   async createRecharge(ctx) {
     const { txHash, usdtJine, yonghu } = ctx.request.body;
