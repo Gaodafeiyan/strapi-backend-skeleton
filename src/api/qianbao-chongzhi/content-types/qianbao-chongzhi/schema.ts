@@ -8,6 +8,9 @@ export default {
       previewable: false 
     }
   },
+  options: {
+    draftAndPublish: false,
+  },
   info: {
     singularName: 'qianbao-chongzhi',
     pluralName:  'qianbao-chongzhis',
