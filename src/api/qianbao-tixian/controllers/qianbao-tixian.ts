@@ -1,6 +1,30 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreController('api::qianbao-tixian.qianbao-tixian', ({ strapi }) => ({
+  // 标准create方法
+  async create(ctx) {
+    const { data } = ctx.request.body;
+    
+    try {
+      // 检查用户余额
+      await strapi.service('api::qianbao-yue.qianbao-yue').deductBalance(
+        data.yonghu, 
+        data.usdtJine.toString()
+      );
+      
+      const withdrawal = await strapi.entityService.create('api::qianbao-tixian.qianbao-tixian', {
+        data: {
+          ...data,
+          zhuangtai: 'pending'
+        }
+      });
+      
+      ctx.body = { data: withdrawal };
+    } catch (error) {
+      ctx.throw(500, `创建提现记录失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  },
+
   // 自定义方法可以在这里添加
   async createWithdrawal(ctx) {
     const { toAddress, usdtJine, yonghu } = ctx.request.body;

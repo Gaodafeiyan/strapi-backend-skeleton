@@ -1,6 +1,24 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreController('api::qianbao-chongzhi.qianbao-chongzhi', ({ strapi }) => ({
+  // 标准create方法
+  async create(ctx) {
+    const { data } = ctx.request.body;
+    
+    try {
+      const recharge = await strapi.entityService.create('api::qianbao-chongzhi.qianbao-chongzhi', {
+        data: {
+          ...data,
+          zhuangtai: 'pending'
+        }
+      });
+      
+      ctx.body = { data: recharge };
+    } catch (error) {
+      ctx.throw(500, `创建充值记录失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  },
+
   // 自定义方法可以在这里添加
   async createRecharge(ctx) {
     const { txHash, usdtJine, yonghu } = ctx.request.body;
