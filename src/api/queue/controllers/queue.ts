@@ -12,7 +12,20 @@ export default factories.createCoreController('api::queue.queue', ({ strapi }) =
         timestamp: new Date().toISOString()
       };
     } catch (error) {
-      ctx.throw(500, `获取队列状态失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      // 如果Redis连接失败，返回离线状态
+      ctx.body = { 
+        success: true, 
+        data: {
+          waiting: 0,
+          active: 0,
+          completed: 0,
+          failed: 0,
+          total: 0,
+          status: 'disconnected',
+          message: 'Redis未连接，队列功能不可用'
+        },
+        timestamp: new Date().toISOString()
+      };
     }
   },
 
