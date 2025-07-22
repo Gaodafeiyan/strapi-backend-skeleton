@@ -82,33 +82,34 @@ class QueueProcessor {
   }
   
   async processJob(job) {
-    const { type, data } = job.data;
+    // 修复数据解构问题
+    // Strapi发送的数据格式：{ withdrawId, userId, amount, toAddress, priority }
+    // 不是 { type, data } 格式
+    const jobData = job.data;
+    const jobType = job.name; // 从job.name获取任务类型
     
     logger.info('Processing job', {
       jobId: job.id,
-      type,
-      data
+      type: jobType,
+      data: jobData
     });
     
     try {
-      // 如果任务没有type字段，从job.name获取
-      const jobType = type || job.name;
-      
       switch (jobType) {
         case 'sign':
-          return await this.processSignJob(data);
+          return await this.processSignJob(jobData);
         case 'broadcast':
-          return await this.processBroadcastJob(data);
+          return await this.processBroadcastJob(jobData);
         case 'confirm':
-          return await this.processConfirmJob(data);
+          return await this.processConfirmJob(jobData);
         default:
           throw new Error(`Unknown job type: ${jobType}`);
       }
     } catch (error) {
       logger.error('Job processing failed', {
         jobId: job.id,
-        type: type || job.name,
-        data,
+        type: jobType,
+        data: jobData,
         error: error.message,
         stack: error.stack
       });
