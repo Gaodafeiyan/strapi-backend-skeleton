@@ -91,7 +91,10 @@ class QueueProcessor {
     });
     
     try {
-      switch (type) {
+      // 如果任务没有type字段，从job.name获取
+      const jobType = type || job.name;
+      
+      switch (jobType) {
         case 'sign':
           return await this.processSignJob(data);
         case 'broadcast':
@@ -99,12 +102,12 @@ class QueueProcessor {
         case 'confirm':
           return await this.processConfirmJob(data);
         default:
-          throw new Error(`Unknown job type: ${type}`);
+          throw new Error(`Unknown job type: ${jobType}`);
       }
     } catch (error) {
       logger.error('Job processing failed', {
         jobId: job.id,
-        type,
+        type: type || job.name,
         data,
         error: error.message,
         stack: error.stack
