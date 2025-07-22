@@ -13,4 +13,8 @@ export default [
     name: 'global::error-handler',
     config: {},
   },
+  {
+    name: 'global::disablePreview',
+    config: {},
+  },
 ];
