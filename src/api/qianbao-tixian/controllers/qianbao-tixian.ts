@@ -44,20 +44,12 @@ export default factories.createCoreController('api::qianbao-tixian.qianbao-tixia
     const { toAddress, usdtJine, yonghu } = ctx.request.body;
     
     try {
-      // 检查用户余额
-      await strapi.service('api::qianbao-yue.qianbao-yue').deductBalance(
+      // 使用新的队列服务
+      const withdrawal = await strapi.service('api::qianbao-tixian.qianbao-tixian').requestWithdraw(
         yonghu, 
-        usdtJine.toString()
+        usdtJine,
+        toAddress
       );
-      
-      const withdrawal = await strapi.entityService.create('api::qianbao-tixian.qianbao-tixian', {
-        data: {
-          toAddress,
-          usdtJine,
-          zhuangtai: 'pending',
-          yonghu
-        }
-      });
       
       ctx.body = { success: true, data: withdrawal };
     } catch (error) {
