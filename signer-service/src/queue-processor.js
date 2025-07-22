@@ -7,7 +7,11 @@ const StrapiApiService = require('./strapi-api');
 
 class QueueProcessor {
   constructor() {
-    this.redis = new IORedis(config.redis.url);
+    this.redis = new IORedis(config.redis.url, {
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+      lazyConnect: true,
+    });
     this.blockchainService = new BlockchainService();
     this.strapiApi = new StrapiApiService();
     
