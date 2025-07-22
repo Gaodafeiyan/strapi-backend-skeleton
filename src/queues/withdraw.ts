@@ -15,6 +15,11 @@ export type WithdrawJobType = 'sign' | 'broadcast' | 'confirm';
 
 // 添加提现签名任务
 export async function addWithdrawSignJob(data: WithdrawJobData) {
+  if (!withdrawQueue) {
+    console.warn('⚠️ Redis未连接，跳过队列任务添加');
+    return null;
+  }
+
   try {
     const job = await withdrawQueue.add('sign', data, {
       priority: data.priority === 'high' ? 1 : data.priority === 'low' ? 3 : 2,
@@ -66,6 +71,17 @@ export async function addWithdrawConfirmJob(data: WithdrawJobData & { txHash: st
 
 // 获取队列状态
 export async function getQueueStatus() {
+  if (!withdrawQueue) {
+    return {
+      waiting: 0,
+      active: 0,
+      completed: 0,
+      failed: 0,
+      total: 0,
+      status: 'disconnected',
+    };
+  }
+
   try {
     const waiting = await withdrawQueue.getWaiting();
     const active = await withdrawQueue.getActive();
@@ -78,6 +94,7 @@ export async function getQueueStatus() {
       completed: completed.length,
       failed: failed.length,
       total: waiting.length + active.length + completed.length + failed.length,
+      status: 'connected',
     };
   } catch (error) {
     console.error('❌ 获取队列状态失败:', error);

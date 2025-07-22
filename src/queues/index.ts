@@ -1,25 +1,35 @@
 import IORedis from 'ioredis';
 import { Queue } from 'bullmq';
 
-// Redis连接配置
-const connection = new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-  lazyConnect: true,
-});
+// Redis连接配置 - 支持可选连接
+let connection: IORedis | null = null;
 
-// 连接事件监听
-connection.on('connect', () => {
-  console.log('✅ Redis连接成功');
-});
+try {
+  connection = new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', {
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    lazyConnect: true,
+  });
 
-connection.on('error', (error) => {
-  console.error('❌ Redis连接错误:', error);
-});
+  // 连接事件监听
+  connection.on('connect', () => {
+    console.log('✅ Redis连接成功');
+  });
 
-connection.on('close', () => {
-  console.log('🔌 Redis连接关闭');
-});
+  connection.on('error', (error) => {
+    console.error('❌ Redis连接错误:', error);
+    // 连接失败时设置为null
+    connection = null;
+  });
+
+  connection.on('close', () => {
+    console.log('🔌 Redis连接关闭');
+    connection = null;
+  });
+} catch (error) {
+  console.warn('⚠️ Redis连接失败，队列功能将不可用:', error);
+  connection = null;
+}
 
 // 导出连接实例
 export { connection };
@@ -37,13 +47,15 @@ export const queueConfig = {
   },
 };
 
-// 创建队列实例
-export const withdrawQueue = new Queue('withdraw', { 
+// 创建队列实例 - 支持可选Redis
+export const withdrawQueue = connection ? new Queue('withdraw', { 
   connection,
   defaultJobOptions: queueConfig.defaultJobOptions,
-});
+}) : null;
 
 // 队列事件监听
-withdrawQueue.on('waiting', (job) => {
-  console.log(`📋 提现任务等待中: ${job.id}`);
-}); 
+if (withdrawQueue) {
+  withdrawQueue.on('waiting', (job) => {
+    console.log(`📋 提现任务等待中: ${job.id}`);
+  });
+} 
