@@ -33,6 +33,25 @@ export default factories.createCoreController('api::qianbao-tixian.qianbao-tixia
     }
   },
 
+  // 标准findOne方法
+  async findOne(ctx) {
+    try {
+      const { id } = ctx.params;
+      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian' as any, id, {
+        ...ctx.query,
+        populate: ['yonghu']
+      });
+      
+      if (!withdrawal) {
+        return ctx.notFound('提现记录不存在');
+      }
+      
+      ctx.body = { data: withdrawal };
+    } catch (error) {
+      ctx.throw(500, `查询提现记录失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  },
+
   // 自定义方法可以在这里添加
   async createWithdrawal(ctx) {
     const { toAddress, usdtJine, yonghu } = ctx.request.body;
