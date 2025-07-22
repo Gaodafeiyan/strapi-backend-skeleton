@@ -2,7 +2,12 @@ import type { Schema } from '@strapi/strapi';
 
 export default {
   kind: 'collectionType',
-  pluginOptions: { 'content-api': { enabled: true } },
+  pluginOptions: { 
+    'content-api': { enabled: true },
+    'content-manager': { 
+      previewable: false 
+    }
+  },
   info: {
     singularName: 'qianbao-chongzhi',
     pluralName:  'qianbao-chongzhis',

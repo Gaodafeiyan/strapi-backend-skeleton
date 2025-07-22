@@ -1,6 +1,11 @@
 export default {
   kind: 'collectionType',
-  pluginOptions: { 'content-api': { enabled: true } },
+  pluginOptions: { 
+    'content-api': { enabled: true },
+    'content-manager': { 
+      previewable: false 
+    }
+  },
   info: {
     singularName: 'qianbao-tixian',
     pluralName:  'qianbao-tixians',
