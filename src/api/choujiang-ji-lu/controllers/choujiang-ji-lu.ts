@@ -5,10 +5,22 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   async performChoujiang(ctx) {
     try {
       const { jihuiId, userId } = ctx.request.body;
-      const currentUserId = ctx.state.user?.id || userId || 3; // 默认使用用户ID 3
+      
+      // 优先从JWT token中获取用户ID，其次从请求体获取
+      const currentUserId = ctx.state.user?.id || userId;
 
       if (!jihuiId) {
         return ctx.badRequest('缺少抽奖机会ID');
+      }
+
+      if (!currentUserId) {
+        return ctx.badRequest('缺少用户ID，请提供有效的认证token或userId参数');
+      }
+
+      // 验证用户是否存在
+      const user = await strapi.entityService.findOne('plugin::users-permissions.user', currentUserId);
+      if (!user) {
+        return ctx.badRequest(`用户ID ${currentUserId} 不存在`);
       }
 
       const result = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').performChoujiang(currentUserId, jihuiId);
@@ -27,7 +39,18 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   // 获取用户抽奖机会
   async getUserChoujiangJihui(ctx) {
     try {
-      const userId = ctx.state.user.id;
+      const userId = ctx.state.user?.id || ctx.query.userId;
+      
+      if (!userId) {
+        return ctx.badRequest('缺少用户ID，请提供有效的认证token或userId参数');
+      }
+
+      // 验证用户是否存在
+      const user = await strapi.entityService.findOne('plugin::users-permissions.user', userId);
+      if (!user) {
+        return ctx.badRequest(`用户ID ${userId} 不存在`);
+      }
+
       const jihuis = await strapi.service('api::choujiang-jihui.choujiang-jihui').getUserChoujiangJihui(userId);
 
       ctx.send({
@@ -113,8 +136,18 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   // 获取用户抽奖记录
   async getUserChoujiangRecords(ctx) {
     try {
-      const userId = ctx.state.user.id;
+      const userId = ctx.state.user?.id || ctx.query.userId;
       const { limit = 20, offset = 0 } = ctx.query;
+
+      if (!userId) {
+        return ctx.badRequest('缺少用户ID，请提供有效的认证token或userId参数');
+      }
+
+      // 验证用户是否存在
+      const user = await strapi.entityService.findOne('plugin::users-permissions.user', userId);
+      if (!user) {
+        return ctx.badRequest(`用户ID ${userId} 不存在`);
+      }
 
       const records = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').getUserChoujiangRecords(
         userId, 
@@ -136,10 +169,20 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   async claimPrize(ctx) {
     try {
       const { recordId } = ctx.request.body;
-      const userId = ctx.state.user.id;
+      const userId = ctx.state.user?.id || ctx.query.userId;
 
       if (!recordId) {
         return ctx.badRequest('缺少记录ID');
+      }
+
+      if (!userId) {
+        return ctx.badRequest('缺少用户ID，请提供有效的认证token或userId参数');
+      }
+
+      // 验证用户是否存在
+      const user = await strapi.entityService.findOne('plugin::users-permissions.user', userId);
+      if (!user) {
+        return ctx.badRequest(`用户ID ${userId} 不存在`);
       }
 
       // 验证记录是否属于当前用户
