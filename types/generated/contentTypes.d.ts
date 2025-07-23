@@ -373,6 +373,78 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAiTokenAiToken extends Struct.CollectionTypeSchema {
+  collectionName: 'ai-token';
+  info: {
+    description: 'AI\u4EE3\u5E01\u914D\u7F6E\u4FE1\u606F';
+    displayName: 'AI\u4EE3\u5E01';
+    pluralName: 'ai-tokens';
+    singularName: 'ai-token';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    contractAddress: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::ai-token.ai-token'
+    > &
+      Schema.Attribute.Private;
+    logoUrl: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 255;
+      }>;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    priceApiId: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    priceSource: Schema.Attribute.Enumeration<
+      ['coingecko', 'binance', 'dexscreener']
+    > &
+      Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    symbol: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    weight: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 100;
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<20>;
+  };
+}
+
 export interface ApiCacheCache extends Struct.CollectionTypeSchema {
   collectionName: 'cache';
   info: {
@@ -827,6 +899,7 @@ export interface ApiQianbaoYueQianbaoYue extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    aiTokenBalances: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<'{}'>;
     aiYue: Schema.Attribute.String & Schema.Attribute.DefaultTo<'0'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1041,6 +1114,76 @@ export interface ApiShopProductShopProduct extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+  };
+}
+
+export interface ApiTokenRewardRecordTokenRewardRecord
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'token-reward-record';
+  info: {
+    description: 'AI\u4EE3\u5E01\u8D60\u9001\u8BB0\u5F55';
+    displayName: '\u4EE3\u5E01\u8D60\u9001\u8BB0\u5F55';
+    pluralName: 'token-reward-records';
+    singularName: 'token-reward-record';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    amount: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 1000000000;
+          min: 0;
+        },
+        number
+      >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::token-reward-record.token-reward-record'
+    > &
+      Schema.Attribute.Private;
+    order: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::dinggou-dingdan.dinggou-dingdan'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    token: Schema.Attribute.Relation<'manyToOne', 'api::ai-token.ai-token'>;
+    tokenPrice: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 999999.99999999;
+          min: 0;
+        },
+        number
+      >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    usdtValue: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 999999.99;
+          min: 0;
+        },
+        number
+      >;
+    user: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
   };
 }
 
@@ -1699,6 +1842,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::ai-token.ai-token': ApiAiTokenAiToken;
       'api::cache.cache': ApiCacheCache;
       'api::choujiang-ji-lu.choujiang-ji-lu': ApiChoujiangJiLuChoujiangJiLu;
       'api::choujiang-jiangpin.choujiang-jiangpin': ApiChoujiangJiangpinChoujiangJiangpin;
@@ -1713,6 +1857,7 @@ declare module '@strapi/strapi' {
       'api::shop-cart.shop-cart': ApiShopCartShopCart;
       'api::shop-order.shop-order': ApiShopOrderShopOrder;
       'api::shop-product.shop-product': ApiShopProductShopProduct;
+      'api::token-reward-record.token-reward-record': ApiTokenRewardRecordTokenRewardRecord;
       'api::wallet-address.wallet-address': ApiWalletAddressWalletAddress;
       'api::yaoqing-jiangli.yaoqing-jiangli': ApiYaoqingJiangliYaoqingJiangli;
       'plugin::content-releases.release': PluginContentReleasesRelease;

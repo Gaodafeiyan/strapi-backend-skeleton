@@ -3,27 +3,13 @@ import { factories } from '@strapi/strapi';
 export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }) => ({
   // 获取所有活跃的代币
   async getActiveTokens() {
-    try {
-      const result = await strapi.db.connection.raw(`
-        SELECT * FROM ai_tokens 
-        WHERE is_active = true 
-        ORDER BY weight DESC
-      `);
-      console.log('Database query result:', result); // 调试日志
-      
-      // 确保返回数组格式
-      if (Array.isArray(result[0])) {
-        return result[0];
-      } else if (Array.isArray(result)) {
-        return result;
-      } else {
-        console.log('Unexpected result format:', typeof result, result);
-        return [];
-      }
-    } catch (error) {
-      console.error('Error in getActiveTokens:', error);
-      return [];
-    }
+    const result = await strapi.db.connection.raw(`
+      SELECT * FROM ai_tokens 
+      WHERE is_active = true 
+      ORDER BY weight DESC
+    `);
+    console.log('Database query result:', result); // 调试日志
+    return result[0] || []; // 确保返回数组
   },
 
   // 随机选择一个代币（基于权重）
@@ -52,43 +38,26 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
 
   // 获取代币价格
   async getTokenPrice(tokenId: number) {
-    try {
-      const result = await strapi.db.connection.raw(`
-        SELECT * FROM ai_tokens WHERE id = ?
-      `, [tokenId]);
-      
-      console.log('Token query result:', result); // 调试日志
-      
-      // 检查结果格式
-      let token;
-      if (Array.isArray(result[0]) && result[0].length > 0) {
-        token = result[0][0];
-      } else if (Array.isArray(result) && result.length > 0) {
-        token = result[0];
-      } else {
-        throw new Error(`代币不存在: ${tokenId}`);
-      }
-      
-      if (!token) {
-        throw new Error(`代币不存在: ${tokenId}`);
-      }
+    const result = await strapi.db.connection.raw(`
+      SELECT * FROM ai_tokens WHERE id = ?
+    `, [tokenId]);
+    
+    const token = result[0][0];
+    if (!token) {
+      throw new Error(`代币不存在: ${tokenId}`);
+    }
 
-      const { price_source, price_api_id } = token;
-      console.log('Token found:', { id: tokenId, price_source, price_api_id }); // 调试日志
-      
-      switch (price_source) {
-        case 'coingecko':
-          return await this.getCoinGeckoPrice(price_api_id);
-        case 'binance':
-          return await this.getBinancePrice(price_api_id);
-        case 'dexscreener':
-          return await this.getDexScreenerPrice(price_api_id);
-        default:
-          throw new Error(`不支持的价格源: ${price_source}`);
-      }
-    } catch (error) {
-      console.error(`获取代币价格失败 (ID: ${tokenId}):`, error);
-      throw error;
+    const { price_source, price_api_id } = token;
+    
+    switch (price_source) {
+      case 'coingecko':
+        return await this.getCoinGeckoPrice(price_api_id);
+      case 'binance':
+        return await this.getBinancePrice(price_api_id);
+      case 'dexscreener':
+        return await this.getDexScreenerPrice(price_api_id);
+      default:
+        throw new Error(`不支持的价格源: ${price_source}`);
     }
   },
 
