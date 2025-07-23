@@ -3,6 +3,16 @@ export default {
   routes: [
     {
       method: 'GET',
+      path: '/qianbao-chongzhis/deposit-address',
+      handler: 'qianbao-chongzhi.getDepositAddress',
+    },
+    {
+      method: 'POST',
+      path: '/qianbao-chongzhis/:id/confirm',
+      handler: 'qianbao-chongzhi.confirmRecharge',
+    },
+    {
+      method: 'GET',
       path: '/qianbao-chongzhis',
       handler: 'qianbao-chongzhi.find',
     },
@@ -25,16 +35,6 @@ export default {
       method: 'DELETE',
       path: '/qianbao-chongzhis/:id',
       handler: 'qianbao-chongzhi.delete',
-    },
-    {
-      method: 'POST',
-      path: '/qianbao-chongzhis/:id/confirm',
-      handler: 'qianbao-chongzhi.confirmRecharge',
-    },
-    {
-      method: 'GET',
-      path: '/qianbao-chongzhis/deposit-address',
-      handler: 'qianbao-chongzhi.getDepositAddress',
     },
   ],
 }; 
