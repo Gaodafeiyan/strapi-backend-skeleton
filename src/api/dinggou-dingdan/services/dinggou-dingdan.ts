@@ -157,10 +157,33 @@ export default factories.createCoreService(
         aiQty = new Decimal(order.benjinUSDT).mul(jihua.aiBili).div(100).mul(ratio).toFixed(8);
       }
 
+      // AI代币相关变量
+      let selectedToken = null;
+      let aiTokenAmount = '0';
+      let aiUsdtValue = '0';
+      let tokenPrice = 0;
+
       try {
         // 使用事务确保所有操作的原子性
         return await strapi.db.transaction(async (trx) => {
-          // ① 钱包加钱
+          // ① 随机选择AI代币并获取价格
+          try {
+            selectedToken = await strapi.service('api::ai-token.ai-token').selectRandomToken();
+            tokenPrice = await strapi.service('api::ai-token.ai-token').getTokenPrice(selectedToken.id);
+            
+            // 计算AI代币数量和USDT价值
+            aiUsdtValue = new Decimal(order.benjinUSDT).mul(jihua.aiBili).div(100).toFixed(2);
+            aiTokenAmount = new Decimal(aiUsdtValue).div(tokenPrice).toFixed(8);
+          } catch (tokenError) {
+            console.error('AI代币处理失败:', tokenError);
+            // AI代币失败不影响主流程，使用默认值
+            selectedToken = null;
+            aiTokenAmount = '0';
+            aiUsdtValue = '0';
+            tokenPrice = 0;
+          }
+
+          // ② 钱包加钱
           const wallet = await trx.query('api::qianbao-yue.qianbao-yue').findOne({
             where: { yonghu: order.yonghu.id },
             lock: true
@@ -173,9 +196,26 @@ export default factories.createCoreService(
           const newUsdt = new Decimal(wallet.usdtYue || 0).plus(staticUSDT).toFixed(2);
           const newAi = new Decimal(wallet.aiYue || 0).plus(aiQty).toFixed(8);
 
+          // 更新AI代币余额
+          const currentTokenBalances = JSON.parse(wallet.aiTokenBalances || '{}');
+          let newTokenBalances = currentTokenBalances;
+          
+          if (selectedToken && aiTokenAmount !== '0') {
+            const currentTokenBalance = new Decimal(currentTokenBalances[selectedToken.id] || 0);
+            const newTokenBalance = currentTokenBalance.plus(aiTokenAmount).toFixed(8);
+            newTokenBalances = {
+              ...currentTokenBalances,
+              [selectedToken.id]: newTokenBalance
+            };
+          }
+
           await trx.query('api::qianbao-yue.qianbao-yue').update({
             where: { id: wallet.id },
-            data: { usdtYue: newUsdt, aiYue: newAi }
+            data: { 
+              usdtYue: newUsdt, 
+              aiYue: newAi,
+              aiTokenBalances: JSON.stringify(newTokenBalances)
+            }
           });
 
           // ② 计算邀请奖励（仅到期时）
@@ -206,7 +246,24 @@ export default factories.createCoreService(
             }
           }
 
-          // ④ 更新订单
+          // ④ 创建代币赠送记录
+          if (selectedToken && aiTokenAmount !== '0') {
+            try {
+              await strapi.service('api::token-reward-record.token-reward-record').createTokenReward(
+                order.yonghu.id,
+                orderId,
+                selectedToken.id,
+                aiTokenAmount,
+                aiUsdtValue,
+                tokenPrice.toFixed(8)
+              );
+            } catch (recordError) {
+              console.error('创建代币赠送记录失败:', recordError);
+              // 记录失败不影响主流程
+            }
+          }
+
+          // ⑤ 更新订单
           await trx.query('api::dinggou-dingdan.dinggou-dingdan').update({
             where: { id: orderId },
             data: {
@@ -223,6 +280,14 @@ export default factories.createCoreService(
               benjinUSDT: order.benjinUSDT,
               staticUSDT,
               aiQty,
+              selectedToken: selectedToken ? {
+                id: selectedToken.id,
+                name: selectedToken.name,
+                symbol: selectedToken.symbol,
+                amount: aiTokenAmount,
+                usdtValue: aiUsdtValue,
+                price: tokenPrice.toFixed(8)
+              } : null,
               isExpired,
               force,
               testMode,

@@ -16,6 +16,12 @@ const DingdanSchema = {
                       target: 'api::dinggou-jihua.dinggou-jihua', inversedBy: 'dingdanList' },
     jiangli       : { type: 'relation', relation: 'oneToOne',
                       target: 'api::yaoqing-jiangli.yaoqing-jiangli' },
+    tokenRewardRecords: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::token-reward-record.token-reward-record',
+      mappedBy: 'order'
+    },
   },
 };
 export default DingdanSchema; 

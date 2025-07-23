@@ -26,5 +26,29 @@ export default {
       path: '/qianbao-yues/:id',
       handler: 'qianbao-yue.delete',
     },
+    {
+      method: 'GET',
+      path: '/qianbao-yues/token-balances',
+      handler: 'qianbao-yue.getTokenBalances',
+      config: {
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/qianbao-yues/token-rewards',
+      handler: 'qianbao-yue.getTokenRewardRecords',
+      config: {
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
   ],
 }; 

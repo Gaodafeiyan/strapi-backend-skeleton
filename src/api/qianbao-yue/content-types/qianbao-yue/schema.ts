@@ -6,8 +6,19 @@ const QianbaoSchema = {
   attributes: {
     usdtYue : { type: 'string', default: '0' },
     aiYue   : { type: 'string', default: '0' },
+    aiTokenBalances: { 
+      type: 'json', 
+      default: '{}',
+      description: 'AI代币余额JSON格式 {tokenId: balance}'
+    },
     yonghu  : { type: 'relation', relation: 'oneToOne',
                 target: 'plugin::users-permissions.user', inversedBy: 'qianbao' },
+    tokenRewardRecords: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::token-reward-record.token-reward-record',
+      mappedBy: 'user'
+    }
   },
 };
 export default QianbaoSchema; 
