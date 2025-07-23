@@ -63,6 +63,15 @@ export default {
       config: {
         auth: false
       }
+    },
+    // 测试抽奖机会检查（公开接口，用于调试）
+    {
+      method: 'GET',
+      path: '/choujiang/test-check',
+      handler: 'choujiang-ji-lu.testCheckJihui',
+      config: {
+        auth: false
+      }
     }
   ]
 }; 

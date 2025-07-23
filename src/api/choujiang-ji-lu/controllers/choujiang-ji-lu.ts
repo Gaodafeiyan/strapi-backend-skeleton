@@ -179,5 +179,48 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
       console.error('获取奖品列表失败:', error);
       ctx.badRequest(error.message || '获取奖品列表失败');
     }
+  },
+
+  // 测试抽奖机会检查（公开接口）
+  async testCheckJihui(ctx) {
+    try {
+      const userId = ctx.query.userId || 3; // 默认使用用户ID 3
+      
+      // 使用entityService查询
+      const jihuis = await strapi.entityService.findMany('api::choujiang-jihui.choujiang-jihui' as any, {
+        filters: {
+          yonghu: userId,
+          zhuangtai: 'active',
+          shengYuCiShu: {
+            $gt: 0
+          }
+        }
+      });
+
+      const totalRemaining = jihuis.reduce((sum, jihui) => sum + (jihui as any).shengYuCiShu, 0);
+      
+      const result = {
+        userId: userId,
+        hasJihui: jihuis.length > 0,
+        totalRemaining,
+        jihuis: jihuis.map(j => ({
+          id: j.id,
+          zongCiShu: (j as any).zongCiShu,
+          yiYongCiShu: (j as any).yiYongCiShu,
+          shengYuCiShu: (j as any).shengYuCiShu,
+          zhuangtai: (j as any).zhuangtai,
+          chuangJianShiJian: (j as any).chuangJianShiJian,
+          daoQiShiJian: (j as any).daoQiShiJian
+        }))
+      };
+
+      ctx.send({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('测试检查抽奖机会失败:', error);
+      ctx.badRequest(error.message || '测试检查抽奖机会失败');
+    }
   }
 })); 
