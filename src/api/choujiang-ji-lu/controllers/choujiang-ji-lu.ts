@@ -4,14 +4,14 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   // 执行抽奖
   async performChoujiang(ctx) {
     try {
-      const { jihuiId } = ctx.request.body;
-      const userId = ctx.state.user.id;
+      const { jihuiId, userId } = ctx.request.body;
+      const currentUserId = ctx.state.user?.id || userId || 3; // 默认使用用户ID 3
 
       if (!jihuiId) {
         return ctx.badRequest('缺少抽奖机会ID');
       }
 
-      const result = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').performChoujiang(userId, jihuiId);
+      const result = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').performChoujiang(currentUserId, jihuiId);
 
       ctx.send({
         success: true,

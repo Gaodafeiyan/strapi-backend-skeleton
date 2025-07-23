@@ -6,9 +6,7 @@ export default {
       path: '/choujiang/perform',
       handler: 'choujiang-ji-lu.performChoujiang',
       config: {
-        auth: {
-          scope: ['authenticated']
-        }
+        auth: false
       }
     },
     // 获取用户抽奖机会
@@ -17,9 +15,7 @@ export default {
       path: '/choujiang/jihui',
       handler: 'choujiang-ji-lu.getUserChoujiangJihui',
       config: {
-        auth: {
-          scope: ['authenticated']
-        }
+        auth: false
       }
     },
     // 检查用户抽奖机会
@@ -37,9 +33,7 @@ export default {
       path: '/choujiang/records',
       handler: 'choujiang-ji-lu.getUserChoujiangRecords',
       config: {
-        auth: {
-          scope: ['authenticated']
-        }
+        auth: false
       }
     },
     // 领取奖品
@@ -48,9 +42,7 @@ export default {
       path: '/choujiang/claim-prize',
       handler: 'choujiang-ji-lu.claimPrize',
       config: {
-        auth: {
-          scope: ['authenticated']
-        }
+        auth: false
       }
     },
     // 获取抽奖奖品列表（公开接口）
