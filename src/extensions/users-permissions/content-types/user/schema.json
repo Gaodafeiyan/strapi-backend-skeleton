@@ -95,6 +95,18 @@
       "relation": "oneToMany",
       "target": "api::dinggou-dingdan.dinggou-dingdan",
       "mappedBy": "yonghu"
+    },
+    "shopOrders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::shop-order.shop-order",
+      "mappedBy": "user"
+    },
+    "shopCarts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::shop-cart.shop-cart",
+      "mappedBy": "user"
     }
   }
 } 

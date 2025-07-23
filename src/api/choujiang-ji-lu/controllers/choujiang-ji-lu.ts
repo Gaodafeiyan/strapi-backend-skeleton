@@ -6,8 +6,42 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
     try {
       const { jihuiId, userId } = ctx.request.body;
       
-      // 优先从JWT token中获取用户ID，其次从请求体获取
-      const currentUserId = ctx.state.user?.id || userId;
+      // 调试信息
+      console.log('请求体:', ctx.request.body);
+      console.log('认证状态:', ctx.state.user);
+      console.log('请求头:', ctx.request.headers.authorization);
+      
+      // 尝试从多个来源获取用户ID
+      let currentUserId = userId;
+      
+      // 1. 从请求体获取
+      if (!currentUserId) {
+        currentUserId = ctx.request.body.userId;
+      }
+      
+      // 2. 从查询参数获取
+      if (!currentUserId) {
+        currentUserId = ctx.query.userId;
+      }
+      
+      // 3. 从认证状态获取
+      if (!currentUserId && ctx.state.user) {
+        currentUserId = ctx.state.user.id;
+      }
+      
+      // 4. 尝试解析JWT token
+      if (!currentUserId && ctx.request.headers.authorization) {
+        try {
+          const token = ctx.request.headers.authorization.replace('Bearer ', '');
+          const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+          currentUserId = payload.id;
+          console.log('从JWT解析的用户ID:', currentUserId);
+        } catch (error) {
+          console.error('JWT解析失败:', error);
+        }
+      }
+
+      console.log('最终用户ID:', currentUserId);
 
       if (!jihuiId) {
         return ctx.badRequest('缺少抽奖机会ID');
