@@ -1,32 +1,7 @@
 export default {
   type: 'content-api',
   routes: [
-    {
-      method: 'POST',
-      path: '/shop-products',
-      handler: 'shop-product.create',
-    },
-    {
-      method: 'GET',
-      path: '/shop-products',
-      handler: 'shop-product.find',
-    },
-    {
-      method: 'GET',
-      path: '/shop-products/:id',
-      handler: 'shop-product.findOne',
-    },
-    {
-      method: 'PUT',
-      path: '/shop-products/:id',
-      handler: 'shop-product.update',
-    },
-    {
-      method: 'DELETE',
-      path: '/shop-products/:id',
-      handler: 'shop-product.delete',
-    },
-    // 自定义路由
+    // 自定义路由 - 必须放在通用路由之前
     {
       method: 'GET',
       path: '/shop-products/hot/list',
@@ -51,6 +26,32 @@ export default {
       method: 'PUT',
       path: '/shop-products/:id/sales',
       handler: 'shop-product.updateSales',
+    },
+    // 通用路由
+    {
+      method: 'POST',
+      path: '/shop-products',
+      handler: 'shop-product.create',
+    },
+    {
+      method: 'GET',
+      path: '/shop-products',
+      handler: 'shop-product.find',
+    },
+    {
+      method: 'GET',
+      path: '/shop-products/:id',
+      handler: 'shop-product.findOne',
+    },
+    {
+      method: 'PUT',
+      path: '/shop-products/:id',
+      handler: 'shop-product.update',
+    },
+    {
+      method: 'DELETE',
+      path: '/shop-products/:id',
+      handler: 'shop-product.delete',
     },
   ],
 }; 
