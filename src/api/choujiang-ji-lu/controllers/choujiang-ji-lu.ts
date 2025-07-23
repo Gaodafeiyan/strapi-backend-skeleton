@@ -78,8 +78,8 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
     }
   },
 
-  // 领取实物奖品
-  async claimPhysicalPrize(ctx) {
+  // 领取奖品
+  async claimPrize(ctx) {
     try {
       const { recordId } = ctx.request.body;
       const userId = ctx.state.user.id;
@@ -94,7 +94,7 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
         return ctx.forbidden('无权操作此记录');
       }
 
-      const result = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').claimPhysicalPrize(recordId);
+      const result = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').claimPrize(recordId);
 
       ctx.send({
         success: true,

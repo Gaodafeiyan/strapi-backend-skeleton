@@ -79,10 +79,9 @@ export default factories.createCoreService('api::choujiang-ji-lu.choujiang-ji-lu
           transaction: trx
         });
 
-        // 8. 如果是USDT或AI代币，直接发放到钱包
-        if ((selectedPrize as any).jiangpinLeiXing === 'USDT' || (selectedPrize as any).jiangpinLeiXing === 'AI_TOKEN') {
-          await this.distributePrize(userId, selectedPrize, choujiangRecord.id as number);
-        }
+        // 8. 奖品发放逻辑（商城板块处理）
+        // 所有奖品都通过抽奖记录管理，由商城板块处理具体发放
+        console.log(`用户 ${userId} 抽奖成功，获得: ${(selectedPrize as any).jiangpinMing}`);
 
         console.log(`用户 ${userId} 抽奖成功，获得: ${(selectedPrize as any).jiangpinMing}`);
 
@@ -115,51 +114,7 @@ export default factories.createCoreService('api::choujiang-ji-lu.choujiang-ji-lu
     return prizes.sort((a, b) => parseFloat(b.zhongJiangGaiLv || 0) - parseFloat(a.zhongJiangGaiLv || 0))[0];
   },
 
-  // 发放奖品
-  async distributePrize(userId: number, prize: any, recordId: number) {
-    try {
-      if (prize.jiangpinLeiXing === 'USDT') {
-        // 发放USDT到钱包
-        await strapi.service('api::qianbao-yue.qianbao-yue').addBalance(
-          userId, 
-          prize.jiangpinJiaZhi
-        );
-        
-        // 更新记录状态为已领取
-        await strapi.entityService.update('api::choujiang-ji-lu.choujiang-ji-lu' as any, recordId, {
-          data: {
-            zhuangtai: 'yiLingQu',
-            lingQuShiJian: new Date(),
-            beiZhu: 'USDT已自动发放到钱包'
-          }
-        });
 
-        console.log(`USDT奖品已发放到用户 ${userId} 钱包: ${prize.jiangpinJiaZhi}`);
-
-      } else if (prize.jiangpinLeiXing === 'AI_TOKEN') {
-        // 发放AI代币到钱包
-        await strapi.service('api::qianbao-yue.qianbao-yue').addBalance(
-          userId, 
-          '0', // USDT余额不变
-          prize.jiangpinJiaZhi // AI代币余额增加
-        );
-        
-        // 更新记录状态为已领取
-        await strapi.entityService.update('api::choujiang-ji-lu.choujiang-ji-lu' as any, recordId, {
-          data: {
-            zhuangtai: 'yiLingQu',
-            lingQuShiJian: new Date(),
-            beiZhu: 'AI代币已自动发放到钱包'
-          }
-        });
-
-        console.log(`AI代币奖品已发放到用户 ${userId} 钱包: ${prize.jiangpinJiaZhi}`);
-      }
-    } catch (error) {
-      console.error('发放奖品失败:', error);
-      throw error;
-    }
-  },
 
   // 获取用户抽奖记录
   async getUserChoujiangRecords(userId: number, limit: number = 20, offset: number = 0) {
@@ -178,17 +133,13 @@ export default factories.createCoreService('api::choujiang-ji-lu.choujiang-ji-lu
     }
   },
 
-  // 领取实物奖品
-  async claimPhysicalPrize(recordId: number) {
+  // 领取奖品
+  async claimPrize(recordId: number) {
     try {
       const record = await strapi.entityService.findOne('api::choujiang-ji-lu.choujiang-ji-lu' as any, recordId);
       
       if (!record) {
         throw new Error('抽奖记录不存在');
-      }
-
-      if ((record as any).jiangPinLeiXing !== 'WU_PIN') {
-        throw new Error('只有实物奖品需要手动领取');
       }
 
       if ((record as any).zhuangtai !== 'zhongJiang') {
@@ -200,14 +151,14 @@ export default factories.createCoreService('api::choujiang-ji-lu.choujiang-ji-lu
         data: {
           zhuangtai: 'yiLingQu',
           lingQuShiJian: new Date(),
-          beiZhu: '实物奖品已领取'
+          beiZhu: '奖品已领取，请到商城查看'
         }
       });
 
-      console.log(`用户领取实物奖品: ${(record as any).jiangPinMing}`);
+      console.log(`用户领取奖品: ${(record as any).jiangPinMing}`);
       return updatedRecord;
     } catch (error) {
-      console.error('领取实物奖品失败:', error);
+      console.error('领取奖品失败:', error);
       throw error;
     }
   }

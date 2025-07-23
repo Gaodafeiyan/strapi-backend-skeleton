@@ -44,11 +44,11 @@ export default {
         }
       }
     },
-    // 领取实物奖品
+    // 领取奖品
     {
       method: 'POST',
       path: '/choujiang/claim-prize',
-      handler: 'choujiang-ji-lu.claimPhysicalPrize',
+      handler: 'choujiang-ji-lu.claimPrize',
       config: {
         auth: {
           scope: ['authenticated']

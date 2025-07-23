@@ -20,9 +20,9 @@ const ChoujiangJiangpinSchema = {
     }, // 奖品图片URL
     jiangpinLeiXing: { 
       type: 'enumeration', 
-      enum: ['USDT', 'AI_TOKEN', 'WU_PIN'], 
-      default: 'USDT' 
-    }, // 奖品类型：USDT/AI代币/实物
+      enum: ['SHANG_PIN', 'JIN_BI', 'YOU_HUI_QUAN'], 
+      default: 'SHANG_PIN' 
+    }, // 奖品类型：商品/金币/优惠券
     jiangpinJiaZhi: { 
       type: 'string', 
       required: true, 
