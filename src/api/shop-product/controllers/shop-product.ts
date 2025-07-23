@@ -41,6 +41,48 @@ export default factories.createCoreController(
       };
     },
     
+    // 创建商品
+    async create(ctx) {
+      const { data } = ctx.request.body;
+      
+      const product = await strapi.entityService.create(
+        'api::shop-product.shop-product',
+        {
+          data,
+        }
+      );
+      
+      return { data: product };
+    },
+    
+    // 更新商品
+    async update(ctx) {
+      const { id } = ctx.params;
+      const { data } = ctx.request.body;
+      
+      const product = await strapi.entityService.update(
+        'api::shop-product.shop-product',
+        id,
+        {
+          data,
+        }
+      );
+      
+      return { data: product };
+    },
+    
+    // 删除商品
+    async delete(ctx) {
+      const { id } = ctx.params;
+      
+      const product = await strapi.entityService.delete(
+        'api::shop-product.shop-product',
+        id
+      );
+      
+      return { data: product };
+    },
+    
     // 获取商品详情
     async findOne(ctx) {
       const { id } = ctx.params;
