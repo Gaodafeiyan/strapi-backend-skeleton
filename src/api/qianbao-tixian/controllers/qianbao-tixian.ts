@@ -4,13 +4,18 @@ export default factories.createCoreController('api::qianbao-tixian.qianbao-tixia
   // 标准create方法 - 使用队列系统
   async create(ctx) {
     const { data } = ctx.request.body;
+    const userId = ctx.state.user?.id;
+    
+    if (!userId) {
+      return ctx.unauthorized('用户未登录');
+    }
     
     try {
       // 使用队列服务创建提现
       const withdrawal = await strapi.service('api::qianbao-tixian.qianbao-tixian').requestWithdraw(
-        data.yonghu, 
+        userId, 
         data.usdtJine,
-        data.toAddress
+        data.tixianAddress || data.toAddress
       );
       
       ctx.body = { data: withdrawal };
