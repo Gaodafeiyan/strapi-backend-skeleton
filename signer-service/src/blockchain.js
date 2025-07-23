@@ -53,23 +53,36 @@ class BlockchainService {
   // 获取最佳提现钱包地址
   async getBestWithdrawalWallet(amount) {
     try {
-      // 从Strapi获取有足够余额的钱包地址
-      const StrapiApiService = require('./strapi-api');
-      const strapiApi = new StrapiApiService();
+      // 临时使用固定钱包地址进行测试
+      // TODO: 等Strapi后台问题解决后，改为从数据库获取
+      const testWallets = [
+        {
+          id: 1,
+          address: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+          private_key: config.blockchain.hotWalletPrivateKey, // 使用配置中的私钥
+          balance: 1000.00,
+          priority: 50,
+          usage_count: 0,
+          status: 'active',
+          chain: 'BSC',
+          asset: 'USDT'
+        },
+        {
+          id: 2,
+          address: '0xe3353f75d68f9096aC4A49b4968e56b5DFbd2697',
+          private_key: config.blockchain.hotWalletPrivateKey,
+          balance: 500.00,
+          priority: 40,
+          usage_count: 0,
+          status: 'active',
+          chain: 'BSC',
+          asset: 'USDT'
+        }
+      ];
       
-      // 先检查是否有钱包地址
-      const walletAddresses = await strapiApi.getWalletAddresses();
-      
-      if (!walletAddresses.data || walletAddresses.data.length === 0) {
-        throw new Error('没有可用的提现钱包地址，请在Strapi后台添加钱包地址');
-      }
-      
-      // 筛选有足够余额的活跃钱包
-      const availableWallets = walletAddresses.data.filter(wallet => 
-        wallet.status === 'active' && 
-        parseFloat(wallet.balance) >= parseFloat(amount) &&
-        wallet.chain === 'BSC' &&
-        wallet.asset === 'USDT'
+      // 筛选有足够余额的钱包
+      const availableWallets = testWallets.filter(wallet => 
+        parseFloat(wallet.balance) >= parseFloat(amount)
       );
       
       if (availableWallets.length === 0) {
@@ -80,13 +93,13 @@ class BlockchainService {
       const bestWallet = availableWallets.sort((a, b) => {
         // 优先级高的优先
         if (a.priority !== b.priority) {
-          return (b.priority || 50) - (a.priority || 50);
+          return b.priority - a.priority;
         }
         // 使用次数少的优先
-        return (a.usage_count || 0) - (b.usage_count || 0);
+        return a.usage_count - b.usage_count;
       })[0];
       
-      logger.info('Best withdrawal wallet selected', {
+      logger.info('Best withdrawal wallet selected (test mode)', {
         walletAddress: bestWallet.address,
         balance: bestWallet.balance,
         amount,

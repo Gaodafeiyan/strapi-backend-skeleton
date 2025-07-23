@@ -3,14 +3,17 @@ import { factories } from '@strapi/strapi';
 export default {
   kind: 'collectionType',
   collectionName: 'wallet_addresses',
+  pluginOptions: { 
+    'content-api': { enabled: true },
+    'content-manager': { 
+      previewable: false 
+    }
+  },
   info: {
     singularName: 'wallet-address',
     pluralName: 'wallet-addresses',
     displayName: '钱包地址',
     description: '热钱包地址池管理',
-  },
-  options: {
-    draftAndPublish: false,
   },
   attributes: {
     address: {
