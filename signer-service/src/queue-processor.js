@@ -172,8 +172,9 @@ class QueueProcessor {
       }
       
       // 2. 验证状态
-      if (withdrawal.data.data.zhuangtai !== 'pending') {
-        throw new Error(`Invalid withdrawal status: ${withdrawal.data.data.zhuangtai}`);
+      const withdrawalData = withdrawal.data?.data || withdrawal.data;
+      if (!withdrawalData || withdrawalData.zhuangtai !== 'pending') {
+        throw new Error(`Invalid withdrawal status: ${withdrawalData?.zhuangtai || 'unknown'}`);
       }
       
       // 3. 签名交易
