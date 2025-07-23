@@ -3,13 +3,27 @@ import { factories } from '@strapi/strapi';
 export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }) => ({
   // 获取所有活跃的代币
   async getActiveTokens() {
-    const result = await strapi.db.connection.raw(`
-      SELECT * FROM ai_tokens 
-      WHERE is_active = true 
-      ORDER BY weight DESC
-    `);
-    console.log('Database query result:', result); // 调试日志
-    return result[0] || []; // 确保返回数组
+    try {
+      const result = await strapi.db.connection.raw(`
+        SELECT * FROM ai_tokens 
+        WHERE is_active = true 
+        ORDER BY weight DESC
+      `);
+      console.log('Database query result:', result); // 调试日志
+      
+      // 确保返回数组格式
+      if (Array.isArray(result[0])) {
+        return result[0];
+      } else if (Array.isArray(result)) {
+        return result;
+      } else {
+        console.log('Unexpected result format:', typeof result, result);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error in getActiveTokens:', error);
+      return [];
+    }
   },
 
   // 随机选择一个代币（基于权重）
