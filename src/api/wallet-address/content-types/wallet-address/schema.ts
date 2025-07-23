@@ -3,6 +3,9 @@ import { factories } from '@strapi/strapi';
 export default {
   kind: 'collectionType',
   collectionName: 'wallet_addresses',
+  options: {
+    draftAndPublish: false,  // 禁用草稿发布功能
+  },
   pluginOptions: { 
     'content-api': { enabled: true },
     'content-manager': { 
