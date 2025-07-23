@@ -99,95 +99,64 @@ export default factories.createCoreService(
         
         console.log('✅ 奖励记录创建成功:', rewardRecord.id);
 
-        // ② 加钱 - 添加详细的错误处理
+        // ② 加钱 - 使用事务确保数据一致性
         try {
           console.log('开始更新钱包余额，用户ID:', referrerId.toString(), '金额:', rewardStr);
           
-          // 先检查钱包是否存在
-          const wallets = await strapi.entityService.findMany(
-            'api::qianbao-yue.qianbao-yue',
-            { filters: { yonghu: { id: referrerId } } }
-          );
-          
-          console.log('找到的钱包数量:', wallets.length);
-          
-          if (wallets.length === 0) {
-            console.error('❌ 用户钱包不存在，用户ID:', referrerId);
-            return;
-          }
-          
-          const wallet = wallets[0];
-          console.log('钱包信息:', {
-            id: wallet.id,
-            currentBalance: wallet.usdtYue,
-            userId: referrerId.toString()
-          });
-          
-          // 直接更新钱包，不调用钱包服务
-          const currentBalance = new Decimal(wallet.usdtYue || 0);
-          const addAmount = new Decimal(rewardStr);
-          const newBalance = currentBalance.plus(addAmount).toFixed(2);
-          
-          console.log('直接计算新余额:', {
-            oldBalance: wallet.usdtYue,
-            addAmount: rewardStr,
-            newBalance: newBalance.toString()
-          });
-          
-          // 强制刷新数据库连接
-          console.log('强制刷新数据库连接...');
-          
-          // 直接更新钱包记录
-          const updateResult = await strapi.entityService.update(
-            'api::qianbao-yue.qianbao-yue',
-            wallet.id,
-            { data: { usdtYue: newBalance } }
-          );
-          
-          console.log('✅ 钱包直接更新成功:', {
-            id: updateResult.id,
-            newBalance: updateResult.usdtYue,
-            updatedAt: updateResult.updatedAt
-          });
-          
-          // 等待一下确保数据库更新完成
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // 验证更新结果 - 强制重新查询
-          console.log('强制重新查询验证结果...');
-          const updatedWallets = await strapi.entityService.findMany(
-            'api::qianbao-yue.qianbao-yue',
-            { filters: { yonghu: { id: referrerId } } }
-          );
-          
-          if (updatedWallets.length > 0) {
-            const newBalanceActual = updatedWallets[0].usdtYue;
-            const oldBalance = wallet.usdtYue;
-            const balanceChange = parseFloat(newBalanceActual) - parseFloat(oldBalance);
-            
-            console.log('钱包更新结果:', {
-              oldBalance,
-              newBalance: newBalanceActual,
-              balanceChange: balanceChange.toString(),
-              expectedChange: rewardStr,
-              updatedAt: updatedWallets[0].updatedAt
+          // 使用事务更新钱包
+          await strapi.db.transaction(async (trx) => {
+            const wallet = await trx.query('api::qianbao-yue.qianbao-yue').findOne({
+              where: { yonghu: referrerId },
+              lock: true
             });
             
-            if (Math.abs(balanceChange - parseFloat(rewardStr)) < 0.01) {
-              console.log('✅ 上级钱包余额已正确更新');
-            } else {
-              console.error('❌ 钱包余额更新异常，期望增加:', rewardStr, '实际增加:', balanceChange.toString());
-              console.error('⚠️ 可能是数据库事务或缓存问题');
+            if (!wallet) {
+              console.error('❌ 用户钱包不存在，用户ID:', referrerId);
+              throw new Error('用户钱包不存在');
             }
-          }
+            
+            console.log('钱包信息:', {
+              id: wallet.id,
+              currentBalance: wallet.usdtYue,
+              userId: referrerId.toString()
+            });
+            
+            const currentBalance = new Decimal(wallet.usdtYue || 0);
+            const addAmount = new Decimal(rewardStr);
+            const newBalance = currentBalance.plus(addAmount).toFixed(2);
+            
+            console.log('计算新余额:', {
+              oldBalance: wallet.usdtYue,
+              addAmount: rewardStr,
+              newBalance: newBalance.toString()
+            });
+            
+            const updateResult = await trx.query('api::qianbao-yue.qianbao-yue').update({
+              where: { id: wallet.id },
+              data: { usdtYue: newBalance }
+            });
+            
+            console.log('✅ 钱包更新成功:', {
+              id: updateResult.id,
+              newBalance: updateResult.usdtYue,
+              updatedAt: updateResult.updatedAt
+            });
+          });
           
         } catch (walletError) {
           console.error('❌ 钱包更新失败:', walletError);
           console.error('钱包错误详情:', walletError.message);
           console.error('钱包错误堆栈:', walletError.stack);
           
-          // 钱包更新失败不影响奖励记录创建
-          console.log('⚠️ 钱包更新失败，但奖励记录已创建');
+          // 钱包更新失败，回滚奖励记录
+          try {
+            await strapi.entityService.delete('api::yaoqing-jiangli.yaoqing-jiangli', rewardRecord.id);
+            console.log('✅ 已回滚奖励记录');
+          } catch (rollbackError) {
+            console.error('❌ 回滚奖励记录失败:', rollbackError);
+          }
+          
+          throw new Error(`邀请奖励失败: ${walletError.message}`);
         }
         
         console.log('=== 邀请奖励服务完成 ===');
