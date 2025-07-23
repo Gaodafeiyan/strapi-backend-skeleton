@@ -4,7 +4,7 @@ const JiangliSchema = {
   info: { singularName: 'yaoqing-jiangli', pluralName: 'yaoqing-jianglis', displayName: '邀请奖励' },
   options: { draftAndPublish: false },
   attributes: {
-    shouyiUSDT : { type: 'decimal', required: true },
+    shouyiUSDT : { type: 'string', required: true },           // 改为string类型
     tuijianRen : { type: 'relation', relation: 'manyToOne',
                    target: 'plugin::users-permissions.user' },
     laiyuanRen : { type: 'relation', relation: 'manyToOne',

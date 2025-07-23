@@ -55,16 +55,12 @@ export default {
       type: 'datetime',
     },
     balance: {
-      type: 'decimal',
-      precision: 18,
-      scale: 6,
-      default: 0,
+      type: 'string',                    // 改为string类型
+      default: '0',
     },
     max_balance: {
-      type: 'decimal',
-      precision: 18,
-      scale: 6,
-      default: 10000,
+      type: 'string',                    // 改为string类型
+      default: '10000',
     },
     private_key: {
       type: 'text',

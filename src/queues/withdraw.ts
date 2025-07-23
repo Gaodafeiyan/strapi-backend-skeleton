@@ -5,7 +5,7 @@ import { withdrawQueue } from './index';
 export interface WithdrawJobData {
   withdrawId: number;
   userId: number;
-  amount: number;
+  amount: string;  // 改为string类型
   toAddress: string;
   priority?: 'low' | 'normal' | 'high';
 }

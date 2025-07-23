@@ -5,17 +5,20 @@ export default factories.createCoreService(
   'api::qianbao-tixian.qianbao-tixian' as any,
   ({ strapi }) => ({
     // 请求提现 - 集成队列系统
-    async requestWithdraw(userId: number, amount: number, toAddress: string) {
+    async requestWithdraw(userId: number, amount: string | number, toAddress: string) {
       return strapi.db.transaction(async (trx) => {
         try {
+          // 确保amount是string类型
+          const amountStr = amount.toString();
+          
           // 1. 扣除用户余额
-          await strapi.service('api::qianbao-yue.qianbao-yue').deductBalance(userId, amount.toString());
+          await strapi.service('api::qianbao-yue.qianbao-yue').deductBalance(userId, amountStr);
 
           // 2. 创建提现记录
           const withdrawal = await strapi.entityService.create('api::qianbao-tixian.qianbao-tixian' as any, {
             data: {
               yonghu: userId,
-              usdtJine: amount,
+              usdtJine: amountStr,  // 使用string类型
               toAddress,
               zhuangtai: 'pending',
             },
@@ -26,14 +29,14 @@ export default factories.createCoreService(
           const jobData: WithdrawJobData = {
             withdrawId: Number(withdrawal.id),
             userId,
-            amount,
+            amount: amountStr,  // 使用string类型
             toAddress,
             priority: 'normal',
           };
 
           await addWithdrawSignJob(jobData);
 
-          console.log(`📋 提现请求已创建: ID=${withdrawal.id}, 用户=${userId}, 金额=${amount}, 地址=${toAddress}`);
+          console.log(`📋 提现请求已创建: ID=${withdrawal.id}, 用户=${userId}, 金额=${amountStr}, 地址=${toAddress}`);
 
           return withdrawal;
         } catch (error) {

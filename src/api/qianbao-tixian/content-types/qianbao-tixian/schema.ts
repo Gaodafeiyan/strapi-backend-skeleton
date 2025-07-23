@@ -14,7 +14,7 @@ export default {
   attributes: {
     txHash:     { type: 'string', unique: true },             // 广播后再写入
     toAddress:  { type: 'string', required: true },
-    usdtJine:   { type: 'decimal', required: true },
+    usdtJine:   { type: 'string', required: true },           // 改为string类型
     zhuangtai:  { type: 'enumeration',
                   enum: ['pending','broadcasted','success','failed'],
                   default: 'pending' },

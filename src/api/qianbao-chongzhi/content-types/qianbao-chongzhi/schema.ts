@@ -18,7 +18,7 @@ export default {
   },
   attributes: {
     txHash:     { type: 'string', unique: true, required: true },
-    usdtJine:   { type: 'decimal', required: true },
+    usdtJine:   { type: 'string', required: true },            // 改为string类型
     zhuangtai:  { type: 'enumeration', enum: ['pending','success','failed'], default: 'pending' },
     yonghu:     { type: 'relation', relation: 'manyToOne', target: 'plugin::users-permissions.user' },
   },
