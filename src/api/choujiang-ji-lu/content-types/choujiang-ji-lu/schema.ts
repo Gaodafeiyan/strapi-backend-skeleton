@@ -42,7 +42,7 @@ const ChoujiangJiLuSchema = {
     }, // 奖品价值
     jiangPinLeiXing: { 
       type: 'enumeration', 
-      enum: ['USDT', 'AI_TOKEN', 'WU_PIN'], 
+      enum: ['SHANG_PIN', 'JIN_BI', 'YOU_HUI_QUAN'], 
       required: true 
     }, // 奖品类型
     zhuangtai: { 
