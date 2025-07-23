@@ -43,7 +43,31 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   // 检查用户抽奖机会
   async checkUserChoujiangJihui(ctx) {
     try {
-      const userId = ctx.state.user.id;
+      // 从认证用户或查询参数获取用户ID
+      const userId = ctx.state.user?.id || ctx.query.userId;
+      
+      if (!userId) {
+        // 如果没有用户ID，返回所有抽奖机会的统计信息
+        const knex = (strapi as any).connections.default;
+        const allJihuis = await knex('choujiang_jihuis')
+          .where('zhuangtai', 'active')
+          .where('sheng_yu_ci_shu', '>', 0);
+
+        const totalRemaining = allJihuis.reduce((sum, jihui) => sum + jihui.sheng_yu_ci_shu, 0);
+        
+        const result = {
+          hasJihui: allJihuis.length > 0,
+          totalRemaining,
+          totalUsers: new Set(allJihuis.map(j => j.yonghu_id)).size,
+          message: '请提供用户ID或使用认证token'
+        };
+
+        ctx.send({
+          success: true,
+          data: result
+        });
+        return;
+      }
       
       // 使用数据库查询，完全绕过权限检查
       const knex = (strapi as any).connections.default;
