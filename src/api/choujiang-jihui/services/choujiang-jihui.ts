@@ -21,8 +21,8 @@ export default factories.createCoreService('api::choujiang-jihui.choujiang-jihui
       // 创建新的抽奖机会
       const choujiangJihui = await strapi.entityService.create('api::choujiang-jihui.choujiang-jihui' as any, {
         data: {
-          yonghu: userId,
-          dingdan: orderId,
+          yonghu: { id: userId },
+          dingdan: { id: orderId },
           zongCiShu: choujiangCi,
           yiYongCiShu: 0,
           shengYuCiShu: choujiangCi,
