@@ -12,11 +12,6 @@ export default {
   options: {
     draftAndPublish: false,
   },
-  pluginOptions: {
-    i18n: {
-      localized: false,
-    },
-  },
   attributes: {
     address: {
       type: 'string',
@@ -70,7 +65,7 @@ export default {
     },
     private_key: {
       type: 'text',
-      private: true, // 加密存储
+      private: true,
     },
     description: {
       type: 'text',
