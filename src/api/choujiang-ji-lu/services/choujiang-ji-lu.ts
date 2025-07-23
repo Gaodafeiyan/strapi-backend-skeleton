@@ -63,21 +63,78 @@ export default factories.createCoreService('api::choujiang-ji-lu.choujiang-ji-lu
           transaction: trx
         });
 
-        // 7. 创建抽奖记录
-        const choujiangRecord = await strapi.entityService.create('api::choujiang-ji-lu.choujiang-ji-lu' as any, {
-          data: {
-            yonghu: { id: userId },
-            jiangpin: { id: selectedPrize.id },
-            choujiangJihui: { id: jihuiId },
-            dingdan: (jihui as any).dingdan ? { id: (jihui as any).dingdan.id } : null,
+        // 7. 验证用户存在性
+        const user = await strapi.entityService.findOne('plugin::users-permissions.user', userId);
+        
+        if (!user) {
+          throw new Error(`用户ID ${userId} 不存在`);
+        }
+
+        // 8. 创建抽奖记录
+        let choujiangRecord;
+        try {
+          choujiangRecord = await strapi.entityService.create('api::choujiang-ji-lu.choujiang-ji-lu' as any, {
+            data: {
+              yonghu: { id: userId },
+              jiangpin: { id: selectedPrize.id },
+              choujiangJihui: { id: jihuiId },
+              dingdan: (jihui as any).dingdan ? { id: (jihui as any).dingdan.id } : null,
+              chouJiangShiJian: new Date(),
+              jiangPinMing: (selectedPrize as any).jiangpinMing,
+              jiangPinJiaZhi: (selectedPrize as any).jiangpinJiaZhi,
+              jiangPinLeiXing: (selectedPrize as any).jiangpinLeiXing,
+              zhuangtai: 'zhongJiang'
+            },
+            transaction: trx
+          });
+        } catch (createError) {
+          console.error('Strapi创建记录失败，使用原始SQL:', createError);
+          
+          // 备用方案：使用原始SQL插入
+          const documentId = `choujiang_${Date.now()}_${userId}`;
+          await strapi.db.connection.raw(`
+            INSERT INTO [choujiang-ji-lu] (document_id, chou_jiang_shi_jian, jiang_pin_ming, jiang_pin_jia_zhi, jiang_pin_lei_xing, zhuangtai) 
+            VALUES (?, ?, ?, ?, ?, ?)
+          `, [documentId, new Date(), (selectedPrize as any).jiangpinMing, (selectedPrize as any).jiangpinJiaZhi, (selectedPrize as any).jiangpinLeiXing, 'zhongJiang']);
+          
+          // 获取插入的记录ID
+          const result = await strapi.db.connection.raw('SELECT last_insert_rowid() as id');
+          const recordId = result[0].id;
+          
+          // 手动插入关系
+          await strapi.db.connection.raw(`
+            INSERT INTO choujiang_ji_lu_yonghu_lnk (choujiang_ji_lu_id, user_id) 
+            VALUES (?, ?)
+          `, [recordId, userId]);
+          
+          await strapi.db.connection.raw(`
+            INSERT INTO choujiang_ji_lu_jiangpin_lnk (choujiang_ji_lu_id, choujiang_jiangpin_id) 
+            VALUES (?, ?)
+          `, [recordId, selectedPrize.id]);
+          
+          await strapi.db.connection.raw(`
+            INSERT INTO choujiang_ji_lu_choujiang_jihui_lnk (choujiang_ji_lu_id, choujiang_jihui_id) 
+            VALUES (?, ?)
+          `, [recordId, jihuiId]);
+          
+          if ((jihui as any).dingdan) {
+            await strapi.db.connection.raw(`
+              INSERT INTO choujiang_ji_lu_dinggou_dingdan_lnk (choujiang_ji_lu_id, dinggou_dingdan_id) 
+              VALUES (?, ?)
+            `, [recordId, (jihui as any).dingdan.id]);
+          }
+          
+          // 构造返回的记录对象
+          choujiangRecord = {
+            id: recordId,
+            document_id: documentId,
             chouJiangShiJian: new Date(),
             jiangPinMing: (selectedPrize as any).jiangpinMing,
             jiangPinJiaZhi: (selectedPrize as any).jiangpinJiaZhi,
             jiangPinLeiXing: (selectedPrize as any).jiangpinLeiXing,
             zhuangtai: 'zhongJiang'
-          },
-          transaction: trx
-        });
+          };
+        }
 
         // 8. 奖品发放逻辑（商城板块处理）
         // 所有奖品都通过抽奖记录管理，由商城板块处理具体发放

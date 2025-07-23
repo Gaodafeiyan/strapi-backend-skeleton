@@ -4,6 +4,12 @@ export default factories.createCoreService('api::choujiang-jihui.choujiang-jihui
   // 为用户创建抽奖机会（订单赎回时调用）
   async createChoujiangJihui(userId: number, orderId: number, choujiangCi: number) {
     try {
+      // 验证用户存在性
+      const user = await strapi.entityService.findOne('plugin::users-permissions.user', userId);
+      if (!user) {
+        throw new Error(`用户ID ${userId} 不存在，无法创建抽奖机会`);
+      }
+
       // 检查是否已存在抽奖机会
       const existingJihui = await strapi.entityService.findMany('api::choujiang-jihui.choujiang-jihui' as any, {
         filters: {
