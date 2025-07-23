@@ -45,23 +45,29 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
     try {
       const userId = ctx.state.user.id;
       
-      // 直接使用entityService查询，避免权限问题
-      const jihuis = await strapi.entityService.findMany('api::choujiang-jihui.choujiang-jihui' as any, {
-        filters: {
-          yonghu: userId,
-          zhuangtai: 'active',
-          shengYuCiShu: {
-            $gt: 0
-          }
-        }
-      });
+      // 使用数据库查询，完全绕过权限检查
+      const knex = (strapi as any).connections.default;
+      const jihuis = await knex('choujiang_jihuis')
+        .where({
+          yonghu_id: userId,
+          zhuangtai: 'active'
+        })
+        .where('sheng_yu_ci_shu', '>', 0);
 
-      const totalRemaining = jihuis.reduce((sum, jihui) => sum + (jihui as any).shengYuCiShu, 0);
+      const totalRemaining = jihuis.reduce((sum, jihui) => sum + jihui.sheng_yu_ci_shu, 0);
       
       const result = {
         hasJihui: jihuis.length > 0,
         totalRemaining,
-        jihuis
+        jihuis: jihuis.map(j => ({
+          id: j.id,
+          zongCiShu: j.zong_ci_shu,
+          yiYongCiShu: j.yi_yong_ci_shu,
+          shengYuCiShu: j.sheng_yu_ci_shu,
+          zhuangtai: j.zhuangtai,
+          chuangJianShiJian: j.chuang_jian_shi_jian,
+          daoQiShiJian: j.dao_qi_shi_jian
+        }))
       };
 
       ctx.send({
