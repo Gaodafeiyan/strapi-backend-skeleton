@@ -6,49 +6,71 @@ export default factories.createCoreService(
   ({ strapi }) => ({
     /** 创建订单并锁定本金 */
     async createOrder(userId: number, jihuaId: number) {
-      // 验证计划是否存在且开启
-      const jihua = await strapi.entityService.findOne(
-        'api::dinggou-jihua.dinggou-jihua',
-        jihuaId
-      ) as any;
-      
-      if (!jihua) {
-        throw new Error('投资计划不存在');
-      }
-      
-      if (!jihua.kaiqi) {
-        throw new Error('该投资计划已关闭');
-      }
+      // 使用事务确保数据一致性
+      return await strapi.db.transaction(async (trx) => {
+        // 验证计划是否存在且开启
+        const jihua = await trx.query('api::dinggou-jihua.dinggou-jihua').findOne({
+          where: { id: jihuaId }
+        });
+        
+        if (!jihua) {
+          throw new Error('投资计划不存在');
+        }
+        
+        if (!jihua.kaiqi) {
+          throw new Error('该投资计划已关闭');
+        }
 
-      const { benjinUSDT, zhouQiTian, jingtaiBili, aiBili, choujiangCi } = jihua;
+        const { benjinUSDT, zhouQiTian } = jihua;
 
-      // 验证用户是否存在
-      const user = await strapi.entityService.findOne(
-        'plugin::users-permissions.user',
-        userId
-      ) as any;
-      
-      if (!user) {
-        throw new Error('用户不存在');
-      }
+        // 验证用户是否存在
+        const user = await trx.query('plugin::users-permissions.user').findOne({
+          where: { id: userId }
+        });
+        
+        if (!user) {
+          throw new Error('用户不存在');
+        }
 
-      // ① 扣钱包本金
-      await strapi
-        .service('api::qianbao-yue.qianbao-yue')
-        .deductBalance(userId, benjinUSDT);
+        // ① 扣钱包本金（带锁）
+        const wallet = await trx.query('api::qianbao-yue.qianbao-yue').findOne({
+          where: { yonghu: userId },
+          lock: true
+        });
 
-      // ② 写订单
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + zhouQiTian);
-      
-      return strapi.entityService.create('api::dinggou-dingdan.dinggou-dingdan', {
-        data: {
-          benjinUSDT,
-          kaishiShiJian: new Date(),
-          jieshuShiJian: endDate,
-          yonghu: userId,
-          jihua: jihuaId,
-        },
+        if (!wallet) {
+          throw new Error('用户钱包不存在');
+        }
+
+        const currentBalance = new Decimal(wallet.usdtYue || 0);
+        const deductAmount = new Decimal(benjinUSDT);
+        
+        if (currentBalance.lessThan(deductAmount)) {
+          throw new Error('余额不足');
+        }
+
+        const newBalance = currentBalance.minus(deductAmount).toFixed(2);
+        
+        await trx.query('api::qianbao-yue.qianbao-yue').update({
+          where: { id: wallet.id },
+          data: { usdtYue: newBalance }
+        });
+
+        // ② 写订单
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + zhouQiTian);
+        
+        const order = await trx.query('api::dinggou-dingdan.dinggou-dingdan').create({
+          data: {
+            benjinUSDT,
+            kaishiShiJian: new Date(),
+            jieshuShiJian: endDate,
+            yonghu: userId,
+            jihua: jihuaId,
+          },
+        });
+
+        return order;
       });
     },
 
@@ -136,72 +158,80 @@ export default factories.createCoreService(
       }
 
       try {
-        // ① 钱包加钱
-        await strapi
-          .service('api::qianbao-yue.qianbao-yue')
-          .addBalance(order.yonghu.id, staticUSDT, aiQty);
+        // 使用事务确保所有操作的原子性
+        return await strapi.db.transaction(async (trx) => {
+          // ① 钱包加钱
+          const wallet = await trx.query('api::qianbao-yue.qianbao-yue').findOne({
+            where: { yonghu: order.yonghu.id },
+            lock: true
+          });
 
-        // ② 计算邀请奖励（仅到期时）
-        if (isExpired || force) {
-          try {
-            console.log('开始创建邀请奖励，订单ID:', orderId);
-            console.log('用户信息:', {
-              userId: order.yonghu.id,
-              username: order.yonghu.username,
-              shangji: order.yonghu.shangji
-            });
-            
-            await strapi
-              .service('api::yaoqing-jiangli.yaoqing-jiangli')
-              .createReferralReward(order);
-              
-            console.log('邀请奖励创建成功');
-          } catch (rewardError) {
-            console.error('邀请奖励创建失败:', rewardError);
-            // 邀请奖励失败不影响主流程
+          if (!wallet) {
+            throw new Error('用户钱包不存在');
           }
-        }
 
-        // ③ 创建抽奖机会（仅到期时）
-        if ((isExpired || force) && jihua.choujiangCi > 0) {
-          try {
-            console.log('开始创建抽奖机会，订单ID:', orderId, '抽奖次数:', jihua.choujiangCi);
-            
-            await strapi
-              .service('api::choujiang-jihui.choujiang-jihui')
-              .createChoujiangJihui(order.yonghu.id, orderId, jihua.choujiangCi);
-              
-            console.log('抽奖机会创建成功');
-          } catch (choujiangError) {
-            console.error('抽奖机会创建失败:', choujiangError);
-            // 抽奖机会失败不影响主流程
+          const newUsdt = new Decimal(wallet.usdtYue || 0).plus(staticUSDT).toFixed(2);
+          const newAi = new Decimal(wallet.aiYue || 0).plus(aiQty).toFixed(8);
+
+          await trx.query('api::qianbao-yue.qianbao-yue').update({
+            where: { id: wallet.id },
+            data: { usdtYue: newUsdt, aiYue: newAi }
+          });
+
+          // ② 计算邀请奖励（仅到期时）
+          if (isExpired || force) {
+            try {
+              console.log('开始创建邀请奖励，订单ID:', orderId);
+              await strapi
+                .service('api::yaoqing-jiangli.yaoqing-jiangli')
+                .createReferralReward(order);
+              console.log('邀请奖励创建成功');
+            } catch (rewardError) {
+              console.error('邀请奖励创建失败:', rewardError);
+              // 邀请奖励失败不影响主流程
+            }
           }
-        }
 
-        // ③ 更新订单
-        await strapi.entityService.update('api::dinggou-dingdan.dinggou-dingdan', orderId, {
-          data: {
-            zhuangtai: 'finished',
-            jingtaiShouyi: staticUSDT,
-            aiShuliang: aiQty,
-          },
+          // ③ 创建抽奖机会（仅到期时）
+          if ((isExpired || force) && jihua.choujiangCi > 0) {
+            try {
+              console.log('开始创建抽奖机会，订单ID:', orderId, '抽奖次数:', jihua.choujiangCi);
+              await strapi
+                .service('api::choujiang-jihui.choujiang-jihui')
+                .createChoujiangJihui(order.yonghu.id, orderId, jihua.choujiangCi);
+              console.log('抽奖机会创建成功');
+            } catch (choujiangError) {
+              console.error('抽奖机会创建失败:', choujiangError);
+              // 抽奖机会失败不影响主流程
+            }
+          }
+
+          // ④ 更新订单
+          await trx.query('api::dinggou-dingdan.dinggou-dingdan').update({
+            where: { id: orderId },
+            data: {
+              zhuangtai: 'finished',
+              jingtaiShouyi: staticUSDT,
+              aiShuliang: aiQty,
+            },
+          });
+
+          return {
+            success: true,
+            data: {
+              orderId,
+              benjinUSDT: order.benjinUSDT,
+              staticUSDT,
+              aiQty,
+              isExpired,
+              force,
+              testMode,
+              startTime: startTime,
+              endTime: endTime,
+              currentTime: now
+            }
+          };
         });
-
-        return {
-          success: true,
-          data: {
-            orderId,
-            benjinUSDT: order.benjinUSDT,
-            staticUSDT,
-            aiQty,
-            isExpired,
-            force,
-            testMode,
-            startTime: startTime,
-            endTime: endTime,
-            currentTime: now
-          }
-        };
       } catch (error) {
         throw new Error(`赎回失败: ${error instanceof Error ? error.message : '未知错误'}`);
       }
