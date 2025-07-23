@@ -5,7 +5,8 @@ export default factories.createCoreController(
   ({ strapi }) => ({
     async createWithPlan(ctx) {
       try {
-        const { jihuaId } = ctx.request.body;
+        const { data } = ctx.request.body;
+        const { jihuaId } = data || {};
         
         // 输入验证
         if (!jihuaId || typeof jihuaId !== 'number' || jihuaId <= 0) {
