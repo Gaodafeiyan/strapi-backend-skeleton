@@ -11,15 +11,17 @@ export default factories.createCoreController(
       try {
         const userId = ctx.state.user.id;
         
-        const wallet = await strapi.entityService.findOne('api::qianbao-yue.qianbao-yue', {
+        const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
           filters: { yonghu: userId }
         });
+        
+        const wallet = wallets[0];
 
         if (!wallet) {
           ctx.throw(404, '钱包不存在');
         }
 
-        const tokenBalances = JSON.parse(wallet.aiTokenBalances || '{}');
+        const tokenBalances = JSON.parse((wallet as any).aiTokenBalances || '{}');
         
         // 获取所有代币信息
         const tokens = await strapi.service('api::ai-token.ai-token').getActiveTokens();

@@ -18,7 +18,7 @@ export default factories.createCoreService('api::token-reward-record.token-rewar
   // 获取用户的代币赠送记录
   async getUserTokenRewards(userId: number) {
     return await strapi.entityService.findMany('api::token-reward-record.token-reward-record', {
-      filters: { user: userId },
+      filters: { user: { id: userId } },
       populate: {
         token: true,
         order: {
@@ -32,7 +32,7 @@ export default factories.createCoreService('api::token-reward-record.token-rewar
   // 获取订单的代币赠送记录
   async getOrderTokenRewards(orderId: number) {
     return await strapi.entityService.findMany('api::token-reward-record.token-reward-record', {
-      filters: { order: orderId },
+      filters: { order: { id: orderId } },
       populate: {
         token: true,
         user: {

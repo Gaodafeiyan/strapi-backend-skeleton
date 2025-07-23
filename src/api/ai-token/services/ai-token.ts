@@ -59,13 +59,18 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
   // CoinGecko API
   async getCoinGeckoPrice(coinId: string) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`, {
         headers: {
           'Accept': 'application/json',
           'User-Agent': 'Mozilla/5.0 (compatible; AI-Token-Bot/1.0)'
         },
-        timeout: 5000
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`CoinGecko API error: ${response.status}`);
@@ -86,18 +91,23 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
   // Binance API
   async getBinancePrice(symbol: string) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`, {
         headers: {
           'Accept': 'application/json'
         },
-        timeout: 5000
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`Binance API error: ${response.status}`);
       }
       
-      const data = await response.json();
+      const data = await response.json() as any;
       if (!data.price) {
         throw new Error(`Invalid response from Binance for ${symbol}`);
       }
@@ -112,18 +122,23 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
   // DexScreener API
   async getDexScreenerPrice(pairAddress: string) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch(`https://api.dexscreener.com/latest/dex/pairs/solana/${pairAddress}`, {
         headers: {
           'Accept': 'application/json'
         },
-        timeout: 5000
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`DexScreener API error: ${response.status}`);
       }
       
-      const data = await response.json();
+      const data = await response.json() as any;
       if (!data.pairs || data.pairs.length === 0 || !data.pairs[0].priceUsd) {
         throw new Error(`Invalid response from DexScreener for ${pairAddress}`);
       }

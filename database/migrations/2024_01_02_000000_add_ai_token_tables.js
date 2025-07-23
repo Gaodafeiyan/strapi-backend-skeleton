@@ -47,10 +47,13 @@ module.exports = {
       table.index(['created_at']);
     });
 
-    // 为钱包余额表添加AI代币余额字段
-    await knex.schema.alterTable('qianbao_yues', (table) => {
-      table.json('ai_token_balances').defaultTo('{}');
-    });
+    // 为钱包余额表添加AI代币余额字段（如果表存在）
+    const hasQianbaoYuesTable = await knex.schema.hasTable('qianbao_yues');
+    if (hasQianbaoYuesTable) {
+      await knex.schema.alterTable('qianbao_yues', (table) => {
+        table.json('ai_token_balances');
+      });
+    }
 
     // 插入初始代币数据
     const tokens = [
