@@ -13,7 +13,7 @@ export default factories.createCoreService('api::wallet-address.wallet-address' 
         filters: {
           chain,
           asset,
-          status: 'active',
+          wallet_status: 'active',  // 改为wallet_status
           balance: {
             $lt: '10000' // 余额小于10000的地址，改为string类型
           }
@@ -72,7 +72,7 @@ export default factories.createCoreService('api::wallet-address.wallet-address' 
         filters: {
           chain,
           asset,
-          status: 'active',
+          wallet_status: 'active',  // 改为wallet_status
           balance: {
             $gte: amount // 余额足够，amount已经是string类型
           }
@@ -115,7 +115,7 @@ export default factories.createCoreService('api::wallet-address.wallet-address' 
     try {
       // 获取所有活跃地址
       const addresses = await strapi.entityService.findMany('api::wallet-address.wallet-address' as any, {
-        filters: { status: 'active' }
+        filters: { wallet_status: 'active' }  // 改为wallet_status
       }) as any[];
 
       for (const address of addresses) {
@@ -125,7 +125,7 @@ export default factories.createCoreService('api::wallet-address.wallet-address' 
         if (shouldRotate) {
           await strapi.entityService.update('api::wallet-address.wallet-address' as any, address.id, {
             data: {
-              status: 'maintenance',
+              wallet_status: 'maintenance',  // 改为wallet_status
               priority: Math.max(1, (address as any).priority - 10) // 降低优先级
             }
           });
@@ -180,7 +180,7 @@ export default factories.createCoreService('api::wallet-address.wallet-address' 
             address: mockAddress,
             chain,
             asset,
-            status: 'active',
+            wallet_status: 'active',  // 改为wallet_status
             priority: 50,
             description: `自动生成的${chain}链${asset}地址 #${i + 1}`,
             tags: ['auto-generated', chain.toLowerCase(), asset.toLowerCase()]

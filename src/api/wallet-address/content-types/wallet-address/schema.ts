@@ -4,7 +4,7 @@ export default {
   kind: 'collectionType',
   collectionName: 'wallet_addresses',
   options: {
-    draftAndPublish: false,  // 禁用草稿发布功能
+    draftAndPublish: false,
   },
   pluginOptions: { 
     'content-api': { enabled: true },
@@ -38,7 +38,7 @@ export default {
       required: true,
       default: 'USDT',
     },
-    status: {
+    wallet_status: {  // 改名为wallet_status避免与Strapi内部status冲突
       type: 'enumeration',
       enum: ['active', 'inactive', 'maintenance'],
       required: true,
@@ -58,11 +58,11 @@ export default {
       type: 'datetime',
     },
     balance: {
-      type: 'string',                    // 改为string类型
+      type: 'string',
       default: '0',
     },
     max_balance: {
-      type: 'string',                    // 改为string类型
+      type: 'string',
       default: '10000',
     },
     private_key: {
