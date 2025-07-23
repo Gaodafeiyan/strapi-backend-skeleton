@@ -179,7 +179,7 @@ class StrapiApiService {
       });
       throw error;
     }
-  },
+  }
 
   // 获取钱包地址详情
   async getWalletAddress(walletId) {
