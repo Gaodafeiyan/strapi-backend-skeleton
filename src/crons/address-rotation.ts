@@ -1,6 +1,4 @@
-import { Strapi } from '@strapi/strapi';
-
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }) => ({
   // 每小时检查一次地址轮换
   '0 * * * *': async () => {
     try {
@@ -36,7 +34,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 });
 
 // 检查并生成新地址
-async function checkAndGenerateNewAddresses(strapi: Strapi) {
+async function checkAndGenerateNewAddresses(strapi) {
   try {
     const walletAddressService = strapi.service('api::wallet-address.wallet-address');
     
@@ -69,7 +67,7 @@ async function checkAndGenerateNewAddresses(strapi: Strapi) {
 }
 
 // 深度清理地址
-async function performDeepAddressCleanup(strapi: Strapi) {
+async function performDeepAddressCleanup(strapi) {
   try {
     // 1. 清理长期未使用的地址
     const thirtyDaysAgo = new Date();
