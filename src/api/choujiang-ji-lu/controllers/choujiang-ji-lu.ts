@@ -44,7 +44,25 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   async checkUserChoujiangJihui(ctx) {
     try {
       const userId = ctx.state.user.id;
-      const result = await strapi.service('api::choujiang-jihui.choujiang-jihui').checkUserChoujiangJihui(userId);
+      
+      // 直接使用entityService查询，避免权限问题
+      const jihuis = await strapi.entityService.findMany('api::choujiang-jihui.choujiang-jihui' as any, {
+        filters: {
+          yonghu: userId,
+          zhuangtai: 'active',
+          shengYuCiShu: {
+            $gt: 0
+          }
+        }
+      });
+
+      const totalRemaining = jihuis.reduce((sum, jihui) => sum + (jihui as any).shengYuCiShu, 0);
+      
+      const result = {
+        hasJihui: jihuis.length > 0,
+        totalRemaining,
+        jihuis
+      };
 
       ctx.send({
         success: true,
