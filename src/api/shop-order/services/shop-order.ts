@@ -64,7 +64,7 @@ export default factories.createCoreService(
         productId,
         {
           data: {
-            productStock: product.productStock - quantity,
+            stockQuantity: product.stockQuantity - quantity,
           },
         }
       );
@@ -170,7 +170,7 @@ export default factories.createCoreService(
           item.product.id,
           {
             data: {
-              productStock: item.product.productStock - item.quantity,
+              stockQuantity: item.product.stockQuantity - item.quantity,
             },
           }
         );
@@ -299,7 +299,7 @@ export default factories.createCoreService(
           product.id,
           {
             data: {
-              productStock: product.productStock + orderData.quantity,
+              stockQuantity: product.stockQuantity + orderData.quantity,
             },
           }
         );

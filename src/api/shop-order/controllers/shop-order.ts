@@ -111,7 +111,7 @@ export default factories.createCoreController(
         
         const orders = await strapi
           .service('api::shop-order.shop-order')
-          .getUserOrders(user.id, parseInt(page), parseInt(pageSize));
+          .getUserOrders(user.id, parseInt(page as string), parseInt(pageSize as string));
         
         return ctx.send({
           success: true,

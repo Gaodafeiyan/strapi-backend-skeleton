@@ -20,10 +20,10 @@ export default factories.createCoreController(
         {
           filters,
           populate: { productImages: true },
-          sort: [sort],
+          sort: [sort as string],
           pagination: {
-            page: parseInt(page),
-            pageSize: parseInt(pageSize),
+            page: parseInt(page as string),
+            pageSize: parseInt(pageSize as string),
           },
         }
       );
@@ -35,9 +35,9 @@ export default factories.createCoreController(
       return {
         data: products,
         pagination: {
-          page: parseInt(page),
-          pageSize: parseInt(pageSize),
-          pageCount: Math.ceil(total / parseInt(pageSize)),
+          page: parseInt(page as string),
+          pageSize: parseInt(pageSize as string),
+          pageCount: Math.ceil(total / parseInt(pageSize as string)),
           total,
         },
       };
@@ -81,9 +81,9 @@ export default factories.createCoreController(
       // 关键词搜索
       if (keyword) {
         filters.$or = [
-          { productName: { $containsi: keyword } },
-          { productDescription: { $containsi: keyword } },
-          { productTags: { $containsi: keyword } },
+          { productName: { $containsi: keyword as string } },
+          { productDescription: { $containsi: keyword as string } },
+          { productTags: { $containsi: keyword as string } },
         ];
       }
       
@@ -96,10 +96,10 @@ export default factories.createCoreController(
       if (minPrice || maxPrice) {
         filters.productPrice = {};
         if (minPrice) {
-          filters.productPrice.$gte = parseFloat(minPrice);
+          filters.productPrice.$gte = parseFloat(minPrice as string);
         }
         if (maxPrice) {
-          filters.productPrice.$lte = parseFloat(maxPrice);
+          filters.productPrice.$lte = parseFloat(maxPrice as string);
         }
       }
       
@@ -108,10 +108,10 @@ export default factories.createCoreController(
         {
           filters,
           populate: { productImages: true },
-          sort: [sort],
+          sort: [sort as string],
           pagination: {
-            page: parseInt(page),
-            pageSize: parseInt(pageSize),
+            page: parseInt(page as string),
+            pageSize: parseInt(pageSize as string),
           },
         }
       );
@@ -123,9 +123,9 @@ export default factories.createCoreController(
       return {
         data: products,
         pagination: {
-          page: parseInt(page),
-          pageSize: parseInt(pageSize),
-          pageCount: Math.ceil(total / parseInt(pageSize)),
+          page: parseInt(page as string),
+          pageSize: parseInt(pageSize as string),
+          pageCount: Math.ceil(total / parseInt(pageSize as string)),
           total,
         },
       };
@@ -140,13 +140,13 @@ export default factories.createCoreController(
         {
           filters: {
             publishedAt: { $notNull: true },
-            productHot: true,
+            isHot: true,
           },
           populate: { productImages: true },
-          sort: ['productSales:desc'],
+          sort: ['sortOrder:asc', 'createdAt:desc'],
           pagination: {
             page: 1,
-            pageSize: parseInt(limit),
+            pageSize: parseInt(limit as string),
           },
         }
       );
@@ -163,13 +163,13 @@ export default factories.createCoreController(
         {
           filters: {
             publishedAt: { $notNull: true },
-            productRecommended: true,
+            isRecommend: true,
           },
           populate: { productImages: true },
-          sort: ['createdAt:desc'],
+          sort: ['sortOrder:asc', 'createdAt:desc'],
           pagination: {
             page: 1,
-            pageSize: parseInt(limit),
+            pageSize: parseInt(limit as string),
           },
         }
       );
@@ -213,7 +213,7 @@ export default factories.createCoreController(
         id,
         {
           data: {
-            productSales: (product.productSales || 0) + parseInt(quantity),
+            soldQuantity: (product.soldQuantity || 0) + parseInt(quantity),
           },
         }
       );
