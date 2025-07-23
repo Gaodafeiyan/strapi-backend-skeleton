@@ -28,9 +28,7 @@ export default {
       path: '/choujiang/check-jihui',
       handler: 'choujiang-ji-lu.checkUserChoujiangJihui',
       config: {
-        auth: {
-          scope: ['authenticated']
-        }
+        auth: false
       }
     },
     // 获取用户抽奖记录
