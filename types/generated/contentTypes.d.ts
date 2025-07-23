@@ -925,7 +925,7 @@ export interface ApiShopProductShopProduct extends Struct.CollectionTypeSchema {
     singularName: 'shop-product';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   pluginOptions: {
     'content-api': {
