@@ -3,6 +3,34 @@ import { factories } from '@strapi/strapi';
 export default factories.createCoreController(
   'api::shop-cart.shop-cart',
   ({ strapi }) => ({
+    // 创建购物车项目（简化版，用于测试）
+    async create(ctx) {
+      try {
+        const { data } = ctx.request.body;
+        
+        // 如果没有用户认证，使用默认用户ID
+        const userId = data.userId || 1;
+        
+        const cartItem = await strapi.entityService.create(
+          'api::shop-cart.shop-cart',
+          {
+            data: {
+              quantity: data.quantity || 1,
+              selected: data.selected !== false,
+              user: userId,
+              product: data.productId,
+            },
+          }
+        );
+        
+        return ctx.send({
+          success: true,
+          data: cartItem,
+        });
+      } catch (error) {
+        return ctx.badRequest(error.message);
+      }
+    },
     // 添加到购物车
     async addToCart(ctx) {
       try {
