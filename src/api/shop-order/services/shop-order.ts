@@ -389,5 +389,70 @@ export default factories.createCoreService(
         },
       };
     },
+    
+    // 支付订单
+    async payOrder(orderId: number, userId: number) {
+      const order = await strapi.entityService.findOne(
+        'api::shop-order.shop-order',
+        orderId,
+        {
+          populate: ['product'],
+        }
+      );
+      
+      if (!order) {
+        throw new Error('订单不存在');
+      }
+      
+      // 检查用户权限
+      const orderData = order as any;
+      if (orderData.user?.id !== userId) {
+        throw new Error('无权操作此订单');
+      }
+      
+      if (orderData.orderStatus !== 'pending') {
+        throw new Error('订单状态不允许支付');
+      }
+      
+      // 更新订单状态
+      return await strapi.entityService.update(
+        'api::shop-order.shop-order',
+        orderId,
+        {
+          data: {
+            orderStatus: 'paid',
+            paidAt: new Date(),
+          },
+        }
+      );
+    },
+    
+    // 发货
+    async shipOrder(orderId: number, trackingNumber: string) {
+      const order = await strapi.entityService.findOne(
+        'api::shop-order.shop-order',
+        orderId
+      );
+      
+      if (!order) {
+        throw new Error('订单不存在');
+      }
+      
+      if ((order as any).orderStatus !== 'paid') {
+        throw new Error('订单状态不允许发货');
+      }
+      
+      return await strapi.entityService.update(
+        'api::shop-order.shop-order',
+        orderId,
+        {
+          data: {
+            orderStatus: 'shipped',
+            trackingNumber,
+            shippedAt: new Date(),
+          },
+        }
+      );
+    },
   })
 ); 

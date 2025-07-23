@@ -7,15 +7,15 @@ export default factories.createCoreController(
     async create(ctx) {
       try {
         const { user } = ctx.state;
-        const { productId, quantity, shippingInfo } = ctx.request.body;
+        const { productId, quantity, shippingAddress, shippingPhone, shippingName, notes } = ctx.request.body;
         
         const order = await strapi
           .service('api::shop-order.shop-order')
-          .createOrder({
-            userId: user.id,
-            productId,
-            quantity,
-            shippingInfo,
+          .createOrder(user.id, productId, quantity, {
+            shippingAddress,
+            shippingPhone,
+            shippingName,
+            notes,
           });
         
         return ctx.send({
@@ -107,16 +107,11 @@ export default factories.createCoreController(
     async myOrders(ctx) {
       try {
         const { user } = ctx.state;
-        const { orderStatus, page = 1, limit = 20 } = ctx.query;
-        
-        const filters: any = {};
-        if (orderStatus) {
-          filters.orderStatus = orderStatus;
-        }
+        const { page = 1, pageSize = 10 } = ctx.query;
         
         const orders = await strapi
           .service('api::shop-order.shop-order')
-          .getUserOrders(user.id, filters);
+          .getUserOrders(user.id, parseInt(page), parseInt(pageSize));
         
         return ctx.send({
           success: true,
@@ -131,23 +126,24 @@ export default factories.createCoreController(
     async checkoutFromCart(ctx) {
       try {
         const { user } = ctx.state;
-        const { cartItemIds, shippingInfo } = ctx.request.body;
+        const { cartItemIds, shippingAddress, shippingPhone, shippingName, notes } = ctx.request.body;
         
         if (!cartItemIds || !Array.isArray(cartItemIds) || cartItemIds.length === 0) {
           return ctx.badRequest('请选择要购买的商品');
         }
         
-        if (!shippingInfo || !shippingInfo.address || !shippingInfo.phone || !shippingInfo.name) {
-          return ctx.badRequest('请填写完整的收货信息');
-        }
-        
-        const result = await strapi
+        const order = await strapi
           .service('api::shop-order.shop-order')
-          .createOrdersFromCart(user.id, cartItemIds, shippingInfo);
+          .createOrderFromCart(user.id, cartItemIds, {
+            shippingAddress,
+            shippingPhone,
+            shippingName,
+            notes,
+          });
         
         return ctx.send({
           success: true,
-          data: result,
+          data: order,
           message: '订单创建成功',
         });
       } catch (error) {

@@ -63,18 +63,8 @@ export default {
     },
     {
       method: 'GET',
-      path: '/shop-products/new/list',
-      handler: 'shop-product.getNewProducts',
-      config: {
-        auth: {
-          scope: ['public'],
-        },
-      },
-    },
-    {
-      method: 'GET',
       path: '/shop-products/recommend/list',
-      handler: 'shop-product.getRecommendProducts',
+      handler: 'shop-product.getRecommendedProducts',
       config: {
         auth: {
           scope: ['public'],
@@ -84,7 +74,7 @@ export default {
     {
       method: 'GET',
       path: '/shop-products/search',
-      handler: 'shop-product.searchProducts',
+      handler: 'shop-product.search',
       config: {
         auth: {
           scope: ['public'],
@@ -98,6 +88,16 @@ export default {
       config: {
         auth: {
           scope: ['public'],
+        },
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/shop-products/:id/sales',
+      handler: 'shop-product.updateSales',
+      config: {
+        auth: {
+          scope: ['authenticated'],
         },
       },
     },
