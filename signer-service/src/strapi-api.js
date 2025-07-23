@@ -200,6 +200,24 @@ class StrapiApiService {
       throw error;
     }
   }
+
+  // 获取所有钱包地址
+  async getWalletAddresses() {
+    try {
+      const response = await this.client.get('/api/wallet-addresses');
+      
+      logger.info('Wallet addresses retrieved', {
+        count: response.data.data?.length || 0
+      });
+      
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to get wallet addresses', {
+        error: error.response?.data || error.message
+      });
+      throw error;
+    }
+  }
 }
 
 module.exports = StrapiApiService; 

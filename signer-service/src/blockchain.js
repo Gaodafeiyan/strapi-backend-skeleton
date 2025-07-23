@@ -54,19 +54,44 @@ class BlockchainService {
   async getBestWithdrawalWallet(amount) {
     try {
       // 从Strapi获取有足够余额的钱包地址
-      const strapiApi = require('./strapi-api');
-      const walletAddressService = strapiApi.default;
+      const StrapiApiService = require('./strapi-api');
+      const strapiApi = new StrapiApiService();
       
-      const bestWallet = await walletAddressService.getWithdrawalAddress('BSC', 'USDT', amount);
+      // 先检查是否有钱包地址
+      const walletAddresses = await strapiApi.getWalletAddresses();
       
-      if (!bestWallet) {
-        throw new Error('没有余额足够的提现钱包');
+      if (!walletAddresses.data || walletAddresses.data.length === 0) {
+        throw new Error('没有可用的提现钱包地址，请在Strapi后台添加钱包地址');
       }
+      
+      // 筛选有足够余额的活跃钱包
+      const availableWallets = walletAddresses.data.filter(wallet => 
+        wallet.status === 'active' && 
+        parseFloat(wallet.balance) >= parseFloat(amount) &&
+        wallet.chain === 'BSC' &&
+        wallet.asset === 'USDT'
+      );
+      
+      if (availableWallets.length === 0) {
+        throw new Error(`没有余额足够的提现钱包。需要: ${amount} USDT`);
+      }
+      
+      // 按优先级和使用次数排序
+      const bestWallet = availableWallets.sort((a, b) => {
+        // 优先级高的优先
+        if (a.priority !== b.priority) {
+          return (b.priority || 50) - (a.priority || 50);
+        }
+        // 使用次数少的优先
+        return (a.usage_count || 0) - (b.usage_count || 0);
+      })[0];
       
       logger.info('Best withdrawal wallet selected', {
         walletAddress: bestWallet.address,
         balance: bestWallet.balance,
-        amount
+        amount,
+        priority: bestWallet.priority,
+        usageCount: bestWallet.usage_count
       });
       
       return bestWallet;
