@@ -48,17 +48,21 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
       
       if (!userId) {
         // 如果没有用户ID，返回所有抽奖机会的统计信息
-        const knex = (strapi as any).connections.default;
-        const allJihuis = await knex('choujiang_jihuis')
-          .where('zhuangtai', 'active')
-          .where('sheng_yu_ci_shu', '>', 0);
+        const allJihuis = await strapi.entityService.findMany('api::choujiang-jihui.choujiang-jihui' as any, {
+          filters: {
+            zhuangtai: 'active',
+            shengYuCiShu: {
+              $gt: 0
+            }
+          }
+        });
 
-        const totalRemaining = allJihuis.reduce((sum, jihui) => sum + jihui.sheng_yu_ci_shu, 0);
+        const totalRemaining = allJihuis.reduce((sum, jihui) => sum + (jihui as any).shengYuCiShu, 0);
         
         const result = {
           hasJihui: allJihuis.length > 0,
           totalRemaining,
-          totalUsers: new Set(allJihuis.map(j => j.yonghu_id)).size,
+          totalUsers: new Set(allJihuis.map(j => (j as any).yonghu?.id)).size,
           message: '请提供用户ID或使用认证token'
         };
 
@@ -69,28 +73,30 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
         return;
       }
       
-      // 使用数据库查询，完全绕过权限检查
-      const knex = (strapi as any).connections.default;
-      const jihuis = await knex('choujiang_jihuis')
-        .where({
-          yonghu_id: userId,
-          zhuangtai: 'active'
-        })
-        .where('sheng_yu_ci_shu', '>', 0);
+      // 使用entityService查询，但绕过权限检查
+      const jihuis = await strapi.entityService.findMany('api::choujiang-jihui.choujiang-jihui' as any, {
+        filters: {
+          yonghu: userId,
+          zhuangtai: 'active',
+          shengYuCiShu: {
+            $gt: 0
+          }
+        }
+      });
 
-      const totalRemaining = jihuis.reduce((sum, jihui) => sum + jihui.sheng_yu_ci_shu, 0);
+      const totalRemaining = jihuis.reduce((sum, jihui) => sum + (jihui as any).shengYuCiShu, 0);
       
       const result = {
         hasJihui: jihuis.length > 0,
         totalRemaining,
         jihuis: jihuis.map(j => ({
           id: j.id,
-          zongCiShu: j.zong_ci_shu,
-          yiYongCiShu: j.yi_yong_ci_shu,
-          shengYuCiShu: j.sheng_yu_ci_shu,
-          zhuangtai: j.zhuangtai,
-          chuangJianShiJian: j.chuang_jian_shi_jian,
-          daoQiShiJian: j.dao_qi_shi_jian
+          zongCiShu: (j as any).zongCiShu,
+          yiYongCiShu: (j as any).yiYongCiShu,
+          shengYuCiShu: (j as any).shengYuCiShu,
+          zhuangtai: (j as any).zhuangtai,
+          chuangJianShiJian: (j as any).chuangJianShiJian,
+          daoQiShiJian: (j as any).daoQiShiJian
         }))
       };
 
