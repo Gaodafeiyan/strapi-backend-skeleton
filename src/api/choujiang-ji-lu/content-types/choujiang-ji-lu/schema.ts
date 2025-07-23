@@ -11,8 +11,7 @@ const ChoujiangJiLuSchema = {
     yonghu: { 
       type: 'relation', 
       relation: 'manyToOne',
-      target: 'plugin::users-permissions.user', 
-      inversedBy: 'choujiangJiLus' 
+      target: 'plugin::users-permissions.user'
     },
     jiangpin: { 
       type: 'relation', 
