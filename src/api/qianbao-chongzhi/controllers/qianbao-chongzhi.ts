@@ -25,13 +25,46 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
       const { chain = 'BSC', asset = 'USDT' } = ctx.query;
       const userId = ctx.state.user?.id;
       
-      // 使用钱包地址服务获取最佳地址
-      const walletAddressService = strapi.service('api::wallet-address.wallet-address');
-      const bestAddress = await walletAddressService.getBestDepositAddress(chain, asset, userId);
+      // 直接查询钱包地址，不使用服务方法
+      const addresses = await strapi.entityService.findMany('api::wallet-address.wallet-address' as any, {
+        filters: {
+          chain,
+          asset,
+          wallet_status: 'active',
+          balance: {
+            $lt: '10000'
+          }
+        },
+        sort: [
+          { priority: 'desc' },
+          { usage_count: 'asc' },
+          { last_used_at: 'asc' }
+        ],
+        limit: 1
+      });
+
+      if (addresses.length === 0) {
+        return ctx.notFound(`没有可用的${chain}链${asset}充值地址`);
+      }
+
+      const bestAddress = addresses[0];
+      
+      // 更新使用统计
+      await strapi.entityService.update('api::wallet-address.wallet-address' as any, bestAddress.id, {
+        data: {
+          usage_count: (bestAddress as any).usage_count + 1,
+          last_used_at: new Date()
+        }
+      });
       
       ctx.body = {
         success: true,
-        data: bestAddress
+        data: {
+          address: (bestAddress as any).address,
+          chain: (bestAddress as any).chain,
+          asset: (bestAddress as any).asset,
+          description: (bestAddress as any).description
+        }
       };
     } catch (error) {
       ctx.throw(500, `获取充值地址失败: ${error instanceof Error ? error.message : '未知错误'}`);
