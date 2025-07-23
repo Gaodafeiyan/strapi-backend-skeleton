@@ -139,9 +139,9 @@ class QueueProcessor {
     } else if (data.id) {
       // 从Strapi返回的数据格式
       withdrawId = data.id;
-      userId = data.attributes?.yonghu;
-      amount = data.attributes?.usdtJine;
-      toAddress = data.attributes?.toAddress;
+      userId = data.data?.yonghu;
+      amount = data.data?.usdtJine;
+      toAddress = data.data?.toAddress;
     } else {
       throw new Error('Invalid job data format: missing required fields');
     }
