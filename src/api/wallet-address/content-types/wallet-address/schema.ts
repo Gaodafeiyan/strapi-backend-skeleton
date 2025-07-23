@@ -23,8 +23,8 @@ export default {
       type: 'string',
       required: true,
       unique: true,
-      minLength: 42,
-      maxLength: 42,
+      minLength: 26,  // 降低最小长度，支持TRON地址
+      maxLength: 42,  // 保持最大长度
     },
     chain: {
       type: 'enumeration',
