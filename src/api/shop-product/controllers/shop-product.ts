@@ -20,7 +20,7 @@ export default factories.createCoreController(
         {
           filters,
           populate: { productImages: true },
-          sort: [sort as string],
+          sort: { createdAt: 'desc' },
           pagination: {
             page: parseInt(page as string),
             pageSize: parseInt(pageSize as string),
@@ -108,7 +108,7 @@ export default factories.createCoreController(
         {
           filters,
           populate: { productImages: true },
-          sort: [sort as string],
+          sort: { createdAt: 'desc' },
           pagination: {
             page: parseInt(page as string),
             pageSize: parseInt(pageSize as string),
