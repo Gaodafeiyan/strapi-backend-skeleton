@@ -1,16 +1,17 @@
 import { factories } from '@strapi/strapi';
-import Decimal from 'decimal.js';
 
 export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }) => ({
-  // 获取所有活跃代币
+  // 获取所有活跃的代币
   async getActiveTokens() {
-    return await strapi.entityService.findMany('api::ai-token.ai-token', {
-      filters: { isActive: true },
-      sort: { weight: 'desc' }
-    });
+    const result = await strapi.db.connection.raw(`
+      SELECT * FROM ai_tokens 
+      WHERE is_active = true 
+      ORDER BY weight DESC
+    `);
+    return result[0];
   },
 
-  // 随机选择代币
+  // 随机选择一个代币（基于权重）
   async selectRandomToken() {
     const tokens = await this.getActiveTokens();
     if (tokens.length === 0) {
@@ -19,7 +20,7 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
     return this.weightedRandomSelect(tokens);
   },
 
-  // 权重随机选择算法
+  // 基于权重的随机选择算法
   weightedRandomSelect(tokens: any[]) {
     const totalWeight = tokens.reduce((sum, token) => sum + token.weight, 0);
     let random = Math.random() * totalWeight;
@@ -31,28 +32,31 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
       }
     }
     
-    return tokens[0];
+    return tokens[tokens.length - 1]; // 兜底
   },
 
-  // 获取代币实时价格
+  // 获取代币价格
   async getTokenPrice(tokenId: number) {
-    const token = await strapi.entityService.findOne('api::ai-token.ai-token', tokenId);
+    const result = await strapi.db.connection.raw(`
+      SELECT * FROM ai_tokens WHERE id = ?
+    `, [tokenId]);
+    
+    const token = result[0][0];
     if (!token) {
-      throw new Error('代币不存在');
+      throw new Error(`代币不存在: ${tokenId}`);
     }
 
-    try {
-      if (token.priceSource === 'coingecko') {
-        return await this.getCoinGeckoPrice(token.priceApiId);
-      } else if (token.priceSource === 'binance') {
-        return await this.getBinancePrice(token.priceApiId);
-      } else if (token.priceSource === 'dexscreener') {
-        return await this.getDexScreenerPrice(token.priceApiId);
-      }
-    } catch (error) {
-      console.error(`获取代币价格失败: ${token.name}`, error);
-      // 使用默认价格作为备用
-      return 0.01; // 默认价格
+    const { price_source, price_api_id } = token;
+    
+    switch (price_source) {
+      case 'coingecko':
+        return await this.getCoinGeckoPrice(price_api_id);
+      case 'binance':
+        return await this.getBinancePrice(price_api_id);
+      case 'dexscreener':
+        return await this.getDexScreenerPrice(price_api_id);
+      default:
+        throw new Error(`不支持的价格源: ${price_source}`);
     }
   },
 
@@ -60,15 +64,12 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
   async getCoinGeckoPrice(coinId: string) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
       
-      const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`, {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (compatible; AI-Token-Bot/1.0)'
-        },
-        signal: controller.signal
-      });
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`,
+        { signal: controller.signal }
+      );
       
       clearTimeout(timeoutId);
       
@@ -76,12 +77,12 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
         throw new Error(`CoinGecko API error: ${response.status}`);
       }
       
-      const data = await response.json();
+      const data = await response.json() as any;
       if (!data[coinId] || !data[coinId].usd) {
         throw new Error(`Invalid response from CoinGecko for ${coinId}`);
       }
       
-      return parseFloat(data[coinId].usd);
+      return data[coinId].usd;
     } catch (error) {
       console.error('CoinGecko API error:', error);
       throw error;
@@ -92,14 +93,12 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
   async getBinancePrice(symbol: string) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
       
-      const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`, {
-        headers: {
-          'Accept': 'application/json'
-        },
-        signal: controller.signal
-      });
+      const response = await fetch(
+        `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`,
+        { signal: controller.signal }
+      );
       
       clearTimeout(timeoutId);
       
@@ -123,14 +122,12 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
   async getDexScreenerPrice(pairAddress: string) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
       
-      const response = await fetch(`https://api.dexscreener.com/latest/dex/pairs/solana/${pairAddress}`, {
-        headers: {
-          'Accept': 'application/json'
-        },
-        signal: controller.signal
-      });
+      const response = await fetch(
+        `https://api.dexscreener.com/latest/dex/pairs/solana/${pairAddress}`,
+        { signal: controller.signal }
+      );
       
       clearTimeout(timeoutId);
       
@@ -173,59 +170,74 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
       {
         name: 'Render',
         symbol: 'RNDR',
-        contractAddress: 'RNDR1A97ZatuqTAT2bZn1r4KwQisLvVfwJQfqWwaCSm',
-        priceSource: 'coingecko' as const,
-        priceApiId: 'render-token',
+        contract_address: 'RNDR1A97ZatuqTAT2bZn1r4KwQisLvVfwJQfqWwaCSm',
+        price_source: 'coingecko',
+        price_api_id: 'render-token',
         weight: 30,
-        description: 'Render Network - 去中心化GPU渲染网络'
+        description: 'Render Network - 去中心化GPU渲染网络',
+        is_active: true
       },
       {
         name: 'Nosana',
         symbol: 'NOS',
-        contractAddress: '4BC2PiK9Y319bPQKHbLbHu86xdksJLAuBTBDPc6QcKAS',
-        priceSource: 'coingecko',
-        priceApiId: 'nosana',
+        contract_address: '4BC2PiK9Y319bPQKHbLbHu86xdksJLAuBTBDPc6QcKAS',
+        price_source: 'coingecko',
+        price_api_id: 'nosana',
         weight: 25,
-        description: 'Nosana - 去中心化CI/CD平台'
+        description: 'Nosana - 去中心化CI/CD平台',
+        is_active: true
       },
       {
         name: 'Synesis One',
         symbol: 'SNS',
-        contractAddress: 'SNS5czn4ZyjtHNpgJyHCN33zBYFWvLJoYxx3JrqkjvGc',
-        priceSource: 'coingecko',
-        priceApiId: 'synesis-one',
+        contract_address: 'SNS5czn4ZyjtHNpgJyHCN33zBYFWvLJoYxx3JrqkjvGc',
+        price_source: 'coingecko',
+        price_api_id: 'synesis-one',
         weight: 20,
-        description: 'Synesis One - AI数据标注平台'
+        description: 'Synesis One - AI数据标注平台',
+        is_active: true
       },
       {
         name: 'Numeraire',
         symbol: 'NMR',
-        contractAddress: 'NMR1gd2nautLcWTPZLY625YCHP6oVVNqs8s4ET3SkMsv',
-        priceSource: 'coingecko',
-        priceApiId: 'numerai',
+        contract_address: 'NMR1gd2nautLcWTPZLY625YCHP6oVVNqs8s4ET3SkMsv',
+        price_source: 'coingecko',
+        price_api_id: 'numerai',
         weight: 15,
-        description: 'Numeraire - 去中心化对冲基金'
+        description: 'Numeraire - 去中心化对冲基金',
+        is_active: true
       },
       {
         name: 'ChainGPT',
         symbol: 'CGPT',
-        contractAddress: 'CGPT1Ws3jh9E82fUmX9Zykp17fjM5pVp4SGbXw7U7Doo',
-        priceSource: 'coingecko',
-        priceApiId: 'chaingpt',
+        contract_address: 'CGPT1Ws3jh9E82fUmX9Zykp17fjM5pVp4SGbXw7U7Doo',
+        price_source: 'coingecko',
+        price_api_id: 'chaingpt',
         weight: 10,
-        description: 'ChainGPT - AI驱动的区块链工具'
+        description: 'ChainGPT - AI驱动的区块链工具',
+        is_active: true
       }
     ];
 
     for (const tokenData of tokens) {
-      const existingToken = await strapi.entityService.findMany('api::ai-token.ai-token', {
-        filters: { symbol: tokenData.symbol }
-      });
+      const result = await strapi.db.connection.raw(`
+        SELECT id FROM ai_tokens WHERE symbol = ?
+      `, [tokenData.symbol]);
 
-      if (existingToken.length === 0) {
-        await strapi.entityService.create('api::ai-token.ai-token', {
-          data: tokenData
-        });
+      if (result[0].length === 0) {
+        await strapi.db.connection.raw(`
+          INSERT INTO ai_tokens (name, symbol, contract_address, price_source, price_api_id, weight, description, is_active, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        `, [
+          tokenData.name,
+          tokenData.symbol,
+          tokenData.contract_address,
+          tokenData.price_source,
+          tokenData.price_api_id,
+          tokenData.weight,
+          tokenData.description,
+          tokenData.is_active
+        ]);
         console.log(`创建代币: ${tokenData.name}`);
       }
     }
