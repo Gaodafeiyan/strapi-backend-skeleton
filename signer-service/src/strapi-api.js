@@ -153,6 +153,53 @@ class StrapiApiService {
       throw error;
     }
   }
+
+  // 更新钱包余额
+  async updateWalletBalance(walletId, newBalance) {
+    try {
+      const response = await this.client.put(`/api/wallet-addresses/${walletId}`, {
+        data: { 
+          balance: newBalance,
+          last_used_at: new Date().toISOString()
+        }
+      });
+
+      logger.info('Wallet balance updated', {
+        walletId,
+        newBalance,
+        response: response.data
+      });
+
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to update wallet balance', {
+        walletId,
+        newBalance,
+        error: error.response?.data || error.message
+      });
+      throw error;
+    }
+  },
+
+  // 获取钱包地址详情
+  async getWalletAddress(walletId) {
+    try {
+      const response = await this.client.get(`/api/wallet-addresses/${walletId}`);
+      
+      logger.info('Wallet address retrieved', {
+        walletId,
+        data: response.data
+      });
+      
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to get wallet address', {
+        walletId,
+        error: error.response?.data || error.message
+      });
+      throw error;
+    }
+  }
 }
 
 module.exports = StrapiApiService; 

@@ -245,7 +245,8 @@ class QueueProcessor {
       withdrawId,
       userId,
       amount,
-      toAddress
+      toAddress,
+      fromWallet: signedTx.fromWallet
     });
     
     try {
@@ -255,13 +256,40 @@ class QueueProcessor {
       // 2. 更新提现状态为已广播
       await this.strapiApi.updateWithdrawalStatus(withdrawId, 'broadcasted', result.txHash);
       
-      // 3. 添加确认任务到队列
+      // 3. 更新钱包余额（扣除已转出的金额）
+      if (signedTx.walletId) {
+        try {
+          const currentBalance = await this.blockchainService.getWalletBalance(signedTx.fromWallet);
+          const newBalance = currentBalance - parseFloat(amount);
+          
+          // 更新Strapi中的钱包余额
+          await this.strapiApi.updateWalletBalance(signedTx.walletId, newBalance);
+          
+          logger.info('Wallet balance updated after withdrawal', {
+            walletId: signedTx.walletId,
+            walletAddress: signedTx.fromWallet,
+            oldBalance: currentBalance,
+            newBalance: newBalance,
+            amount: amount
+          });
+        } catch (error) {
+          logger.error('Failed to update wallet balance', {
+            walletId: signedTx.walletId,
+            error: error.message
+          });
+          // 不抛出错误，因为提现已经成功
+        }
+      }
+      
+      // 4. 添加确认任务到队列
       await this.withdrawQueue.add('confirm', {
         withdrawId,
         userId,
         amount,
         toAddress,
-        txHash: result.txHash
+        txHash: result.txHash,
+        fromWallet: signedTx.fromWallet,
+        walletId: signedTx.walletId
       }, {
         delay: 30000, // 30秒后检查确认
         jobId: `withdraw_confirm_${withdrawId}`,
@@ -274,13 +302,15 @@ class QueueProcessor {
       
       logger.info('Broadcast job completed, confirm job queued', {
         withdrawId,
-        txHash: result.txHash
+        txHash: result.txHash,
+        fromWallet: signedTx.fromWallet
       });
       
       return {
         status: 'broadcasted',
         withdrawId,
-        txHash: result.txHash
+        txHash: result.txHash,
+        fromWallet: signedTx.fromWallet
       };
     } catch (error) {
       // 处理广播失败
