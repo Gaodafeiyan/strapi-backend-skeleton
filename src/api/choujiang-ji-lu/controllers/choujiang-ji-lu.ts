@@ -1,6 +1,6 @@
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreController('api::choujiang-jiLu.choujiang-jiLu' as any, ({ strapi }) => ({
+export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji-lu' as any, ({ strapi }) => ({
   // 执行抽奖
   async performChoujiang(ctx) {
     try {
@@ -11,7 +11,7 @@ export default factories.createCoreController('api::choujiang-jiLu.choujiang-jiL
         return ctx.badRequest('缺少抽奖机会ID');
       }
 
-      const result = await strapi.service('api::choujiang-jiLu.choujiang-jiLu').performChoujiang(userId, jihuiId);
+      const result = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').performChoujiang(userId, jihuiId);
 
       ctx.send({
         success: true,
@@ -62,7 +62,7 @@ export default factories.createCoreController('api::choujiang-jiLu.choujiang-jiL
       const userId = ctx.state.user.id;
       const { limit = 20, offset = 0 } = ctx.query;
 
-      const records = await strapi.service('api::choujiang-jiLu.choujiang-jiLu').getUserChoujiangRecords(
+      const records = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').getUserChoujiangRecords(
         userId, 
         parseInt(limit as string), 
         parseInt(offset as string)
@@ -89,12 +89,12 @@ export default factories.createCoreController('api::choujiang-jiLu.choujiang-jiL
       }
 
       // 验证记录是否属于当前用户
-      const record = await strapi.entityService.findOne('api::choujiang-jiLu.choujiang-jiLu' as any, recordId);
+      const record = await strapi.entityService.findOne('api::choujiang-ji-lu.choujiang-ji-lu' as any, recordId);
       if (!record || (record as any).yonghu?.id !== userId) {
         return ctx.forbidden('无权操作此记录');
       }
 
-      const result = await strapi.service('api::choujiang-jiLu.choujiang-jiLu').claimPhysicalPrize(recordId);
+      const result = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').claimPhysicalPrize(recordId);
 
       ctx.send({
         success: true,

@@ -1,6 +1,6 @@
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreService('api::choujiang-jiLu.choujiang-jiLu' as any, ({ strapi }) => ({
+export default factories.createCoreService('api::choujiang-ji-lu.choujiang-ji-lu' as any, ({ strapi }) => ({
   // 执行抽奖
   async performChoujiang(userId: number, jihuiId: number) {
     return strapi.db.transaction(async (trx) => {
@@ -64,7 +64,7 @@ export default factories.createCoreService('api::choujiang-jiLu.choujiang-jiLu' 
         });
 
         // 7. 创建抽奖记录
-        const choujiangRecord = await strapi.entityService.create('api::choujiang-jiLu.choujiang-jiLu' as any, {
+        const choujiangRecord = await strapi.entityService.create('api::choujiang-ji-lu.choujiang-ji-lu' as any, {
           data: {
             yonghu: userId,
             jiangpin: selectedPrize.id,
@@ -126,7 +126,7 @@ export default factories.createCoreService('api::choujiang-jiLu.choujiang-jiLu' 
         );
         
         // 更新记录状态为已领取
-        await strapi.entityService.update('api::choujiang-jiLu.choujiang-jiLu' as any, recordId, {
+        await strapi.entityService.update('api::choujiang-ji-lu.choujiang-ji-lu' as any, recordId, {
           data: {
             zhuangtai: 'yiLingQu',
             lingQuShiJian: new Date(),
@@ -145,7 +145,7 @@ export default factories.createCoreService('api::choujiang-jiLu.choujiang-jiLu' 
         );
         
         // 更新记录状态为已领取
-        await strapi.entityService.update('api::choujiang-jiLu.choujiang-jiLu' as any, recordId, {
+        await strapi.entityService.update('api::choujiang-ji-lu.choujiang-ji-lu' as any, recordId, {
           data: {
             zhuangtai: 'yiLingQu',
             lingQuShiJian: new Date(),
@@ -164,7 +164,7 @@ export default factories.createCoreService('api::choujiang-jiLu.choujiang-jiLu' 
   // 获取用户抽奖记录
   async getUserChoujiangRecords(userId: number, limit: number = 20, offset: number = 0) {
     try {
-      const records = await strapi.entityService.findMany('api::choujiang-jiLu.choujiang-jiLu' as any, {
+      const records = await strapi.entityService.findMany('api::choujiang-ji-lu.choujiang-ji-lu' as any, {
         filters: { yonghu: userId },
         sort: { chouJiangShiJian: 'desc' },
         pagination: { limit, start: offset },
@@ -181,7 +181,7 @@ export default factories.createCoreService('api::choujiang-jiLu.choujiang-jiLu' 
   // 领取实物奖品
   async claimPhysicalPrize(recordId: number) {
     try {
-      const record = await strapi.entityService.findOne('api::choujiang-jiLu.choujiang-jiLu' as any, recordId);
+      const record = await strapi.entityService.findOne('api::choujiang-ji-lu.choujiang-ji-lu' as any, recordId);
       
       if (!record) {
         throw new Error('抽奖记录不存在');
@@ -196,7 +196,7 @@ export default factories.createCoreService('api::choujiang-jiLu.choujiang-jiLu' 
       }
 
       // 更新记录状态为已领取
-      const updatedRecord = await strapi.entityService.update('api::choujiang-jiLu.choujiang-jiLu' as any, recordId, {
+      const updatedRecord = await strapi.entityService.update('api::choujiang-ji-lu.choujiang-ji-lu' as any, recordId, {
         data: {
           zhuangtai: 'yiLingQu',
           lingQuShiJian: new Date(),

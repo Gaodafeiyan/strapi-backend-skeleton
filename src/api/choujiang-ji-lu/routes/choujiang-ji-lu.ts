@@ -4,7 +4,7 @@ export default {
     {
       method: 'POST',
       path: '/choujiang/perform',
-      handler: 'choujiang-jiLu.performChoujiang',
+      handler: 'choujiang-ji-lu.performChoujiang',
       config: {
         auth: {
           scope: ['authenticated']
@@ -15,7 +15,7 @@ export default {
     {
       method: 'GET',
       path: '/choujiang/jihui',
-      handler: 'choujiang-jiLu.getUserChoujiangJihui',
+      handler: 'choujiang-ji-lu.getUserChoujiangJihui',
       config: {
         auth: {
           scope: ['authenticated']
@@ -26,7 +26,7 @@ export default {
     {
       method: 'GET',
       path: '/choujiang/check-jihui',
-      handler: 'choujiang-jiLu.checkUserChoujiangJihui',
+      handler: 'choujiang-ji-lu.checkUserChoujiangJihui',
       config: {
         auth: {
           scope: ['authenticated']
@@ -37,7 +37,7 @@ export default {
     {
       method: 'GET',
       path: '/choujiang/records',
-      handler: 'choujiang-jiLu.getUserChoujiangRecords',
+      handler: 'choujiang-ji-lu.getUserChoujiangRecords',
       config: {
         auth: {
           scope: ['authenticated']
@@ -48,7 +48,7 @@ export default {
     {
       method: 'POST',
       path: '/choujiang/claim-prize',
-      handler: 'choujiang-jiLu.claimPhysicalPrize',
+      handler: 'choujiang-ji-lu.claimPhysicalPrize',
       config: {
         auth: {
           scope: ['authenticated']
@@ -59,7 +59,7 @@ export default {
     {
       method: 'GET',
       path: '/choujiang/prizes',
-      handler: 'choujiang-jiLu.getChoujiangPrizes',
+      handler: 'choujiang-ji-lu.getChoujiangPrizes',
       config: {
         auth: false
       }

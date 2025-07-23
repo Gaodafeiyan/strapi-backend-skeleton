@@ -2,8 +2,8 @@ const ChoujiangJiLuSchema = {
   kind: 'collectionType',
   pluginOptions: { 'content-api': { enabled: true } },
   info: { 
-    singularName: 'choujiang-jiLu', 
-    pluralName: 'choujiang-jiLus', 
+    singularName: 'choujiang-ji-lu', 
+    pluralName: 'choujiang-ji-lus', 
     displayName: '抽奖记录' 
   },
   options: { draftAndPublish: false },
