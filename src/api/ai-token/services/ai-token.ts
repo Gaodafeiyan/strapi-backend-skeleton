@@ -157,7 +157,7 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
     
     for (const token of tokens) {
       try {
-        prices[token.id] = await this.getTokenPrice(token.id);
+        prices[token.id] = await this.getTokenPrice(parseInt(token.id as string));
       } catch (error) {
         console.error(`获取代币 ${token.name} 价格失败:`, error);
         prices[token.id] = 0.01; // 默认价格
@@ -174,7 +174,7 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
         name: 'Render',
         symbol: 'RNDR',
         contractAddress: 'RNDR1A97ZatuqTAT2bZn1r4KwQisLvVfwJQfqWwaCSm',
-        priceSource: 'coingecko',
+        priceSource: 'coingecko' as const,
         priceApiId: 'render-token',
         weight: 30,
         description: 'Render Network - 去中心化GPU渲染网络'
