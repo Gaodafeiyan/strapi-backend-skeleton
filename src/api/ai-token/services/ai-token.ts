@@ -52,26 +52,43 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
 
   // 获取代币价格
   async getTokenPrice(tokenId: number) {
-    const result = await strapi.db.connection.raw(`
-      SELECT * FROM ai_tokens WHERE id = ?
-    `, [tokenId]);
-    
-    const token = result[0][0];
-    if (!token) {
-      throw new Error(`代币不存在: ${tokenId}`);
-    }
+    try {
+      const result = await strapi.db.connection.raw(`
+        SELECT * FROM ai_tokens WHERE id = ?
+      `, [tokenId]);
+      
+      console.log('Token query result:', result); // 调试日志
+      
+      // 检查结果格式
+      let token;
+      if (Array.isArray(result[0]) && result[0].length > 0) {
+        token = result[0][0];
+      } else if (Array.isArray(result) && result.length > 0) {
+        token = result[0];
+      } else {
+        throw new Error(`代币不存在: ${tokenId}`);
+      }
+      
+      if (!token) {
+        throw new Error(`代币不存在: ${tokenId}`);
+      }
 
-    const { price_source, price_api_id } = token;
-    
-    switch (price_source) {
-      case 'coingecko':
-        return await this.getCoinGeckoPrice(price_api_id);
-      case 'binance':
-        return await this.getBinancePrice(price_api_id);
-      case 'dexscreener':
-        return await this.getDexScreenerPrice(price_api_id);
-      default:
-        throw new Error(`不支持的价格源: ${price_source}`);
+      const { price_source, price_api_id } = token;
+      console.log('Token found:', { id: tokenId, price_source, price_api_id }); // 调试日志
+      
+      switch (price_source) {
+        case 'coingecko':
+          return await this.getCoinGeckoPrice(price_api_id);
+        case 'binance':
+          return await this.getBinancePrice(price_api_id);
+        case 'dexscreener':
+          return await this.getDexScreenerPrice(price_api_id);
+        default:
+          throw new Error(`不支持的价格源: ${price_source}`);
+      }
+    } catch (error) {
+      console.error(`获取代币价格失败 (ID: ${tokenId}):`, error);
+      throw error;
     }
   },
 
