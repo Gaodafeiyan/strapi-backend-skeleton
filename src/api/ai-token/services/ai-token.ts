@@ -8,7 +8,8 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
       WHERE is_active = true 
       ORDER BY weight DESC
     `);
-    return result[0];
+    console.log('Database query result:', result); // 调试日志
+    return result[0] || []; // 确保返回数组
   },
 
   // 随机选择一个代币（基于权重）
