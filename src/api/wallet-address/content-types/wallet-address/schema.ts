@@ -10,11 +10,11 @@ export default {
     description: '热钱包地址池管理',
   },
   options: {
-    draftAndPublish: true,
+    draftAndPublish: false,
   },
   pluginOptions: {
     i18n: {
-      localized: true,
+      localized: false,
     },
   },
   attributes: {
