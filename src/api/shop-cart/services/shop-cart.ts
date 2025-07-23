@@ -3,10 +3,20 @@ import { factories } from '@strapi/strapi';
 export default factories.createCoreService(
   'api::shop-cart.shop-cart',
   ({ strapi }) => ({
-    // 添加到购物车
+    // 添加商品到购物车
     async addToCart(userId: number, productId: number, quantity: number = 1) {
-      // 检查商品是否已在购物车中
-      const existingCart = await strapi.entityService.findMany(
+      // 检查商品是否存在
+      const product = await strapi.entityService.findOne(
+        'api::shop-product.shop-product',
+        productId
+      );
+      
+      if (!product) {
+        throw new Error('商品不存在');
+      }
+      
+      // 检查是否已在购物车中
+      const existingCartItem = await strapi.entityService.findMany(
         'api::shop-cart.shop-cart',
         {
           filters: {
@@ -16,9 +26,9 @@ export default factories.createCoreService(
         }
       );
       
-      if (existingCart.length > 0) {
+      if (existingCartItem.length > 0) {
         // 更新数量
-        const cartItem = existingCart[0];
+        const cartItem = existingCartItem[0];
         const newQuantity = (cartItem.quantity || 0) + quantity;
         
         return await strapi.entityService.update(
@@ -30,17 +40,16 @@ export default factories.createCoreService(
             },
           }
         );
-      } else {
-        // 创建新的购物车项
-        return await strapi.entityService.create('api::shop-cart.shop-cart', {
-          data: {
-            user: userId,
-            product: productId,
-            quantity,
-            selected: true,
-          },
-        });
       }
+      
+      // 创建新的购物车项
+      return await strapi.entityService.create('api::shop-cart.shop-cart', {
+        data: {
+          user: userId,
+          product: productId,
+          quantity,
+        },
+      });
     },
     
     // 更新购物车商品数量
@@ -55,7 +64,9 @@ export default factories.createCoreService(
         throw new Error('购物车商品不存在');
       }
       
-      if ((cartItem.user as any).id !== userId) {
+      // 检查用户权限
+      const cartItemData = cartItem as any;
+      if (cartItemData.user?.id !== userId) {
         throw new Error('无权操作此购物车商品');
       }
       
@@ -90,7 +101,9 @@ export default factories.createCoreService(
         throw new Error('购物车商品不存在');
       }
       
-      if ((cartItem.user as any).id !== userId) {
+      // 检查用户权限
+      const cartItemData = cartItem as any;
+      if (cartItemData.user?.id !== userId) {
         throw new Error('无权操作此购物车商品');
       }
       
@@ -112,7 +125,9 @@ export default factories.createCoreService(
         throw new Error('购物车商品不存在');
       }
       
-      if ((cartItem.user as any).id !== userId) {
+      // 检查用户权限
+      const cartItemData = cartItem as any;
+      if (cartItemData.user?.id !== userId) {
         throw new Error('无权操作此购物车商品');
       }
       
@@ -207,7 +222,8 @@ export default factories.createCoreService(
       
       cartItems.forEach((item) => {
         const quantity = item.quantity || 0;
-        const product = item.product as any;
+        const itemData = item as any;
+        const product = itemData.product;
         const price = product?.productPrice || 0;
         
         totalItems += quantity;

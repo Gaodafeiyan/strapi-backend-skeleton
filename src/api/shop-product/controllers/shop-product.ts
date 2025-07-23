@@ -3,259 +3,222 @@ import { factories } from '@strapi/strapi';
 export default factories.createCoreController(
   'api::shop-product.shop-product',
   ({ strapi }) => ({
-    // 获取商品列表（带分页和筛选）
+    // 获取商品列表
     async find(ctx) {
-      try {
-        const { 
-          page = 1, 
-          limit = 20, 
-          category, 
-          search, 
-          sort = 'createdAt:desc',
-          isHot,
-          isNew,
-          isRecommend 
-        } = ctx.query;
-        
-        const filters: any = {
-          publishedAt: { $notNull: true }, // 只显示已发布的商品
-        };
-        
-        // 分类筛选
-        if (category) {
-          filters.productCategory = category;
-        }
-        
-        // 搜索筛选
-        if (search) {
-          filters.$or = [
-            { productName: { $containsi: search as string } },
-            { productDescription: { $containsi: search as string } },
-          ];
-        }
-        
-        // 热门商品
-        if (isHot === 'true') {
-          filters.isHot = true;
-        }
-        
-        // 新品
-        if (isNew === 'true') {
-          filters.isNew = true;
-        }
-        
-        // 推荐商品
-        if (isRecommend === 'true') {
-          filters.isRecommend = true;
-        }
-        
-        const query = {
+      const { page = 1, pageSize = 10, category, sort = 'createdAt:desc' } = ctx.query;
+      
+      const filters: any = {
+        publishedAt: { $notNull: true },
+      };
+      
+      if (category) {
+        filters.productCategory = category;
+      }
+      
+      const products = await strapi.entityService.findMany(
+        'api::shop-product.shop-product',
+        {
           filters,
           populate: { productImages: true },
-          sort: [sort as string],
+          sort: [sort],
           pagination: {
-            page: parseInt(page as string),
-            pageSize: parseInt(limit as string),
+            page: parseInt(page),
+            pageSize: parseInt(pageSize),
           },
-        };
-        
-        const { results, pagination } = await strapi.entityService.findPage(
-          'api::shop-product.shop-product',
-          query
-        );
-        
-        return ctx.send({
-          success: true,
-          data: results,
-          pagination,
-        });
-      } catch (error) {
-        return ctx.badRequest(error.message);
-      }
+        }
+      );
+      
+      const total = await strapi.entityService.count('api::shop-product.shop-product', {
+        filters,
+      });
+      
+      return {
+        data: products,
+        pagination: {
+          page: parseInt(page),
+          pageSize: parseInt(pageSize),
+          pageCount: Math.ceil(total / parseInt(pageSize)),
+          total,
+        },
+      };
     },
     
     // 获取商品详情
     async findOne(ctx) {
-      try {
-        const { id } = ctx.params;
-        
-        const product = await strapi.entityService.findOne(
-          'api::shop-product.shop-product',
-          parseInt(id),
-          {
-            populate: { productImages: true },
-          }
-        );
-        
-        if (!product) {
-          return ctx.notFound('商品不存在');
+      const { id } = ctx.params;
+      
+      const product = await strapi.entityService.findOne(
+        'api::shop-product.shop-product',
+        id,
+        {
+          populate: { productImages: true },
         }
-        
-        // 增加浏览量（可选）
-        await strapi.entityService.update(
-          'api::shop-product.shop-product',
-          parseInt(id),
-          {
-            data: {
-              // 这里可以添加浏览量字段
-            },
-          }
-        );
-        
-        return ctx.send({
-          success: true,
-          data: product,
-        });
-      } catch (error) {
-        return ctx.badRequest(error.message);
+      );
+      
+      if (!product) {
+        return ctx.notFound('商品不存在');
       }
+      
+      return { data: product };
+    },
+    
+    // 搜索商品
+    async search(ctx) {
+      const { 
+        page = 1, 
+        pageSize = 10, 
+        keyword, 
+        category, 
+        minPrice, 
+        maxPrice,
+        sort = 'createdAt:desc' 
+      } = ctx.query;
+      
+      const filters: any = {
+        publishedAt: { $notNull: true },
+      };
+      
+      // 关键词搜索
+      if (keyword) {
+        filters.$or = [
+          { productName: { $containsi: keyword } },
+          { productDescription: { $containsi: keyword } },
+          { productTags: { $containsi: keyword } },
+        ];
+      }
+      
+      // 分类筛选
+      if (category) {
+        filters.productCategory = category;
+      }
+      
+      // 价格筛选
+      if (minPrice || maxPrice) {
+        filters.productPrice = {};
+        if (minPrice) {
+          filters.productPrice.$gte = parseFloat(minPrice);
+        }
+        if (maxPrice) {
+          filters.productPrice.$lte = parseFloat(maxPrice);
+        }
+      }
+      
+      const products = await strapi.entityService.findMany(
+        'api::shop-product.shop-product',
+        {
+          filters,
+          populate: { productImages: true },
+          sort: [sort],
+          pagination: {
+            page: parseInt(page),
+            pageSize: parseInt(pageSize),
+          },
+        }
+      );
+      
+      const total = await strapi.entityService.count('api::shop-product.shop-product', {
+        filters,
+      });
+      
+      return {
+        data: products,
+        pagination: {
+          page: parseInt(page),
+          pageSize: parseInt(pageSize),
+          pageCount: Math.ceil(total / parseInt(pageSize)),
+          total,
+        },
+      };
     },
     
     // 获取热门商品
     async getHotProducts(ctx) {
-      try {
-        const { limit = 10 } = ctx.query;
-        
-        const products = await strapi.entityService.findMany(
-          'api::shop-product.shop-product',
-          {
-            filters: {
-              publishedAt: { $notNull: true },
-              isHot: true,
-            },
-            populate: { productImages: true },
-            sort: { sortOrder: 'asc', createdAt: 'desc' },
-            limit: parseInt(limit as string),
-          }
-        );
-        
-        return ctx.send({
-          success: true,
-          data: products,
-        });
-      } catch (error) {
-        return ctx.badRequest(error.message);
-      }
-    },
-    
-    // 获取新品
-    async getNewProducts(ctx) {
-      try {
-        const { limit = 10 } = ctx.query;
-        
-        const products = await strapi.entityService.findMany(
-          'api::shop-product.shop-product',
-          {
-            filters: {
-              publishedAt: { $notNull: true },
-              isNew: true,
-            },
-            populate: { productImages: true },
-            sort: { sortOrder: 'asc', createdAt: 'desc' },
-            limit: parseInt(limit as string),
-          }
-        );
-        
-        return ctx.send({
-          success: true,
-          data: products,
-        });
-      } catch (error) {
-        return ctx.badRequest(error.message);
-      }
+      const { limit = 10 } = ctx.query;
+      
+      const products = await strapi.entityService.findMany(
+        'api::shop-product.shop-product',
+        {
+          filters: {
+            publishedAt: { $notNull: true },
+            productHot: true,
+          },
+          populate: { productImages: true },
+          sort: ['productSales:desc'],
+          pagination: {
+            page: 1,
+            pageSize: parseInt(limit),
+          },
+        }
+      );
+      
+      return { data: products };
     },
     
     // 获取推荐商品
-    async getRecommendProducts(ctx) {
-      try {
-        const { limit = 10 } = ctx.query;
-        
-        const products = await strapi.entityService.findMany(
-          'api::shop-product.shop-product',
-          {
-            filters: {
-              publishedAt: { $notNull: true },
-              isRecommend: true,
-            },
-            populate: { productImages: true },
-            sort: { sortOrder: 'asc', createdAt: 'desc' },
-            limit: parseInt(limit as string),
-          }
-        );
-        
-        return ctx.send({
-          success: true,
-          data: products,
-        });
-      } catch (error) {
-        return ctx.badRequest(error.message);
-      }
-    },
-    
-    // 搜索商品
-    async searchProducts(ctx) {
-      try {
-        const { 
-          keyword, 
-          page = 1, 
-          limit = 20, 
-          sort = 'createdAt:desc' 
-        } = ctx.query;
-        
-        if (!keyword) {
-          return ctx.badRequest('搜索关键词不能为空');
-        }
-        
-        const filters = {
-          publishedAt: { $notNull: true },
-          $or: [
-            { productName: { $containsi: keyword as string } },
-            { productDescription: { $containsi: keyword as string } },
-            { productTags: { $containsi: keyword as string } },
-          ],
-        };
-        
-        const query = {
-          filters,
-          populate: { productImages: true },
-          sort: [sort as string],
-          pagination: {
-            page: parseInt(page as string),
-            pageSize: parseInt(limit as string),
+    async getRecommendedProducts(ctx) {
+      const { limit = 10 } = ctx.query;
+      
+      const products = await strapi.entityService.findMany(
+        'api::shop-product.shop-product',
+        {
+          filters: {
+            publishedAt: { $notNull: true },
+            productRecommended: true,
           },
-        };
-        
-        const { results, pagination } = await strapi.entityService.findPage(
-          'api::shop-product.shop-product',
-          query
-        );
-        
-        return ctx.send({
-          success: true,
-          data: results,
-          pagination,
-        });
-      } catch (error) {
-        return ctx.badRequest(error.message);
-      }
+          populate: { productImages: true },
+          sort: ['createdAt:desc'],
+          pagination: {
+            page: 1,
+            pageSize: parseInt(limit),
+          },
+        }
+      );
+      
+      return { data: products };
     },
     
     // 获取商品分类
     async getCategories(ctx) {
-      try {
-        const categories = [
-          { value: 'SHANG_PIN', label: '商品' },
-          { value: 'JIN_BI', label: '金币' },
-          { value: 'YOU_HUI_QUAN', label: '优惠券' },
-        ];
-        
-        return ctx.send({
-          success: true,
-          data: categories,
-        });
-      } catch (error) {
-        return ctx.badRequest(error.message);
+      const products = await strapi.entityService.findMany(
+        'api::shop-product.shop-product',
+        {
+          filters: {
+            publishedAt: { $notNull: true },
+          },
+          fields: ['productCategory'],
+        }
+      );
+      
+      const categories = [...new Set(products.map((p: any) => p.productCategory))];
+      
+      return { data: categories };
+    },
+    
+    // 更新商品销量
+    async updateSales(ctx) {
+      const { id } = ctx.params;
+      const { quantity } = ctx.request.body;
+      
+      const product = await strapi.entityService.findOne(
+        'api::shop-product.shop-product',
+        id
+      ) as any;
+      
+      if (!product) {
+        return ctx.notFound('商品不存在');
       }
+      
+      const updatedProduct = await strapi.entityService.update(
+        'api::shop-product.shop-product',
+        id,
+        {
+          data: {
+            productSales: (product.productSales || 0) + parseInt(quantity),
+          },
+        }
+      );
+      
+      return { data: updatedProduct };
     },
   })
 ); 
