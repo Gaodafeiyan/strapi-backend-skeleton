@@ -7,9 +7,7 @@ export default factories.createCoreController(
     async find(ctx) {
       const { page = 1, pageSize = 10, category, sort = 'createdAt:desc' } = ctx.query;
       
-      const filters: any = {
-        publishedAt: { $notNull: true },
-      };
+      const filters: any = {};
       
       if (category) {
         filters.productCategory = category;
@@ -74,9 +72,7 @@ export default factories.createCoreController(
         sort = 'createdAt:desc' 
       } = ctx.query;
       
-      const filters: any = {
-        publishedAt: { $notNull: true },
-      };
+      const filters: any = {};
       
       // 关键词搜索
       if (keyword) {
@@ -139,7 +135,6 @@ export default factories.createCoreController(
         'api::shop-product.shop-product',
         {
           filters: {
-            publishedAt: { $notNull: true },
             isHot: true,
           },
           populate: { productImages: true },
@@ -162,7 +157,6 @@ export default factories.createCoreController(
         'api::shop-product.shop-product',
         {
           filters: {
-            publishedAt: { $notNull: true },
             isRecommend: true,
           },
           populate: { productImages: true },
@@ -182,9 +176,7 @@ export default factories.createCoreController(
       const products = await strapi.entityService.findMany(
         'api::shop-product.shop-product',
         {
-          filters: {
-            publishedAt: { $notNull: true },
-          },
+          filters: {},
           fields: ['productCategory'],
         }
       );

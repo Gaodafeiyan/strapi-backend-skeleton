@@ -6,7 +6,7 @@ const ShopProductSchema = {
     pluralName: 'shop-products', 
     displayName: '商城商品' 
   },
-  options: { draftAndPublish: true },
+  options: { draftAndPublish: false },
   attributes: {
     productName: { 
       type: 'string', 
