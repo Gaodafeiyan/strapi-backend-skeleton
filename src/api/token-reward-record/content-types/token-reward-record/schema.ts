@@ -12,20 +12,17 @@ const TokenRewardRecordSchema = {
     user: {
       type: 'relation',
       relation: 'manyToOne',
-      target: 'plugin::users-permissions.user',
-      inversedBy: 'tokenRewardRecords'
+      target: 'plugin::users-permissions.user'
     },
     order: {
       type: 'relation',
       relation: 'manyToOne',
-      target: 'api::dinggou-dingdan.dinggou-dingdan',
-      inversedBy: 'tokenRewardRecords'
+      target: 'api::dinggou-dingdan.dinggou-dingdan'
     },
     token: {
       type: 'relation',
       relation: 'manyToOne',
-      target: 'api::ai-token.ai-token',
-      inversedBy: 'tokenRewardRecords'
+      target: 'api::ai-token.ai-token'
     },
     amount: {
       type: 'decimal',

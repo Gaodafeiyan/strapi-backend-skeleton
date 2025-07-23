@@ -58,12 +58,7 @@ const AiTokenSchema = {
       type: 'text',
       description: '代币描述'
     },
-    tokenRewardRecords: {
-      type: 'relation',
-      relation: 'oneToMany',
-      target: 'api::token-reward-record.token-reward-record',
-      mappedBy: 'token'
-    }
+
   },
 };
 

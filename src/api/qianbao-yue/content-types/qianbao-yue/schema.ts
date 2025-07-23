@@ -13,12 +13,7 @@ const QianbaoSchema = {
     },
     yonghu  : { type: 'relation', relation: 'oneToOne',
                 target: 'plugin::users-permissions.user', inversedBy: 'qianbao' },
-    tokenRewardRecords: {
-      type: 'relation',
-      relation: 'oneToMany',
-      target: 'api::token-reward-record.token-reward-record',
-      mappedBy: 'user'
-    }
+
   },
 };
 export default QianbaoSchema; 
