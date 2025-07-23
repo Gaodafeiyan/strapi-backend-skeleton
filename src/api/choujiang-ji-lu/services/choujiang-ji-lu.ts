@@ -66,10 +66,10 @@ export default factories.createCoreService('api::choujiang-ji-lu.choujiang-ji-lu
         // 7. 创建抽奖记录
         const choujiangRecord = await strapi.entityService.create('api::choujiang-ji-lu.choujiang-ji-lu' as any, {
           data: {
-            yonghu: userId,
-            jiangpin: selectedPrize.id,
-            choujiangJihui: jihuiId,
-            dingdan: (jihui as any).dingdan?.id,
+            yonghu: { id: userId },
+            jiangpin: { id: selectedPrize.id },
+            choujiangJihui: { id: jihuiId },
+            dingdan: (jihui as any).dingdan ? { id: (jihui as any).dingdan.id } : null,
             chouJiangShiJian: new Date(),
             jiangPinMing: (selectedPrize as any).jiangpinMing,
             jiangPinJiaZhi: (selectedPrize as any).jiangpinJiaZhi,
