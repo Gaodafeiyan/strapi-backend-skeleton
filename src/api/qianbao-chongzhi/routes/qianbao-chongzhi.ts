@@ -31,5 +31,10 @@ export default {
       path: '/qianbao-chongzhis/:id/confirm',
       handler: 'qianbao-chongzhi.confirmRecharge',
     },
+    {
+      method: 'GET',
+      path: '/qianbao-chongzhis/deposit-address',
+      handler: 'qianbao-chongzhi.getDepositAddress',
+    },
   ],
 }; 
