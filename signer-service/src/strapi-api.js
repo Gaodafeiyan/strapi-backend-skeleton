@@ -73,7 +73,10 @@ class StrapiApiService {
   // 处理提现失败 - 返还余额
   async handleWithdrawalFailure(withdrawalId) {
     try {
-      const response = await this.client.post(`/api/qianbao-tixians/${withdrawalId}/handle-failure`);
+      // 直接更新状态为failed，不调用不存在的handle-failure端点
+      const response = await this.client.put(`/api/qianbao-tixians/${withdrawalId}`, {
+        data: { zhuangtai: 'failed' }
+      });
       
       logger.info('Withdrawal failure handled', {
         withdrawalId,
