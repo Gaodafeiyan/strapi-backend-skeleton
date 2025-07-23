@@ -155,20 +155,38 @@ export default factories.createCoreService('api::choujiang-ji-lu.choujiang-ji-lu
     });
   },
 
-  // 概率计算算法
+  // 概率计算算法 - 改进版
   calculatePrize(prizes: any[]): any {
+    // 方案1：随机打乱奖品顺序，避免ID顺序影响
+    const shuffledPrizes = [...prizes].sort(() => Math.random() - 0.5);
+    
+    // 方案2：使用权重随机选择，而不是累积概率
+    const totalWeight = shuffledPrizes.reduce((sum, prize) => {
+      return sum + parseFloat(prize.zhongJiangGaiLv || 0);
+    }, 0);
+    
+    // 如果总权重超过100%，进行归一化处理
+    const normalizedPrizes = shuffledPrizes.map(prize => ({
+      ...prize,
+      normalizedWeight: totalWeight > 100 ? 
+        (parseFloat(prize.zhongJiangGaiLv || 0) / totalWeight) * 100 : 
+        parseFloat(prize.zhongJiangGaiLv || 0)
+    }));
+    
+    // 生成随机数
     const random = Math.random() * 100;
     let cumulative = 0;
     
-    for (const prize of prizes) {
-      cumulative += parseFloat(prize.zhongJiangGaiLv || 0);
+    // 按归一化后的权重选择
+    for (const prize of normalizedPrizes) {
+      cumulative += prize.normalizedWeight;
       if (random <= cumulative) {
         return prize;
       }
     }
     
-    // 如果没有中奖，返回概率最高的奖品
-    return prizes.sort((a, b) => parseFloat(b.zhongJiangGaiLv || 0) - parseFloat(a.zhongJiangGaiLv || 0))[0];
+    // 保底机制：随机选择一个奖品
+    return shuffledPrizes[Math.floor(Math.random() * shuffledPrizes.length)];
   },
 
 
