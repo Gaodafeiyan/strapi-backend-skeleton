@@ -162,6 +162,22 @@ export default factories.createCoreService(
           }
         }
 
+        // ③ 创建抽奖机会（仅到期时）
+        if ((isExpired || force) && jihua.choujiangCi > 0) {
+          try {
+            console.log('开始创建抽奖机会，订单ID:', orderId, '抽奖次数:', jihua.choujiangCi);
+            
+            await strapi
+              .service('api::choujiang-jihui.choujiang-jihui')
+              .createChoujiangJihui(order.yonghu.id, orderId, jihua.choujiangCi);
+              
+            console.log('抽奖机会创建成功');
+          } catch (choujiangError) {
+            console.error('抽奖机会创建失败:', choujiangError);
+            // 抽奖机会失败不影响主流程
+          }
+        }
+
         // ③ 更新订单
         await strapi.entityService.update('api::dinggou-dingdan.dinggou-dingdan', orderId, {
           data: {

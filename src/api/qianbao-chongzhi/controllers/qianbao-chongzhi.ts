@@ -6,7 +6,7 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
     const { data } = ctx.request.body;
     
     try {
-      const recharge = await strapi.entityService.create('api::qianbao-chongzhi.qianbao-chongzhi', {
+      const recharge = await strapi.entityService.create('api::qianbao-chongzhi.qianbao-chongzhi' as any, {
         data: {
           ...data,
           zhuangtai: 'pending'
@@ -22,6 +22,11 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
   // 获取充值地址 - 动态分配
   async getDepositAddress(ctx) {
     try {
+      // 检查用户权限
+      if (!ctx.state.user) {
+        return ctx.unauthorized('需要登录');
+      }
+
       const { chain = 'BSC', asset = 'USDT' } = ctx.query;
       const userId = ctx.state.user?.id;
       
