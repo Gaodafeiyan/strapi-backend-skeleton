@@ -373,6 +373,38 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiCacheCache extends Struct.CollectionTypeSchema {
+  collectionName: 'cache';
+  info: {
+    displayName: '\u7F13\u5B58\u670D\u52A1';
+    pluralName: 'caches';
+    singularName: 'cache';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    key: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::cache.cache'> &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    ttl: Schema.Attribute.Integer;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    value: Schema.Attribute.Text;
+  };
+}
+
 export interface ApiChoujiangJiLuChoujiangJiLu
   extends Struct.CollectionTypeSchema {
   collectionName: 'choujiang-ji-lu';
@@ -649,6 +681,40 @@ export interface ApiDinggouJihuaDinggouJihua
     zhouQiTian: Schema.Attribute.Integer &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<15>;
+  };
+}
+
+export interface ApiHealthHealth extends Struct.CollectionTypeSchema {
+  collectionName: 'health';
+  info: {
+    displayName: '\u5065\u5EB7\u68C0\u67E5';
+    pluralName: 'healths';
+    singularName: 'health';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::health.health'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.String;
+    timestamp: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -1633,11 +1699,13 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::cache.cache': ApiCacheCache;
       'api::choujiang-ji-lu.choujiang-ji-lu': ApiChoujiangJiLuChoujiangJiLu;
       'api::choujiang-jiangpin.choujiang-jiangpin': ApiChoujiangJiangpinChoujiangJiangpin;
       'api::choujiang-jihui.choujiang-jihui': ApiChoujiangJihuiChoujiangJihui;
       'api::dinggou-dingdan.dinggou-dingdan': ApiDinggouDingdanDinggouDingdan;
       'api::dinggou-jihua.dinggou-jihua': ApiDinggouJihuaDinggouJihua;
+      'api::health.health': ApiHealthHealth;
       'api::qianbao-chongzhi.qianbao-chongzhi': ApiQianbaoChongzhiQianbaoChongzhi;
       'api::qianbao-tixian.qianbao-tixian': ApiQianbaoTixianQianbaoTixian;
       'api::qianbao-yue.qianbao-yue': ApiQianbaoYueQianbaoYue;
