@@ -29,8 +29,8 @@ export default factories.createCoreController(
         // 搜索筛选
         if (search) {
           filters.$or = [
-            { productName: { $containsi: search } },
-            { productDescription: { $containsi: search } },
+            { productName: { $containsi: search as string } },
+            { productDescription: { $containsi: search as string } },
           ];
         }
         
@@ -51,11 +51,11 @@ export default factories.createCoreController(
         
         const query = {
           filters,
-          populate: ['productImages'],
-          sort: [sort],
+          populate: { productImages: true },
+          sort: [sort as string],
           pagination: {
-            page: parseInt(page),
-            pageSize: parseInt(limit),
+            page: parseInt(page as string),
+            pageSize: parseInt(limit as string),
           },
         };
         
@@ -83,7 +83,7 @@ export default factories.createCoreController(
           'api::shop-product.shop-product',
           parseInt(id),
           {
-            populate: ['productImages'],
+            populate: { productImages: true },
           }
         );
         
@@ -123,9 +123,9 @@ export default factories.createCoreController(
               publishedAt: { $notNull: true },
               isHot: true,
             },
-            populate: ['productImages'],
+            populate: { productImages: true },
             sort: { sortOrder: 'asc', createdAt: 'desc' },
-            limit: parseInt(limit),
+            limit: parseInt(limit as string),
           }
         );
         
@@ -150,9 +150,9 @@ export default factories.createCoreController(
               publishedAt: { $notNull: true },
               isNew: true,
             },
-            populate: ['productImages'],
+            populate: { productImages: true },
             sort: { sortOrder: 'asc', createdAt: 'desc' },
-            limit: parseInt(limit),
+            limit: parseInt(limit as string),
           }
         );
         
@@ -177,9 +177,9 @@ export default factories.createCoreController(
               publishedAt: { $notNull: true },
               isRecommend: true,
             },
-            populate: ['productImages'],
+            populate: { productImages: true },
             sort: { sortOrder: 'asc', createdAt: 'desc' },
-            limit: parseInt(limit),
+            limit: parseInt(limit as string),
           }
         );
         
@@ -209,19 +209,19 @@ export default factories.createCoreController(
         const filters = {
           publishedAt: { $notNull: true },
           $or: [
-            { productName: { $containsi: keyword } },
-            { productDescription: { $containsi: keyword } },
-            { productTags: { $containsi: keyword } },
+            { productName: { $containsi: keyword as string } },
+            { productDescription: { $containsi: keyword as string } },
+            { productTags: { $containsi: keyword as string } },
           ],
         };
         
         const query = {
           filters,
-          populate: ['productImages'],
-          sort: [sort],
+          populate: { productImages: true },
+          sort: [sort as string],
           pagination: {
-            page: parseInt(page),
-            pageSize: parseInt(limit),
+            page: parseInt(page as string),
+            pageSize: parseInt(limit as string),
           },
         };
         

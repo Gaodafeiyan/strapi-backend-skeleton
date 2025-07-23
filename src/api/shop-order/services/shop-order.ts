@@ -20,12 +20,12 @@ export default factories.createCoreService(
       }
       
       // 检查库存
-      if (product.stockQuantity < quantity) {
+      if ((product as any).stockQuantity < quantity) {
         throw new Error('库存不足');
       }
       
       // 计算总金额
-      const totalAmount = new Decimal(product.productPrice)
+      const totalAmount = new Decimal((product as any).productPrice)
         .mul(quantity)
         .toFixed(2);
       
@@ -38,7 +38,7 @@ export default factories.createCoreService(
           orderNumber,
           orderStatus: 'pending',
           quantity,
-          unitPrice: product.productPrice,
+          unitPrice: (product as any).productPrice,
           totalAmount,
           shippingAddress: shippingInfo.address,
           shippingPhone: shippingInfo.phone,
@@ -60,7 +60,7 @@ export default factories.createCoreService(
         {
           filters: {
             id: { $in: cartItemIds },
-            user: userId,
+            user: { id: { $eq: userId } },
             selected: true,
           },
           populate: ['product'],
@@ -73,23 +73,25 @@ export default factories.createCoreService(
       
       // 检查库存
       for (const cartItem of cartItems) {
-        if (cartItem.product.stockQuantity < cartItem.quantity) {
-          throw new Error(`商品 ${cartItem.product.productName} 库存不足`);
+        const product = cartItem.product as any;
+        if (product.stockQuantity < cartItem.quantity) {
+          throw new Error(`商品 ${product.productName} 库存不足`);
         }
       }
       
       // 计算总金额
       let totalAmount = new Decimal(0);
       for (const cartItem of cartItems) {
+        const product = cartItem.product as any;
         totalAmount = totalAmount.add(
-          new Decimal(cartItem.product.productPrice).mul(cartItem.quantity)
+          new Decimal(product.productPrice).mul(cartItem.quantity)
         );
       }
       
       // 检查用户钱包余额
       const wallets = await strapi.entityService.findMany(
         'api::qianbao-yue.qianbao-yue',
-        { filters: { yonghu: userId } }
+        { filters: { yonghu: { id: { $eq: userId } } } }
       );
       
       if (wallets.length === 0) {
@@ -106,8 +108,9 @@ export default factories.createCoreService(
       // 创建订单
       const orders = [];
       for (const cartItem of cartItems) {
+        const product = cartItem.product as any;
         const orderNumber = `SO${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
-        const itemTotalAmount = new Decimal(cartItem.product.productPrice)
+        const itemTotalAmount = new Decimal(product.productPrice)
           .mul(cartItem.quantity)
           .toFixed(2);
         
@@ -116,14 +119,14 @@ export default factories.createCoreService(
             orderNumber,
             orderStatus: 'pending',
             quantity: cartItem.quantity,
-            unitPrice: cartItem.product.productPrice,
+            unitPrice: product.productPrice,
             totalAmount: itemTotalAmount,
             shippingAddress: shippingInfo.address,
             shippingPhone: shippingInfo.phone,
             shippingName: shippingInfo.name,
             notes: shippingInfo.notes,
             user: userId,
-            product: cartItem.product.id,
+            product: product.id,
           },
         });
         
@@ -140,13 +143,14 @@ export default factories.createCoreService(
       
       // 更新商品库存
       for (const cartItem of cartItems) {
+        const product = cartItem.product as any;
         await strapi.entityService.update(
           'api::shop-product.shop-product',
-          cartItem.product.id,
+          product.id,
           {
             data: {
-              stockQuantity: cartItem.product.stockQuantity - cartItem.quantity,
-              soldQuantity: cartItem.product.soldQuantity + cartItem.quantity,
+              stockQuantity: product.stockQuantity - cartItem.quantity,
+              soldQuantity: product.soldQuantity + cartItem.quantity,
             },
           }
         );
@@ -192,7 +196,7 @@ export default factories.createCoreService(
         throw new Error('订单不存在');
       }
       
-      if (order.user.id !== userId) {
+      if ((order.user as any).id !== userId) {
         throw new Error('无权操作此订单');
       }
       
@@ -203,7 +207,7 @@ export default factories.createCoreService(
       // 检查用户钱包余额
       const wallets = await strapi.entityService.findMany(
         'api::qianbao-yue.qianbao-yue',
-        { filters: { yonghu: userId } }
+        { filters: { yonghu: { id: { $eq: userId } } } }
       );
       
       if (wallets.length === 0) {
@@ -227,13 +231,14 @@ export default factories.createCoreService(
       );
       
       // 更新商品库存
+      const product = order.product as any;
       await strapi.entityService.update(
         'api::shop-product.shop-product',
-        order.product.id,
+        product.id,
         {
           data: {
-            stockQuantity: order.product.stockQuantity - order.quantity,
-            soldQuantity: order.product.soldQuantity + order.quantity,
+            stockQuantity: product.stockQuantity - order.quantity,
+            soldQuantity: product.soldQuantity + order.quantity,
           },
         }
       );
@@ -295,7 +300,7 @@ export default factories.createCoreService(
         throw new Error('订单不存在');
       }
       
-      if (order.user.id !== userId) {
+      if ((order.user as any).id !== userId) {
         throw new Error('无权操作此订单');
       }
       
@@ -329,7 +334,7 @@ export default factories.createCoreService(
         throw new Error('订单不存在');
       }
       
-      if (order.user.id !== userId) {
+      if ((order.user as any).id !== userId) {
         throw new Error('无权操作此订单');
       }
       
@@ -354,7 +359,7 @@ export default factories.createCoreService(
     // 获取用户订单列表
     async getUserOrders(userId: number, filters: any = {}) {
       const query = {
-        filters: { user: userId, ...filters },
+        filters: { user: { id: { $eq: userId } }, ...filters },
         populate: ['product'],
         sort: { createdAt: 'desc' },
       };

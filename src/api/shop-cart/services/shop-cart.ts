@@ -10,8 +10,8 @@ export default factories.createCoreService(
         'api::shop-cart.shop-cart',
         {
           filters: {
-            user: userId,
-            product: productId,
+            user: { id: { $eq: userId } },
+            product: { id: { $eq: productId } },
           },
         }
       );
@@ -19,7 +19,7 @@ export default factories.createCoreService(
       if (existingCart.length > 0) {
         // 更新数量
         const cartItem = existingCart[0];
-        const newQuantity = cartItem.quantity + quantity;
+        const newQuantity = (cartItem.quantity || 0) + quantity;
         
         return await strapi.entityService.update(
           'api::shop-cart.shop-cart',
@@ -55,7 +55,7 @@ export default factories.createCoreService(
         throw new Error('购物车商品不存在');
       }
       
-      if (cartItem.user.id !== userId) {
+      if ((cartItem.user as any).id !== userId) {
         throw new Error('无权操作此购物车商品');
       }
       
@@ -90,7 +90,7 @@ export default factories.createCoreService(
         throw new Error('购物车商品不存在');
       }
       
-      if (cartItem.user.id !== userId) {
+      if ((cartItem.user as any).id !== userId) {
         throw new Error('无权操作此购物车商品');
       }
       
@@ -112,7 +112,7 @@ export default factories.createCoreService(
         throw new Error('购物车商品不存在');
       }
       
-      if (cartItem.user.id !== userId) {
+      if ((cartItem.user as any).id !== userId) {
         throw new Error('无权操作此购物车商品');
       }
       
@@ -133,7 +133,7 @@ export default factories.createCoreService(
         'api::shop-cart.shop-cart',
         {
           filters: {
-            user: userId,
+            user: { id: { $eq: userId } },
           },
         }
       );
@@ -159,7 +159,7 @@ export default factories.createCoreService(
         'api::shop-cart.shop-cart',
         {
           filters: {
-            user: userId,
+            user: { id: { $eq: userId } },
           },
           populate: ['product'],
           sort: { createdAt: 'desc' },
@@ -173,7 +173,7 @@ export default factories.createCoreService(
         'api::shop-cart.shop-cart',
         {
           filters: {
-            user: userId,
+            user: { id: { $eq: userId } },
           },
         }
       );
@@ -194,7 +194,7 @@ export default factories.createCoreService(
         'api::shop-cart.shop-cart',
         {
           filters: {
-            user: userId,
+            user: { id: { $eq: userId } },
           },
           populate: ['product'],
         }
@@ -206,12 +206,16 @@ export default factories.createCoreService(
       let selectedAmount = 0;
       
       cartItems.forEach((item) => {
-        totalItems += item.quantity;
-        totalAmount += item.product.productPrice * item.quantity;
+        const quantity = item.quantity || 0;
+        const product = item.product as any;
+        const price = product?.productPrice || 0;
+        
+        totalItems += quantity;
+        totalAmount += price * quantity;
         
         if (item.selected) {
-          selectedItems += item.quantity;
-          selectedAmount += item.product.productPrice * item.quantity;
+          selectedItems += quantity;
+          selectedAmount += price * quantity;
         }
       });
       

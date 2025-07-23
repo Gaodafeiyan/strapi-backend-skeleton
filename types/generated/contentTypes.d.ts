@@ -373,6 +373,177 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiChoujiangJiLuChoujiangJiLu
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'choujiang-ji-lu';
+  info: {
+    displayName: '\u62BD\u5956\u8BB0\u5F55';
+    pluralName: 'choujiang-ji-lus';
+    singularName: 'choujiang-ji-lu';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    beiZhu: Schema.Attribute.Text;
+    choujiangJihui: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::choujiang-jihui.choujiang-jihui'
+    >;
+    chouJiangShiJian: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dingdan: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::dinggou-dingdan.dinggou-dingdan'
+    >;
+    jiangpin: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::choujiang-jiangpin.choujiang-jiangpin'
+    >;
+    jiangPinJiaZhi: Schema.Attribute.String & Schema.Attribute.Required;
+    jiangPinLeiXing: Schema.Attribute.Enumeration<
+      ['SHANG_PIN', 'JIN_BI', 'YOU_HUI_QUAN']
+    > &
+      Schema.Attribute.Required;
+    jiangPinMing: Schema.Attribute.String & Schema.Attribute.Required;
+    lingQuShiJian: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::choujiang-ji-lu.choujiang-ji-lu'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    yonghu: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    zhuangtai: Schema.Attribute.Enumeration<
+      ['zhongJiang', 'weiLingQu', 'yiLingQu', 'yiGuoQi']
+    > &
+      Schema.Attribute.DefaultTo<'zhongJiang'>;
+  };
+}
+
+export interface ApiChoujiangJiangpinChoujiangJiangpin
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'choujiang-jiangpin';
+  info: {
+    displayName: '\u62BD\u5956\u5956\u54C1';
+    pluralName: 'choujiang-jiangpins';
+    singularName: 'choujiang-jiangpin';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    jiangpinJiaZhi: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'0'>;
+    jiangpinLeiXing: Schema.Attribute.Enumeration<
+      ['SHANG_PIN', 'JIN_BI', 'YOU_HUI_QUAN']
+    > &
+      Schema.Attribute.DefaultTo<'SHANG_PIN'>;
+    jiangpinMiaoShu: Schema.Attribute.Text;
+    jiangpinMing: Schema.Attribute.String & Schema.Attribute.Required;
+    jiangpinTuPian: Schema.Attribute.String;
+    kaiQi: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    kuCunShuLiang: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::choujiang-jiangpin.choujiang-jiangpin'
+    > &
+      Schema.Attribute.Private;
+    paiXuShunXu: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    teBieJiangPin: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    yiFaChuShuLiang: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    zhongJiangGaiLv: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+  };
+}
+
+export interface ApiChoujiangJihuiChoujiangJihui
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'choujiang-jihui';
+  info: {
+    displayName: '\u62BD\u5956\u673A\u4F1A';
+    pluralName: 'choujiang-jihuis';
+    singularName: 'choujiang-jihui';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    chuangJianShiJian: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    daoQiShiJian: Schema.Attribute.DateTime;
+    dingdan: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::dinggou-dingdan.dinggou-dingdan'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::choujiang-jihui.choujiang-jihui'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    shengYuCiShu: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    yiYongCiShu: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    yonghu: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    zhuangtai: Schema.Attribute.Enumeration<['active', 'used', 'expired']> &
+      Schema.Attribute.DefaultTo<'active'>;
+    zongCiShu: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+  };
+}
+
 export interface ApiDinggouDingdanDinggouDingdan
   extends Struct.CollectionTypeSchema {
   collectionName: 'dinggou-dingdan';
@@ -390,8 +561,8 @@ export interface ApiDinggouDingdanDinggouDingdan
     };
   };
   attributes: {
-    aiShuliang: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
-    benjinUSDT: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    aiShuliang: Schema.Attribute.String & Schema.Attribute.DefaultTo<'0'>;
+    benjinUSDT: Schema.Attribute.String & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -404,7 +575,7 @@ export interface ApiDinggouDingdanDinggouDingdan
       'manyToOne',
       'api::dinggou-jihua.dinggou-jihua'
     >;
-    jingtaiShouyi: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    jingtaiShouyi: Schema.Attribute.String & Schema.Attribute.DefaultTo<'0'>;
     kaishiShiJian: Schema.Attribute.DateTime & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -420,7 +591,9 @@ export interface ApiDinggouDingdanDinggouDingdan
       'manyToOne',
       'plugin::users-permissions.user'
     >;
-    zhuangtai: Schema.Attribute.Enumeration<['active', 'finished']> &
+    zhuangtai: Schema.Attribute.Enumeration<
+      ['active', 'redeemable', 'finished']
+    > &
       Schema.Attribute.DefaultTo<'active'>;
   };
 }
@@ -442,8 +615,12 @@ export interface ApiDinggouJihuaDinggouJihua
     };
   };
   attributes: {
-    aiBili: Schema.Attribute.Decimal & Schema.Attribute.Required;
-    benjinUSDT: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    aiBili: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'0'>;
+    benjinUSDT: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'0'>;
     choujiangCi: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<3>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -455,7 +632,9 @@ export interface ApiDinggouJihuaDinggouJihua
     jihuaCode: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
-    jingtaiBili: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    jingtaiBili: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'0'>;
     kaiqi: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -467,7 +646,102 @@ export interface ApiDinggouJihuaDinggouJihua
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    zhouQiTian: Schema.Attribute.Integer & Schema.Attribute.Required;
+    zhouQiTian: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<15>;
+  };
+}
+
+export interface ApiQianbaoChongzhiQianbaoChongzhi
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'qianbao-chongzhi';
+  info: {
+    displayName: '\u94B1\u5305\u5145\u503C';
+    pluralName: 'qianbao-chongzhis';
+    singularName: 'qianbao-chongzhi';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+    'content-manager': {
+      previewable: false;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::qianbao-chongzhi.qianbao-chongzhi'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    txHash: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    usdtJine: Schema.Attribute.String & Schema.Attribute.Required;
+    yonghu: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    zhuangtai: Schema.Attribute.Enumeration<['pending', 'success', 'failed']> &
+      Schema.Attribute.DefaultTo<'pending'>;
+  };
+}
+
+export interface ApiQianbaoTixianQianbaoTixian
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'qianbao-tixian';
+  info: {
+    displayName: '\u94B1\u5305\u63D0\u73B0';
+    pluralName: 'qianbao-tixians';
+    singularName: 'qianbao-tixian';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+    'content-manager': {
+      previewable: false;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::qianbao-tixian.qianbao-tixian'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    toAddress: Schema.Attribute.String & Schema.Attribute.Required;
+    txHash: Schema.Attribute.String & Schema.Attribute.Unique;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    usdtJine: Schema.Attribute.String & Schema.Attribute.Required;
+    yonghu: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    zhuangtai: Schema.Attribute.Enumeration<
+      ['pending', 'broadcasted', 'success', 'failed']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
   };
 }
 
@@ -487,7 +761,7 @@ export interface ApiQianbaoYueQianbaoYue extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    aiYue: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    aiYue: Schema.Attribute.String & Schema.Attribute.DefaultTo<'0'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -501,11 +775,277 @@ export interface ApiQianbaoYueQianbaoYue extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    usdtYue: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    usdtYue: Schema.Attribute.String & Schema.Attribute.DefaultTo<'0'>;
     yonghu: Schema.Attribute.Relation<
       'oneToOne',
       'plugin::users-permissions.user'
     >;
+  };
+}
+
+export interface ApiQueueQueue extends Struct.CollectionTypeSchema {
+  collectionName: 'queues';
+  info: {
+    description: 'Queue management';
+    displayName: 'Queue';
+    pluralName: 'queues';
+    singularName: 'queue';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::queue.queue'> &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiShopCartShopCart extends Struct.CollectionTypeSchema {
+  collectionName: 'shop-cart';
+  info: {
+    displayName: '\u8D2D\u7269\u8F66';
+    pluralName: 'shop-carts';
+    singularName: 'shop-cart';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shop-cart.shop-cart'
+    > &
+      Schema.Attribute.Private;
+    product: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::shop-product.shop-product'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<1>;
+    selected: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    user: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+  };
+}
+
+export interface ApiShopOrderShopOrder extends Struct.CollectionTypeSchema {
+  collectionName: 'shop-order';
+  info: {
+    displayName: '\u5546\u57CE\u8BA2\u5355';
+    pluralName: 'shop-orders';
+    singularName: 'shop-order';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    cancelledAt: Schema.Attribute.DateTime;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deliveredAt: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shop-order.shop-order'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    orderNumber: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    orderStatus: Schema.Attribute.Enumeration<
+      ['pending', 'paid', 'shipped', 'delivered', 'cancelled', 'refunded']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    paidAt: Schema.Attribute.DateTime;
+    product: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::shop-product.shop-product'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.Integer & Schema.Attribute.Required;
+    shippedAt: Schema.Attribute.DateTime;
+    shippingAddress: Schema.Attribute.Text;
+    shippingName: Schema.Attribute.String;
+    shippingPhone: Schema.Attribute.String;
+    totalAmount: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    trackingNumber: Schema.Attribute.String;
+    unitPrice: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    user: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    walletTransaction: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::qianbao-yue.qianbao-yue'
+    >;
+  };
+}
+
+export interface ApiShopProductShopProduct extends Struct.CollectionTypeSchema {
+  collectionName: 'shop-product';
+  info: {
+    displayName: '\u5546\u57CE\u5546\u54C1';
+    pluralName: 'shop-products';
+    singularName: 'shop-product';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    isHot: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    isNew: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    isRecommend: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shop-product.shop-product'
+    > &
+      Schema.Attribute.Private;
+    originalPrice: Schema.Attribute.Decimal;
+    productCategory: Schema.Attribute.Enumeration<
+      ['SHANG_PIN', 'JIN_BI', 'YOU_HUI_QUAN']
+    > &
+      Schema.Attribute.DefaultTo<'SHANG_PIN'>;
+    productDescription: Schema.Attribute.Text;
+    productImages: Schema.Attribute.Media<undefined, true>;
+    productName: Schema.Attribute.String & Schema.Attribute.Required;
+    productPrice: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    productSpecs: Schema.Attribute.JSON;
+    productStatus: Schema.Attribute.Enumeration<
+      ['active', 'inactive', 'out_of_stock']
+    > &
+      Schema.Attribute.DefaultTo<'active'>;
+    productTags: Schema.Attribute.JSON;
+    publishedAt: Schema.Attribute.DateTime;
+    shopOrders: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shop-order.shop-order'
+    >;
+    soldQuantity: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    stockQuantity: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiWalletAddressWalletAddress
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'wallet_addresses';
+  info: {
+    description: '\u70ED\u94B1\u5305\u5730\u5740\u6C60\u7BA1\u7406';
+    displayName: '\u94B1\u5305\u5730\u5740';
+    pluralName: 'wallet-addresses';
+    singularName: 'wallet-address';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-api': {
+      enabled: true;
+    };
+    'content-manager': {
+      previewable: false;
+    };
+  };
+  attributes: {
+    address: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 42;
+        minLength: 26;
+      }>;
+    asset: Schema.Attribute.Enumeration<['USDT', 'AI_TOKEN', 'ETH', 'BNB']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'USDT'>;
+    balance: Schema.Attribute.String & Schema.Attribute.DefaultTo<'0'>;
+    chain: Schema.Attribute.Enumeration<['BSC', 'ETH', 'TRON']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'BSC'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    last_used_at: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::wallet-address.wallet-address'
+    > &
+      Schema.Attribute.Private;
+    max_balance: Schema.Attribute.String & Schema.Attribute.DefaultTo<'10000'>;
+    priority: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 100;
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<50>;
+    private_key: Schema.Attribute.Text & Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    tags: Schema.Attribute.JSON;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    usage_count: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    wallet_status: Schema.Attribute.Enumeration<
+      ['active', 'inactive', 'maintenance']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'active'>;
   };
 }
 
@@ -544,7 +1084,7 @@ export interface ApiYaoqingJiangliYaoqingJiangli
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    shouyiUSDT: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    shouyiUSDT: Schema.Attribute.String & Schema.Attribute.Required;
     tuijianRen: Schema.Attribute.Relation<
       'manyToOne',
       'plugin::users-permissions.user'
@@ -1053,6 +1593,14 @@ export interface PluginUsersPermissionsUser
       'manyToOne',
       'plugin::users-permissions.user'
     >;
+    shopCarts: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shop-cart.shop-cart'
+    >;
+    shopOrders: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shop-order.shop-order'
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1085,9 +1633,19 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::choujiang-ji-lu.choujiang-ji-lu': ApiChoujiangJiLuChoujiangJiLu;
+      'api::choujiang-jiangpin.choujiang-jiangpin': ApiChoujiangJiangpinChoujiangJiangpin;
+      'api::choujiang-jihui.choujiang-jihui': ApiChoujiangJihuiChoujiangJihui;
       'api::dinggou-dingdan.dinggou-dingdan': ApiDinggouDingdanDinggouDingdan;
       'api::dinggou-jihua.dinggou-jihua': ApiDinggouJihuaDinggouJihua;
+      'api::qianbao-chongzhi.qianbao-chongzhi': ApiQianbaoChongzhiQianbaoChongzhi;
+      'api::qianbao-tixian.qianbao-tixian': ApiQianbaoTixianQianbaoTixian;
       'api::qianbao-yue.qianbao-yue': ApiQianbaoYueQianbaoYue;
+      'api::queue.queue': ApiQueueQueue;
+      'api::shop-cart.shop-cart': ApiShopCartShopCart;
+      'api::shop-order.shop-order': ApiShopOrderShopOrder;
+      'api::shop-product.shop-product': ApiShopProductShopProduct;
+      'api::wallet-address.wallet-address': ApiWalletAddressWalletAddress;
       'api::yaoqing-jiangli.yaoqing-jiangli': ApiYaoqingJiangliYaoqingJiangli;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
