@@ -1,54 +1,30 @@
 export default {
+  type: 'content-api',
   routes: [
     {
       method: 'POST',
       path: '/shop-orders',
       handler: 'shop-order.create',
-      config: {
-        auth: {
-          scope: ['authenticated'],
-        },
-      },
     },
     {
       method: 'GET',
       path: '/shop-orders',
       handler: 'shop-order.find',
-      config: {
-        auth: {
-          scope: ['authenticated'],
-        },
-      },
     },
     {
       method: 'GET',
       path: '/shop-orders/:id',
       handler: 'shop-order.findOne',
-      config: {
-        auth: {
-          scope: ['authenticated'],
-        },
-      },
     },
     {
       method: 'PUT',
       path: '/shop-orders/:id',
       handler: 'shop-order.update',
-      config: {
-        auth: {
-          scope: ['authenticated'],
-        },
-      },
     },
     {
       method: 'DELETE',
       path: '/shop-orders/:id',
       handler: 'shop-order.delete',
-      config: {
-        auth: {
-          scope: ['authenticated'],
-        },
-      },
     },
     // 自定义路由
     {
