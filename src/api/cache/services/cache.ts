@@ -6,12 +6,12 @@ export default factories.createCoreService('api::cache.cache' as any, ({ strapi 
    */
   async get(key: string) {
     try {
-      if (!strapi.redis) {
+      if (!(strapi as any).redis) {
         console.warn('Redis未配置，跳过缓存');
         return null;
       }
       
-      const value = await strapi.redis.get(key);
+      const value = await (strapi as any).redis.get(key);
       if (value) {
         return JSON.parse(value);
       }
@@ -27,12 +27,12 @@ export default factories.createCoreService('api::cache.cache' as any, ({ strapi 
    */
   async set(key: string, value: any, ttl: number = 3600) {
     try {
-      if (!strapi.redis) {
+      if (!(strapi as any).redis) {
         console.warn('Redis未配置，跳过缓存');
         return false;
       }
       
-      await strapi.redis.setex(key, ttl, JSON.stringify(value));
+      await (strapi as any).redis.setex(key, ttl, JSON.stringify(value));
       return true;
     } catch (error) {
       console.error('缓存设置失败:', error);
@@ -45,11 +45,11 @@ export default factories.createCoreService('api::cache.cache' as any, ({ strapi 
    */
   async del(key: string) {
     try {
-      if (!strapi.redis) {
+      if (!(strapi as any).redis) {
         return false;
       }
       
-      await strapi.redis.del(key);
+      await (strapi as any).redis.del(key);
       return true;
     } catch (error) {
       console.error('缓存删除失败:', error);
@@ -62,13 +62,13 @@ export default factories.createCoreService('api::cache.cache' as any, ({ strapi 
    */
   async delPattern(pattern: string) {
     try {
-      if (!strapi.redis) {
+      if (!(strapi as any).redis) {
         return false;
       }
       
-      const keys = await strapi.redis.keys(pattern);
+      const keys = await (strapi as any).redis.keys(pattern);
       if (keys.length > 0) {
-        await strapi.redis.del(...keys);
+        await (strapi as any).redis.del(...keys);
       }
       return true;
     } catch (error) {
@@ -82,11 +82,11 @@ export default factories.createCoreService('api::cache.cache' as any, ({ strapi 
    */
   async exists(key: string) {
     try {
-      if (!strapi.redis) {
+      if (!(strapi as any).redis) {
         return false;
       }
       
-      return await strapi.redis.exists(key) === 1;
+      return await (strapi as any).redis.exists(key) === 1;
     } catch (error) {
       console.error('缓存检查失败:', error);
       return false;
@@ -98,11 +98,11 @@ export default factories.createCoreService('api::cache.cache' as any, ({ strapi 
    */
   async expire(key: string, ttl: number) {
     try {
-      if (!strapi.redis) {
+      if (!(strapi as any).redis) {
         return false;
       }
       
-      await strapi.redis.expire(key, ttl);
+      await (strapi as any).redis.expire(key, ttl);
       return true;
     } catch (error) {
       console.error('设置缓存过期时间失败:', error);
@@ -115,11 +115,11 @@ export default factories.createCoreService('api::cache.cache' as any, ({ strapi 
    */
   async ttl(key: string) {
     try {
-      if (!strapi.redis) {
+      if (!(strapi as any).redis) {
         return -1;
       }
       
-      return await strapi.redis.ttl(key);
+      return await (strapi as any).redis.ttl(key);
     } catch (error) {
       console.error('获取缓存剩余时间失败:', error);
       return -1;
@@ -131,11 +131,11 @@ export default factories.createCoreService('api::cache.cache' as any, ({ strapi 
    */
   async flush() {
     try {
-      if (!strapi.redis) {
+      if (!(strapi as any).redis) {
         return false;
       }
       
-      await strapi.redis.flushdb();
+      await (strapi as any).redis.flushdb();
       return true;
     } catch (error) {
       console.error('清空缓存失败:', error);
@@ -148,12 +148,12 @@ export default factories.createCoreService('api::cache.cache' as any, ({ strapi 
    */
   async getStats() {
     try {
-      if (!strapi.redis) {
+      if (!(strapi as any).redis) {
         return { connected: false };
       }
       
-      const info = await strapi.redis.info();
-      const keys = await strapi.redis.dbsize();
+      const info = await (strapi as any).redis.info();
+      const keys = await (strapi as any).redis.dbsize();
       
       return {
         connected: true,
