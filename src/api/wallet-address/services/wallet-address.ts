@@ -4,18 +4,18 @@ import { factories } from '@strapi/strapi';
 type ChainType = 'BSC' | 'ETH' | 'TRON';
 type AssetType = 'USDT' | 'AI_TOKEN' | 'ETH' | 'BNB';
 
-export default factories.createCoreService('api::wallet-address.wallet-address', ({ strapi }) => ({
+export default factories.createCoreService('api::wallet-address.wallet-address' as any, ({ strapi }) => ({
   // 获取最佳充值地址
   async getBestDepositAddress(chain: ChainType, asset: AssetType, userId?: number) {
     try {
       // 1. 查找符合条件的地址
-      const addresses = await strapi.entityService.findMany('api::wallet-address.wallet-address', {
+      const addresses = await strapi.entityService.findMany('api::wallet-address.wallet-address' as any, {
         filters: {
           chain,
           asset,
           status: 'active',
           balance: {
-            $lt: 10000 // 余额小于10000的地址
+            $lt: '10000' // 余额小于10000的地址，改为string类型
           }
         },
         sort: [
@@ -34,7 +34,7 @@ export default factories.createCoreService('api::wallet-address.wallet-address',
       const bestAddress = addresses[0];
 
       // 3. 更新使用统计
-      await strapi.entityService.update('api::wallet-address.wallet-address', bestAddress.id, {
+      await strapi.entityService.update('api::wallet-address.wallet-address' as any, bestAddress.id, {
         data: {
           usage_count: (bestAddress as any).usage_count + 1,
           last_used_at: new Date()
@@ -66,15 +66,15 @@ export default factories.createCoreService('api::wallet-address.wallet-address',
   },
 
   // 获取提现地址（余额充足的）
-  async getWithdrawalAddress(chain: ChainType, asset: AssetType, amount: number) {
+  async getWithdrawalAddress(chain: ChainType, asset: AssetType, amount: string) {
     try {
-      const addresses = await strapi.entityService.findMany('api::wallet-address.wallet-address', {
+      const addresses = await strapi.entityService.findMany('api::wallet-address.wallet-address' as any, {
         filters: {
           chain,
           asset,
           status: 'active',
           balance: {
-            $gte: amount // 余额足够
+            $gte: amount // 余额足够，amount已经是string类型
           }
         },
         sort: [
@@ -96,11 +96,11 @@ export default factories.createCoreService('api::wallet-address.wallet-address',
   },
 
   // 更新地址余额
-  async updateAddressBalance(addressId: number, newBalance: number) {
+  async updateAddressBalance(addressId: number, newBalance: string) {
     try {
-      await strapi.entityService.update('api::wallet-address.wallet-address', addressId, {
+      await strapi.entityService.update('api::wallet-address.wallet-address' as any, addressId, {
         data: {
-          balance: newBalance,
+          balance: newBalance, // 改为string类型
           last_used_at: new Date()
         }
       });
@@ -114,16 +114,16 @@ export default factories.createCoreService('api::wallet-address.wallet-address',
   async rotateAddresses() {
     try {
       // 获取所有活跃地址
-      const addresses = await strapi.entityService.findMany('api::wallet-address.wallet-address', {
+      const addresses = await strapi.entityService.findMany('api::wallet-address.wallet-address' as any, {
         filters: { status: 'active' }
-      });
+      }) as any[];
 
       for (const address of addresses) {
         // 检查是否需要轮换
         const shouldRotate = this.shouldRotateAddress(address);
         
         if (shouldRotate) {
-          await strapi.entityService.update('api::wallet-address.wallet-address', address.id, {
+          await strapi.entityService.update('api::wallet-address.wallet-address' as any, address.id, {
             data: {
               status: 'maintenance',
               priority: Math.max(1, (address as any).priority - 10) // 降低优先级
@@ -151,13 +151,15 @@ export default factories.createCoreService('api::wallet-address.wallet-address',
     // 4. 优先级过低
     
     const usageThreshold = 100;
-    const balanceThreshold = (address.max_balance || 10000) * 0.8;
+    const maxBalance = parseFloat(address.max_balance || '10000');
+    const balanceThreshold = maxBalance * 0.8;
+    const currentBalance = parseFloat(address.balance || '0');
     const timeThreshold = 24 * 60 * 60 * 1000; // 24小时
     const priorityThreshold = 20;
     
     return (
       (address.usage_count || 0) > usageThreshold ||
-      (address.balance || 0) > balanceThreshold ||
+      currentBalance > balanceThreshold ||
       (lastUsed && (now.getTime() - lastUsed.getTime()) > timeThreshold) ||
       (address.priority || 50) < priorityThreshold
     );
@@ -173,7 +175,7 @@ export default factories.createCoreService('api::wallet-address.wallet-address',
         // 暂时使用模拟地址
         const mockAddress = this.generateMockAddress(chain);
         
-        const newAddress = await strapi.entityService.create('api::wallet-address.wallet-address', {
+        const newAddress = await strapi.entityService.create('api::wallet-address.wallet-address' as any, {
           data: {
             address: mockAddress,
             chain,
