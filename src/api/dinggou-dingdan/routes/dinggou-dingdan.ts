@@ -15,6 +15,13 @@ export default {
       method: 'POST',
       path: '/dinggou-dingdans',
       handler: 'dinggou-dingdan.createWithPlan',
+      config: {
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
+      },
     },
     {
       method: 'PUT',
@@ -30,6 +37,13 @@ export default {
       method: 'POST',
       path: '/dinggou-dingdans/:id/redeem',
       handler: 'dinggou-dingdan.redeem',
+      config: {
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
+      },
     },
   ],
 }; 
