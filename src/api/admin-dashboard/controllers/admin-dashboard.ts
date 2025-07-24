@@ -188,7 +188,7 @@ async function getRecentActivities(strapi: any) {
   return activities.slice(0, 10);
 }
 
-export default factories.createCoreController('api::admin-dashboard.admin-dashboard', ({ strapi }) => ({
+export default factories.createCoreController('api::admin-dashboard.admin-dashboard' as any, ({ strapi }) => ({
   /**
    * 获取系统概览数据
    */

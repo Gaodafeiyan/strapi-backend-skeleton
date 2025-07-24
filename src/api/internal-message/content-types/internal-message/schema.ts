@@ -43,7 +43,6 @@ const InternalMessageSchema = {
       type: 'relation',
       relation: 'manyToOne',
       target: 'plugin::users-permissions.user',
-      inversedBy: 'internal_messages',
       description: '接收用户'
     }
   },
