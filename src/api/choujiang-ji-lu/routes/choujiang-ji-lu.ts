@@ -3,7 +3,7 @@ export default {
     // 标准REST API路由
     {
       method: 'GET',
-      path: '/api/choujiang-ji-lus',
+      path: '/choujiang-ji-lus',
       handler: 'choujiang-ji-lu.find',
       config: {
         auth: {
@@ -15,7 +15,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/api/choujiang-ji-lus/:id',
+      path: '/choujiang-ji-lus/:id',
       handler: 'choujiang-ji-lu.findOne',
       config: {
         auth: {
@@ -27,7 +27,7 @@ export default {
     },
     {
       method: 'POST',
-      path: '/api/choujiang-ji-lus',
+      path: '/choujiang-ji-lus',
       handler: 'choujiang-ji-lu.create',
       config: {
         auth: {
@@ -39,7 +39,7 @@ export default {
     },
     {
       method: 'PUT',
-      path: '/api/choujiang-ji-lus/:id',
+      path: '/choujiang-ji-lus/:id',
       handler: 'choujiang-ji-lu.update',
       config: {
         auth: {
@@ -51,7 +51,7 @@ export default {
     },
     {
       method: 'DELETE',
-      path: '/api/choujiang-ji-lus/:id',
+      path: '/choujiang-ji-lus/:id',
       handler: 'choujiang-ji-lu.delete',
       config: {
         auth: {
@@ -64,7 +64,7 @@ export default {
     // 执行抽奖 - 需要认证
     {
       method: 'POST',
-      path: '/api/choujiang/perform',
+      path: '/choujiang/perform',
       handler: 'choujiang-ji-lu.performChoujiang',
       config: {
         auth: {
@@ -77,7 +77,7 @@ export default {
     // 获取用户抽奖机会 - 需要认证
     {
       method: 'GET',
-      path: '/api/choujiang/jihui',
+      path: '/choujiang/jihui',
       handler: 'choujiang-ji-lu.getUserChoujiangJihui',
       config: {
         auth: {
@@ -90,7 +90,7 @@ export default {
     // 检查用户抽奖机会 - 需要认证
     {
       method: 'GET',
-      path: '/api/choujiang/check-jihui',
+      path: '/choujiang/check-jihui',
       handler: 'choujiang-ji-lu.checkUserChoujiangJihui',
       config: {
         auth: {
@@ -103,7 +103,7 @@ export default {
     // 获取用户抽奖记录 - 需要认证
     {
       method: 'GET',
-      path: '/api/choujiang/records',
+      path: '/choujiang/records',
       handler: 'choujiang-ji-lu.getUserChoujiangRecords',
       config: {
         auth: {
@@ -116,7 +116,7 @@ export default {
     // 领取奖品 - 需要认证
     {
       method: 'POST',
-      path: '/api/choujiang/claim-prize',
+      path: '/choujiang/claim-prize',
       handler: 'choujiang-ji-lu.claimPrize',
       config: {
         auth: {
@@ -129,7 +129,7 @@ export default {
     // 获取抽奖奖品列表（公开接口）- 保持公开
     {
       method: 'GET',
-      path: '/api/choujiang/prizes',
+      path: '/choujiang/prizes',
       handler: 'choujiang-ji-lu.getChoujiangPrizes',
       config: {
         auth: false,
@@ -140,7 +140,7 @@ export default {
     // 测试抽奖机会检查（仅管理员）- 添加管理员权限
     {
       method: 'GET',
-      path: '/api/choujiang/test-check',
+      path: '/choujiang/test-check',
       handler: 'choujiang-ji-lu.testCheckJihui',
       config: {
         auth: {
