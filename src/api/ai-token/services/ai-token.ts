@@ -1,7 +1,7 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }) => ({
-    // 获取所有活跃的代币
+  // 获取所有活跃的代币
   async getActiveTokens() {
     try {
       const result = await strapi.db.connection.raw(`
@@ -14,13 +14,12 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
     } catch (error) {
       console.error('获取活跃代币失败:', error);
       // 如果表不存在，返回空数组而不是抛出错误
-      if (error.message.includes('Table') && error.message.includes('doesn't exist')) {
+      if (error.message.includes('Table') && error.message.includes('doesn\'t exist')) {
         console.log('ai_tokens 表不存在，返回空数组');
         return [];
       }
       throw error;
     }
-  } // 确保返回数组
   },
 
   // 随机选择一个代币（基于权重）
@@ -47,7 +46,7 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
     return tokens[tokens.length - 1]; // 兜底
   },
 
-    // 获取代币价格
+  // 获取代币价格
   async getTokenPrice(tokenId: number) {
     try {
       const result = await strapi.db.connection.raw(`
@@ -76,20 +75,6 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
     } catch (error) {
       console.error(`获取代币 ${tokenId} 价格失败:`, error);
       return 0.01; // 返回默认价格而不是抛出错误
-    }
-  }
-
-    const { price_source, price_api_id } = token;
-    
-    switch (price_source) {
-      case 'coingecko':
-        return await this.getCoinGeckoPrice(price_api_id);
-      case 'binance':
-        return await this.getBinancePrice(price_api_id);
-      case 'dexscreener':
-        return await this.getDexScreenerPrice(price_api_id);
-      default:
-        throw new Error(`不支持的价格源: ${price_source}`);
     }
   },
 
