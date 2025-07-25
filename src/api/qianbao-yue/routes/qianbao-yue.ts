@@ -1,6 +1,7 @@
 export default {
   type: 'content-api',
   routes: [
+    // 默认的CRUD路由
     {
       method: 'GET',
       path: '/api/qianbao-yues',
@@ -26,6 +27,7 @@ export default {
       path: '/api/qianbao-yues/:id',
       handler: 'qianbao-yue.delete',
     },
+    // 自定义路由
     {
       method: 'GET',
       path: '/api/qianbao-yues/user-wallet',
