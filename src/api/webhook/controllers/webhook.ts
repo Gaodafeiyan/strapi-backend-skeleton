@@ -1,66 +1,6 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreController('api::webhook.webhook' as any, ({ strapi }) => ({
-  // 基本的CRUD操作
-  async find(ctx) {
-    try {
-      const webhooks = await strapi.entityService.findMany('api::webhook.webhook' as any, {
-        ...ctx.query
-      });
-      return { data: webhooks };
-    } catch (error) {
-      ctx.throw(500, '获取webhook列表失败');
-    }
-  },
-
-  async findOne(ctx) {
-    try {
-      const { id } = ctx.params;
-      const webhook = await strapi.entityService.findOne('api::webhook.webhook' as any, id);
-      if (!webhook) {
-        return ctx.notFound('Webhook不存在');
-      }
-      return { data: webhook };
-    } catch (error) {
-      ctx.throw(500, '获取webhook详情失败');
-    }
-  },
-
-  async create(ctx) {
-    try {
-      const { data } = ctx.request.body;
-      const webhook = await strapi.entityService.create('api::webhook.webhook' as any, {
-        data
-      });
-      return { data: webhook };
-    } catch (error) {
-      ctx.throw(500, '创建webhook失败');
-    }
-  },
-
-  async update(ctx) {
-    try {
-      const { id } = ctx.params;
-      const { data } = ctx.request.body;
-      const webhook = await strapi.entityService.update('api::webhook.webhook' as any, id, {
-        data
-      });
-      return { data: webhook };
-    } catch (error) {
-      ctx.throw(500, '更新webhook失败');
-    }
-  },
-
-  async delete(ctx) {
-    try {
-      const { id } = ctx.params;
-      const webhook = await strapi.entityService.delete('api::webhook.webhook' as any, id);
-      return { data: webhook };
-    } catch (error) {
-      ctx.throw(500, '删除webhook失败');
-    }
-  },
-
   // Webhook统一处理转入/转出txHash
   async handleTransaction(ctx) {
     const { txHash, status, type } = ctx.request.body;
