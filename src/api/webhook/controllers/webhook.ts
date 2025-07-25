@@ -1,6 +1,66 @@
 import { factories } from '@strapi/strapi';
 
-export default ({ strapi }) => ({
+export default factories.createCoreController('api::webhook.webhook' as any, ({ strapi }) => ({
+  // 基本的CRUD操作
+  async find(ctx) {
+    try {
+      const webhooks = await strapi.entityService.findMany('api::webhook.webhook' as any, {
+        ...ctx.query
+      });
+      return { data: webhooks };
+    } catch (error) {
+      ctx.throw(500, '获取webhook列表失败');
+    }
+  },
+
+  async findOne(ctx) {
+    try {
+      const { id } = ctx.params;
+      const webhook = await strapi.entityService.findOne('api::webhook.webhook' as any, id);
+      if (!webhook) {
+        return ctx.notFound('Webhook不存在');
+      }
+      return { data: webhook };
+    } catch (error) {
+      ctx.throw(500, '获取webhook详情失败');
+    }
+  },
+
+  async create(ctx) {
+    try {
+      const { data } = ctx.request.body;
+      const webhook = await strapi.entityService.create('api::webhook.webhook' as any, {
+        data
+      });
+      return { data: webhook };
+    } catch (error) {
+      ctx.throw(500, '创建webhook失败');
+    }
+  },
+
+  async update(ctx) {
+    try {
+      const { id } = ctx.params;
+      const { data } = ctx.request.body;
+      const webhook = await strapi.entityService.update('api::webhook.webhook' as any, id, {
+        data
+      });
+      return { data: webhook };
+    } catch (error) {
+      ctx.throw(500, '更新webhook失败');
+    }
+  },
+
+  async delete(ctx) {
+    try {
+      const { id } = ctx.params;
+      const webhook = await strapi.entityService.delete('api::webhook.webhook' as any, id);
+      return { data: webhook };
+    } catch (error) {
+      ctx.throw(500, '删除webhook失败');
+    }
+  },
+
   // Webhook统一处理转入/转出txHash
   async handleTransaction(ctx) {
     const { txHash, status, type } = ctx.request.body;
@@ -42,7 +102,7 @@ export default ({ strapi }) => ({
   },
 
   // 处理充值确认
-  async handleRechargeConfirmation(txHash: string, status: string) {
+  async handleRechargeConfirmation(txHash, status) {
     const recharges = await strapi.entityService.findMany('api::qianbao-chongzhi.qianbao-chongzhi', {
       filters: { txHash, zhuangtai: 'pending' },
       populate: ['yonghu']
@@ -52,7 +112,7 @@ export default ({ strapi }) => ({
       throw new Error('未找到待确认的充值记录');
     }
 
-    const recharge = recharges[0] as any;
+    const recharge = recharges[0];
 
     if (status === 'success') {
       // 更新状态为成功
@@ -78,7 +138,7 @@ export default ({ strapi }) => ({
   },
 
   // 处理提现确认
-  async handleWithdrawalConfirmation(txHash: string, status: string) {
+  async handleWithdrawalConfirmation(txHash, status) {
     const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
       filters: { txHash, zhuangtai: 'broadcasted' },
       populate: ['yonghu']
@@ -88,7 +148,7 @@ export default ({ strapi }) => ({
       throw new Error('未找到待确认的提现记录');
     }
 
-    const withdrawal = withdrawals[0] as any;
+    const withdrawal = withdrawals[0];
 
     if (status === 'success') {
       // 更新状态为成功
@@ -112,4 +172,4 @@ export default ({ strapi }) => ({
       console.log(`提现失败，已返还余额: txHash=${txHash}, 用户=${withdrawal.yonghu.id}, 金额=${withdrawal.usdtJine}`);
     }
   }
-}); 
+})); 
