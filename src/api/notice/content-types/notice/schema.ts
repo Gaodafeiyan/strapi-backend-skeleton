@@ -1,6 +1,5 @@
 const NoticeSchema = {
   kind: 'collectionType',
-  pluginOptions: { 'content-api': { enabled: true } },
   info: { 
     singularName: 'notice', 
     pluralName: 'notices', 
