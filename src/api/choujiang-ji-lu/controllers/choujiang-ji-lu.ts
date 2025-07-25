@@ -4,51 +4,17 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   // 执行抽奖
   async performChoujiang(ctx) {
     try {
-      const { jihuiId, userId } = ctx.request.body;
+      const { jihuiId } = ctx.request.body;
       
-      // 调试信息
-      console.log('请求体:', ctx.request.body);
-      console.log('认证状态:', ctx.state.user);
-      console.log('请求头:', ctx.request.headers.authorization);
+      // 从认证状态获取用户ID
+      const currentUserId = ctx.state.user?.id;
       
-      // 尝试从多个来源获取用户ID
-      let currentUserId = userId;
-      
-      // 1. 从请求体获取
       if (!currentUserId) {
-        currentUserId = ctx.request.body.userId;
+        return ctx.unauthorized('用户未登录');
       }
-      
-      // 2. 从查询参数获取
-      if (!currentUserId) {
-        currentUserId = ctx.query.userId;
-      }
-      
-      // 3. 从认证状态获取
-      if (!currentUserId && ctx.state.user) {
-        currentUserId = ctx.state.user.id;
-      }
-      
-      // 4. 尝试解析JWT token
-      if (!currentUserId && ctx.request.headers.authorization) {
-        try {
-          const token = ctx.request.headers.authorization.replace('Bearer ', '');
-          const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-          currentUserId = payload.id;
-          console.log('从JWT解析的用户ID:', currentUserId);
-        } catch (error) {
-          console.error('JWT解析失败:', error);
-        }
-      }
-
-      console.log('最终用户ID:', currentUserId);
 
       if (!jihuiId) {
         return ctx.badRequest('缺少抽奖机会ID');
-      }
-
-      if (!currentUserId) {
-        return ctx.badRequest('缺少用户ID，请提供有效的认证token或userId参数');
       }
 
       // 验证用户是否存在
@@ -73,10 +39,10 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   // 获取用户抽奖机会
   async getUserChoujiangJihui(ctx) {
     try {
-      const userId = ctx.state.user?.id || ctx.query.userId;
+      const userId = ctx.state.user?.id;
       
       if (!userId) {
-        return ctx.badRequest('缺少用户ID，请提供有效的认证token或userId参数');
+        return ctx.unauthorized('用户未登录');
       }
 
       // 验证用户是否存在
@@ -100,66 +66,23 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   // 检查用户抽奖机会
   async checkUserChoujiangJihui(ctx) {
     try {
-      // 从认证用户或查询参数获取用户ID
-      const userId = ctx.state.user?.id || ctx.query.userId;
+      const userId = ctx.state.user?.id;
       
       if (!userId) {
-        // 如果没有用户ID，返回所有抽奖机会的统计信息
-        const allJihuis = await strapi.entityService.findMany('api::choujiang-jihui.choujiang-jihui' as any, {
-          filters: {
-            zhuangtai: 'active',
-            shengYuCiShu: {
-              $gt: 0
-            }
-          }
-        });
-
-        const totalRemaining = allJihuis.reduce((sum, jihui) => sum + (jihui as any).shengYuCiShu, 0);
-        
-        const result = {
-          hasJihui: allJihuis.length > 0,
-          totalRemaining,
-          totalUsers: new Set(allJihuis.map(j => (j as any).yonghu?.id)).size,
-          message: '请提供用户ID或使用认证token'
-        };
-
-        ctx.send({
-          success: true,
-          data: result
-        });
-        return;
+        return ctx.unauthorized('用户未登录');
       }
-      
-      // 使用entityService查询，但绕过权限检查
-      const jihuis = await strapi.entityService.findMany('api::choujiang-jihui.choujiang-jihui' as any, {
-        filters: {
-          yonghu: userId,
-          zhuangtai: 'active',
-          shengYuCiShu: {
-            $gt: 0
-          }
-        }
-      });
 
-      const totalRemaining = jihuis.reduce((sum, jihui) => sum + (jihui as any).shengYuCiShu, 0);
-      
-      const result = {
-        hasJihui: jihuis.length > 0,
-        totalRemaining,
-        jihuis: jihuis.map(j => ({
-          id: j.id,
-          zongCiShu: (j as any).zongCiShu,
-          yiYongCiShu: (j as any).yiYongCiShu,
-          shengYuCiShu: (j as any).shengYuCiShu,
-          zhuangtai: (j as any).zhuangtai,
-          chuangJianShiJian: (j as any).chuangJianShiJian,
-          daoQiShiJian: (j as any).daoQiShiJian
-        }))
-      };
+      // 验证用户是否存在
+      const user = await strapi.entityService.findOne('plugin::users-permissions.user', userId);
+      if (!user) {
+        return ctx.badRequest(`用户ID ${userId} 不存在`);
+      }
+
+      const hasJihui = await strapi.service('api::choujiang-jihui.choujiang-jihui').checkUserHasJihui(userId);
 
       ctx.send({
         success: true,
-        data: result
+        hasJihui: hasJihui
       });
     } catch (error) {
       console.error('检查抽奖机会失败:', error);
@@ -170,11 +93,10 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   // 获取用户抽奖记录
   async getUserChoujiangRecords(ctx) {
     try {
-      const userId = ctx.state.user?.id || ctx.query.userId;
-      const { limit = 20, offset = 0 } = ctx.query;
-
+      const userId = ctx.state.user?.id;
+      
       if (!userId) {
-        return ctx.badRequest('缺少用户ID，请提供有效的认证token或userId参数');
+        return ctx.unauthorized('用户未登录');
       }
 
       // 验证用户是否存在
@@ -183,11 +105,7 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
         return ctx.badRequest(`用户ID ${userId} 不存在`);
       }
 
-      const records = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').getUserChoujiangRecords(
-        userId, 
-        parseInt(limit as string), 
-        parseInt(offset as string)
-      );
+      const records = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').getUserChoujiangRecords(userId);
 
       ctx.send({
         success: true,
@@ -203,14 +121,14 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   async claimPrize(ctx) {
     try {
       const { recordId } = ctx.request.body;
-      const userId = ctx.state.user?.id || ctx.query.userId;
-
-      if (!recordId) {
-        return ctx.badRequest('缺少记录ID');
+      const userId = ctx.state.user?.id;
+      
+      if (!userId) {
+        return ctx.unauthorized('用户未登录');
       }
 
-      if (!userId) {
-        return ctx.badRequest('缺少用户ID，请提供有效的认证token或userId参数');
+      if (!recordId) {
+        return ctx.badRequest('缺少抽奖记录ID');
       }
 
       // 验证用户是否存在
@@ -219,13 +137,7 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
         return ctx.badRequest(`用户ID ${userId} 不存在`);
       }
 
-      // 验证记录是否属于当前用户
-      const record = await strapi.entityService.findOne('api::choujiang-ji-lu.choujiang-ji-lu' as any, recordId);
-      if (!record || (record as any).yonghu?.id !== userId) {
-        return ctx.forbidden('无权操作此记录');
-      }
-
-      const result = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').claimPrize(recordId);
+      const result = await strapi.service('api::choujiang-ji-lu.choujiang-ji-lu').claimPrize(recordId, userId);
 
       ctx.send({
         success: true,
@@ -241,12 +153,7 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
   // 获取抽奖奖品列表（公开接口）
   async getChoujiangPrizes(ctx) {
     try {
-      const prizes = await strapi.entityService.findMany('api::choujiang-jiangpin.choujiang-jiangpin' as any, {
-        filters: {
-          kaiQi: true
-        },
-        sort: { paiXuShunXu: 'asc' }
-      });
+      const prizes = await strapi.service('api::choujiang-jiangpin.choujiang-jiangpin').getActivePrizes();
 
       ctx.send({
         success: true,
@@ -258,46 +165,31 @@ export default factories.createCoreController('api::choujiang-ji-lu.choujiang-ji
     }
   },
 
-  // 测试抽奖机会检查（公开接口）
+  // 测试抽奖机会检查（仅管理员）
   async testCheckJihui(ctx) {
     try {
-      const userId = ctx.query.userId || 3; // 默认使用用户ID 3
+      const { userId } = ctx.query;
       
-      // 使用entityService查询
-      const jihuis = await strapi.entityService.findMany('api::choujiang-jihui.choujiang-jihui' as any, {
-        filters: {
-          yonghu: userId,
-          zhuangtai: 'active',
-          shengYuCiShu: {
-            $gt: 0
-          }
-        }
-      });
+      if (!userId) {
+        return ctx.badRequest('缺少用户ID参数');
+      }
 
-      const totalRemaining = jihuis.reduce((sum, jihui) => sum + (jihui as any).shengYuCiShu, 0);
-      
-      const result = {
-        userId: userId,
-        hasJihui: jihuis.length > 0,
-        totalRemaining,
-        jihuis: jihuis.map(j => ({
-          id: j.id,
-          zongCiShu: (j as any).zongCiShu,
-          yiYongCiShu: (j as any).yiYongCiShu,
-          shengYuCiShu: (j as any).shengYuCiShu,
-          zhuangtai: (j as any).zhuangtai,
-          chuangJianShiJian: (j as any).chuangJianShiJian,
-          daoQiShiJian: (j as any).daoQiShiJian
-        }))
-      };
+      // 验证用户是否存在
+      const user = await strapi.entityService.findOne('plugin::users-permissions.user', Number(userId));
+      if (!user) {
+        return ctx.badRequest(`用户ID ${userId} 不存在`);
+      }
+
+      const hasJihui = await strapi.service('api::choujiang-jihui.choujiang-jihui').checkUserHasJihui(userId);
 
       ctx.send({
         success: true,
-        data: result
+        userId: userId,
+        hasJihui: hasJihui
       });
     } catch (error) {
-      console.error('测试检查抽奖机会失败:', error);
-      ctx.badRequest(error.message || '测试检查抽奖机会失败');
+      console.error('测试检查失败:', error);
+      ctx.badRequest(error.message || '测试检查失败');
     }
   }
 })); 

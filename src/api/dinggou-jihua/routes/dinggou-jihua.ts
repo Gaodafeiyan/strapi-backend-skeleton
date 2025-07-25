@@ -3,27 +3,27 @@ export default {
   routes: [
     {
       method: 'GET',
-      path: '/dinggou-jihuas',
+      path: '/api/dinggou-jihuas',
       handler: 'dinggou-jihua.find',
     },
     {
       method: 'GET',
-      path: '/dinggou-jihuas/:id',
+      path: '/api/dinggou-jihuas/:id',
       handler: 'dinggou-jihua.findOne',
     },
     {
       method: 'POST',
-      path: '/dinggou-jihuas',
+      path: '/api/dinggou-jihuas',
       handler: 'dinggou-jihua.create',
     },
     {
       method: 'PUT',
-      path: '/dinggou-jihuas/:id',
+      path: '/api/dinggou-jihuas/:id',
       handler: 'dinggou-jihua.update',
     },
     {
       method: 'DELETE',
-      path: '/dinggou-jihuas/:id',
+      path: '/api/dinggou-jihuas/:id',
       handler: 'dinggou-jihua.delete',
     },
   ],

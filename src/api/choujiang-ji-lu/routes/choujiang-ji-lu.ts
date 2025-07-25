@@ -1,66 +1,92 @@
 export default {
   routes: [
-    // 执行抽奖
+    // 执行抽奖 - 需要认证
     {
       method: 'POST',
-      path: '/choujiang/perform',
+      path: '/api/choujiang/perform',
       handler: 'choujiang-ji-lu.performChoujiang',
       config: {
-        auth: false
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
       }
     },
-    // 获取用户抽奖机会
+    // 获取用户抽奖机会 - 需要认证
     {
       method: 'GET',
-      path: '/choujiang/jihui',
+      path: '/api/choujiang/jihui',
       handler: 'choujiang-ji-lu.getUserChoujiangJihui',
       config: {
-        auth: false
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
       }
     },
-    // 检查用户抽奖机会
+    // 检查用户抽奖机会 - 需要认证
     {
       method: 'GET',
-      path: '/choujiang/check-jihui',
+      path: '/api/choujiang/check-jihui',
       handler: 'choujiang-ji-lu.checkUserChoujiangJihui',
       config: {
-        auth: false
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
       }
     },
-    // 获取用户抽奖记录
+    // 获取用户抽奖记录 - 需要认证
     {
       method: 'GET',
-      path: '/choujiang/records',
+      path: '/api/choujiang/records',
       handler: 'choujiang-ji-lu.getUserChoujiangRecords',
       config: {
-        auth: false
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
       }
     },
-    // 领取奖品
+    // 领取奖品 - 需要认证
     {
       method: 'POST',
-      path: '/choujiang/claim-prize',
+      path: '/api/choujiang/claim-prize',
       handler: 'choujiang-ji-lu.claimPrize',
       config: {
-        auth: false
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
       }
     },
-    // 获取抽奖奖品列表（公开接口）
+    // 获取抽奖奖品列表（公开接口）- 保持公开
     {
       method: 'GET',
-      path: '/choujiang/prizes',
+      path: '/api/choujiang/prizes',
       handler: 'choujiang-ji-lu.getChoujiangPrizes',
       config: {
-        auth: false
+        auth: false,
+        policies: [],
+        middlewares: [],
       }
     },
-    // 测试抽奖机会检查（公开接口，用于调试）
+    // 测试抽奖机会检查（仅管理员）- 添加管理员权限
     {
       method: 'GET',
-      path: '/choujiang/test-check',
+      path: '/api/choujiang/test-check',
       handler: 'choujiang-ji-lu.testCheckJihui',
       config: {
-        auth: false
+        auth: {
+          scope: ['admin::is-authenticated'],
+        },
+        policies: [],
+        middlewares: [],
       }
     }
   ]

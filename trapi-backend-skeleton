@@ -1,0 +1,155 @@
+[1mdiff --git a/src/api/dinggou-dingdan/routes/dinggou-dingdan.ts b/src/api/dinggou-dingdan/routes/dinggou-dingdan.ts[m
+[1mindex ebb0a0c..ac0f614 100644[m
+[1m--- a/src/api/dinggou-dingdan/routes/dinggou-dingdan.ts[m
+[1m+++ b/src/api/dinggou-dingdan/routes/dinggou-dingdan.ts[m
+[36m@@ -15,6 +15,13 @@[m [mexport default {[m
+       method: 'POST',[m
+       path: '/dinggou-dingdans',[m
+       handler: 'dinggou-dingdan.createWithPlan',[m
+[32m+[m[32m      config: {[m
+[32m+[m[32m        auth: {[m
+[32m+[m[32m          scope: ['authenticated'],[m
+[32m+[m[32m        },[m
+[32m+[m[32m        policies: [],[m
+[32m+[m[32m        middlewares: [],[m
+[32m+[m[32m      },[m
+     },[m
+     {[m
+       method: 'PUT',[m
+[36m@@ -30,6 +37,13 @@[m [mexport default {[m
+       method: 'POST',[m
+       path: '/dinggou-dingdans/:id/redeem',[m
+       handler: 'dinggou-dingdan.redeem',[m
+[32m+[m[32m      config: {[m
+[32m+[m[32m        auth: {[m
+[32m+[m[32m          scope: ['authenticated'],[m
+[32m+[m[32m        },[m
+[32m+[m[32m        policies: [],[m
+[32m+[m[32m        middlewares: [],[m
+[32m+[m[32m      },[m
+     },[m
+   ],[m
+ }; [m
+\ No newline at end of file[m
+[1mdiff --git a/test-dinggou-jihua.js b/test-dinggou-jihua.js[m
+[1mnew file mode 100644[m
+[1mindex 0000000..5392265[m
+[1m--- /dev/null[m
+[1m+++ b/test-dinggou-jihua.js[m
+[36m@@ -0,0 +1,115 @@[m
+[32m+[m[32mconst axios = require('axios');[m
+[32m+[m
+[32m+[m[32mconst API_BASE = 'http://118.107.4.158:1337';[m
+[32m+[m
+[32m+[m[32m// 测试数据 - 5000U档位计划[m
+[32m+[m[32mconst testPlanData = {[m
+[32m+[m[32m  jihuaCode: 'PLAN5000',[m
+[32m+[m[32m  benjinUSDT: '5000',[m
+[32m+[m[32m  zhouQiTian: 15,[m
+[32m+[m[32m  jingtaiBili: '6',[m
+[32m+[m[32m  aiBili: '3',[m
+[32m+[m[32m  choujiangCi: 3,[m
+[32m+[m[32m  kaiqi: true[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m[32masync function testCreatePlan() {[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    console.log('🔍 开始测试创建认购计划...');[m
+[32m+[m[32m    console.log('📋 测试数据:', JSON.stringify(testPlanData, null, 2));[m
+[32m+[m[41m    [m
+[32m+[m[32m    const response = await axios.post(`${API_BASE}/content-manager/collection-types/api::dinggou-jihua.dinggou-jihua`, testPlanData, {[m
+[32m+[m[32m      headers: {[m
+[32m+[m[32m        'Content-Type': 'application/json',[m
+[32m+[m[32m        'Authorization': 'Bearer YOUR_ADMIN_TOKEN' // 需要替换为实际的admin token[m
+[32m+[m[32m      },[m
+[32m+[m[32m      timeout: 10000[m
+[32m+[m[32m    });[m
+[32m+[m[41m    [m
+[32m+[m[32m    console.log('✅ 创建成功!');[m
+[32m+[m[32m    console.log('📊 响应数据:', JSON.stringify(response.data, null, 2));[m
+[32m+[m[41m    [m
+[32m+[m[32m  } catch (error) {[m
+[32m+[m[32m    console.log('❌ 创建失败!');[m
+[32m+[m[32m    console.log('🔍 错误详情:');[m
+[32m+[m[32m    console.log('状态码:', error.response?.status);[m
+[32m+[m[32m    console.log('错误消息:', error.response?.data);[m
+[32m+[m[32m    console.log('请求数据:', error.config?.data);[m
+[32m+[m[32m    console.log('请求URL:', error.config?.url);[m
+[32m+[m[32m    console.log('请求头:', error.config?.headers);[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32masync function testGetPlans() {[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    console.log('\n🔍 测试获取认购计划列表...');[m
+[32m+[m[41m    [m
+[32m+[m[32m    const response = await axios.get(`${API_BASE}/api/dinggou-jihuas`, {[m
+[32m+[m[32m      timeout: 10000[m
+[32m+[m[32m    });[m
+[32m+[m[41m    [m
+[32m+[m[32m    console.log('✅ 获取成功!');[m
+[32m+[m[32m    console.log('📊 计划数量:', response.data.data?.length || 0);[m
+[32m+[m[32m    console.log('📋 计划列表:', JSON.stringify(response.data.data, null, 2));[m
+[32m+[m[41m    [m
+[32m+[m[32m  } catch (error) {[m
+[32m+[m[32m    console.log('❌ 获取失败!');[m
+[32m+[m[32m    console.log('状态码:', error.response?.status);[m
+[32m+[m[32m    console.log('错误消息:', error.response?.data);[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32masync function testSchemaValidation() {[m
+[32m+[m[32m  console.log('\n🔍 检查Schema验证规则...');[m
+[32m+[m[41m  [m
+[32m+[m[32m  // 测试必填字段[m
+[32m+[m[32m  const requiredFields = ['jihuaCode', 'benjinUSDT', 'zhouQiTian', 'jingtaiBili', 'aiBili'];[m
+[32m+[m[41m  [m
+[32m+[m[32m  for (const field of requiredFields) {[m
+[32m+[m[32m    const testData = { ...testPlanData };[m
+[32m+[m[32m    delete testData[field];[m
+[32m+[m[41m    [m
+[32m+[m[32m    try {[m
+[32m+[m[32m      console.log(`\n📝 测试缺少必填字段: ${field}`);[m
+[32m+[m[32m      const response = await axios.post(`${API_BASE}/content-manager/collection-types/api::dinggou-jihua.dinggou-jihua`, testData, {[m
+[32m+[m[32m        headers: {[m
+[32m+[m[32m          'Content-Type': 'application/json',[m
+[32m+[m[32m          'Authorization': 'Bearer YOUR_ADMIN_TOKEN'[m
+[32m+[m[32m        },[m
+[32m+[m[32m        timeout: 10000[m
+[32m+[m[32m      });[m
+[32m+[m[32m      console.log('❌ 应该失败但没有失败!');[m
+[32m+[m[32m    } catch (error) {[m
+[32m+[m[32m      console.log(`✅ 正确返回错误: ${error.response?.status}`);[m
+[32m+[m[32m      console.log(`错误消息: ${JSON.stringify(error.response?.data)}`);[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+[32m+[m[41m  [m
+[32m+[m[32m  // 测试唯一性约束[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    console.log('\n📝 测试重复jihuaCode...');[m
+[32m+[m[32m    const response = await axios.post(`${API_BASE}/content-manager/collection-types/api::dinggou-jihua.dinggou-jihua`, testPlanData, {[m
+[32m+[m[32m      headers: {[m
+[32m+[m[32m        'Content-Type': 'application/json',[m
+[32m+[m[32m        'Authorization': 'Bearer YOUR_ADMIN_TOKEN'[m
+[32m+[m[32m      },[m
+[32m+[m[32m      timeout: 10000[m
+[32m+[m[32m    });[m
+[32m+[m[32m    console.log('❌ 应该失败但没有失败!');[m
+[32m+[m[32m  } catch (error) {[m
+[32m+[m[32m    console.log(`✅ 正确返回错误: ${error.response?.status}`);[m
+[32m+[m[32m    console.log(`错误消息: ${JSON.stringify(error.response?.data)}`);[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32masync function main() {[m
+[32m+[m[32m  console.log('🚀 开始诊断认购计划创建问题...\n');[m
+[32m+[m[41m  [m
+[32m+[m[32m  await testGetPlans();[m
+[32m+[m[32m  await testCreatePlan();[m
+[32m+[m[32m  await testSchemaValidation();[m
+[32m+[m[41m  [m
+[32m+[m[32m  console.log('\n🏁 诊断完成!');[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mmain().catch(console.error);[m[41m [m
+\ No newline at end of file[m

@@ -2,7 +2,17 @@ export default {
   routes: [
     {
       method: 'GET',
-      path: '/ai-tokens/active',
+      path: '/api/ai-tokens',
+      handler: 'ai-token.find',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/api/ai-tokens/active',
       handler: 'ai-token.getActiveTokens',
       config: {
         auth: false,
@@ -12,7 +22,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/ai-tokens/:id/price',
+      path: '/api/ai-tokens/:id/price',
       handler: 'ai-token.getTokenPrice',
       config: {
         auth: false,
@@ -22,7 +32,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/ai-tokens/prices/batch',
+      path: '/api/ai-tokens/prices/batch',
       handler: 'ai-token.getBatchPrices',
       config: {
         auth: false,
@@ -32,7 +42,7 @@ export default {
     },
     {
       method: 'POST',
-      path: '/ai-tokens/initialize',
+      path: '/api/ai-tokens/initialize',
       handler: 'ai-token.initializeTokens',
       config: {
         auth: {

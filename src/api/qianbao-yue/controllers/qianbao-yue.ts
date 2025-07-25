@@ -55,10 +55,55 @@ export default factories.createCoreController(
         );
 
         ctx.body = {
-          success: true,
           data: balancesWithValue
         };
       } catch (error) {
+        ctx.throw(500, error.message);
+      }
+    },
+
+    // 获取用户钱包
+    async getUserWallet(ctx) {
+      try {
+        const userId = ctx.state.user.id;
+        
+        console.log('获取用户钱包，用户ID:', userId);
+        
+        const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
+          filters: { yonghu: userId }
+        });
+        
+        console.log('查询到的钱包数量:', wallets.length);
+        
+        const wallet = wallets[0];
+
+        if (!wallet) {
+          console.log('用户钱包不存在，尝试创建钱包...');
+          
+          // 尝试创建钱包
+          try {
+            const newWallet = await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
+              data: {
+                usdtYue: '0',
+                aiYue: '0',
+                aiTokenBalances: '{}',
+                yonghu: userId
+              }
+            });
+            
+            console.log('✅ 钱包创建成功:', newWallet.id);
+            ctx.body = { data: newWallet };
+          } catch (createError) {
+            console.error('❌ 创建钱包失败:', createError);
+            ctx.throw(404, '钱包不存在且无法创建');
+          }
+          return;
+        }
+
+        console.log('✅ 找到用户钱包:', wallet.id);
+        ctx.body = { data: wallet };
+      } catch (error) {
+        console.error('获取用户钱包失败:', error);
         ctx.throw(500, error.message);
       }
     },
@@ -70,7 +115,6 @@ export default factories.createCoreController(
         const records = await strapi.service('api::token-reward-record.token-reward-record').getUserTokenRewards(userId);
         
         ctx.body = {
-          success: true,
           data: records
         };
       } catch (error) {
