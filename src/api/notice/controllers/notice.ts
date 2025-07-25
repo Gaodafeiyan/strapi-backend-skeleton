@@ -1,17 +1,44 @@
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreController('api::notice.notice' as any, ({ strapi }) => ({
-  // 获取所有通知
-  async find(ctx) {
+export default factories.createCoreController('api::notice.notice', ({ strapi }) => ({
+  // 继承默认的CRUD操作
+
+  // 获取活跃公告
+  async getActiveNotices(ctx) {
     try {
-      const notices = await strapi.entityService.findMany('api::notice.notice' as any, {
-        ...ctx.query,
-        sort: { createdAt: 'desc' },
-      });
-      
+      const notices = await strapi.service('api::notice.notice').getActiveNotices();
       ctx.body = { data: notices };
     } catch (error) {
-      ctx.throw(500, `获取通知失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      ctx.throw(500, error.message);
+    }
+  },
+
+  // 获取最新公告
+  async getLatestNotices(ctx) {
+    try {
+      const limit = parseInt(ctx.query.limit) || 5;
+      const notices = await strapi.service('api::notice.notice').getLatestNotices(limit);
+      ctx.body = { data: notices };
+    } catch (error) {
+      ctx.throw(500, error.message);
+    }
+  },
+
+  // 重写find方法，默认只返回活跃的公告
+  async find(ctx) {
+    try {
+      // 如果没有指定filters，默认只返回活跃的公告
+      if (!ctx.query.filters) {
+        ctx.query.filters = {
+          isActive: true,
+          publishedAt: { $notNull: true }
+        };
+      }
+      
+      const { data, meta } = await super.find(ctx);
+      ctx.body = { data, meta };
+    } catch (error) {
+      ctx.throw(500, error.message);
     }
   },
 
