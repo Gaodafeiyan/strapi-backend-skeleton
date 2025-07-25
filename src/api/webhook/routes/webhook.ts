@@ -2,14 +2,14 @@ export default {
   type: 'content-api',
   routes: [
     {
+      method: 'GET',
+      path: '/api/webhooks',
+      handler: 'webhook.find',
+    },
+    {
       method: 'POST',
-      path: '/webhook/transaction',
-      handler: 'webhook.handleTransaction',
-      config: {
-        auth: false,
-        policies: [],
-        middlewares: [],
-      },
+      path: '/api/webhooks',
+      handler: 'webhook.create',
     },
   ],
-}; 
+};

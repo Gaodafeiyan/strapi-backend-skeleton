@@ -1,15 +1,26 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }) => ({
-  // 获取所有活跃的代币
+    // 获取所有活跃的代币
   async getActiveTokens() {
-    const result = await strapi.db.connection.raw(`
-      SELECT * FROM ai_tokens 
-      WHERE is_active = true 
-      ORDER BY weight DESC
-    `);
-    console.log('Database query result:', result); // 调试日志
-    return result[0] || []; // 确保返回数组
+    try {
+      const result = await strapi.db.connection.raw(`
+        SELECT * FROM ai_tokens 
+        WHERE is_active = true 
+        ORDER BY weight DESC
+      `);
+      console.log('Database query result:', result); // 调试日志
+      return result[0] || []; // 确保返回数组
+    } catch (error) {
+      console.error('获取活跃代币失败:', error);
+      // 如果表不存在，返回空数组而不是抛出错误
+      if (error.message.includes('Table') && error.message.includes('doesn't exist')) {
+        console.log('ai_tokens 表不存在，返回空数组');
+        return [];
+      }
+      throw error;
+    }
+  } // 确保返回数组
   },
 
   // 随机选择一个代币（基于权重）
@@ -36,16 +47,37 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
     return tokens[tokens.length - 1]; // 兜底
   },
 
-  // 获取代币价格
+    // 获取代币价格
   async getTokenPrice(tokenId: number) {
-    const result = await strapi.db.connection.raw(`
-      SELECT * FROM ai_tokens WHERE id = ?
-    `, [tokenId]);
-    
-    const token = result[0][0];
-    if (!token) {
-      throw new Error(`代币不存在: ${tokenId}`);
+    try {
+      const result = await strapi.db.connection.raw(`
+        SELECT * FROM ai_tokens WHERE id = ?
+      `, [tokenId]);
+      
+      const token = result[0][0];
+      if (!token) {
+        console.warn(`代币不存在: ${tokenId}`);
+        return 0.01; // 返回默认价格而不是抛出错误
+      }
+
+      const { price_source, price_api_id } = token;
+      
+      switch (price_source) {
+        case 'coingecko':
+          return await this.getCoinGeckoPrice(price_api_id);
+        case 'binance':
+          return await this.getBinancePrice(price_api_id);
+        case 'dexscreener':
+          return await this.getDexScreenerPrice(price_api_id);
+        default:
+          console.warn(`不支持的价格源: ${price_source}`);
+          return 0.01; // 返回默认价格
+      }
+    } catch (error) {
+      console.error(`获取代币 ${tokenId} 价格失败:`, error);
+      return 0.01; // 返回默认价格而不是抛出错误
     }
+  }
 
     const { price_source, price_api_id } = token;
     

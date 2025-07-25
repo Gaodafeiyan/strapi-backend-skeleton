@@ -4,29 +4,23 @@
   "info": {
     "singularName": "webhook",
     "pluralName": "webhooks",
-    "displayName": "Webhook",
-    "description": "Webhook for handling external transactions"
+    "displayName": "Webhook"
   },
   "options": {
     "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
-    "txHash": {
+    "url": {
       "type": "string",
       "required": true
     },
-    "status": {
-      "type": "string",
-      "required": true
+    "events": {
+      "type": "json"
     },
-    "type": {
-      "type": "string",
-      "required": true
-    },
-    "processed": {
+    "isActive": {
       "type": "boolean",
-      "default": false
+      "default": true
     }
   }
-} 
+}

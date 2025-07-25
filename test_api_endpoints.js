@@ -1,43 +1,45 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:1337';
+const baseURL = 'http://localhost:1337';
 
-async function testAPIEndpoints() {
-  console.log('🔍 测试API端点...\n');
-
+async function testEndpoints() {
+  console.log('🧪 开始测试API端点...\n');
+  
   const endpoints = [
-    '/api/notices',
-    '/api/qianbao-yues/user-wallet',
-    '/api/choujiang-ji-lus',
-    '/api/dinggou-jihuas',
-    '/api/ai-tokens',
+    { path: '/api/ai-tokens/active', method: 'GET', auth: false },
+    { path: '/api/qianbao-yues/user-wallet', method: 'GET', auth: true },
+    { path: '/api/dinggou-jihuas/active', method: 'GET', auth: false },
+    { path: '/api/dinggou-dingdans', method: 'GET', auth: true },
+    { path: '/api/yaoqing-jianglis/stats', method: 'GET', auth: true },
+    { path: '/api/choujiang-ji-lus/perform', method: 'POST', auth: true },
+    { path: '/api/webhooks', method: 'GET', auth: false },
+    { path: '/api/ai-tokens/1/price', method: 'GET', auth: false },
+    { path: '/api/ai-tokens/prices/batch', method: 'GET', auth: false },
   ];
 
   for (const endpoint of endpoints) {
     try {
-      console.log(`测试 ${endpoint}...`);
-      const response = await axios.get(`${BASE_URL}${endpoint}`, {
-        timeout: 5000,
-        validateStatus: () => true // 不抛出错误
-      });
+      const config = {
+        method: endpoint.method.toLowerCase(),
+        url: `${baseURL}${endpoint.path}`,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      };
       
-      if (response.status === 200) {
-        console.log(`✅ ${endpoint} - 状态码: ${response.status}`);
-      } else if (response.status === 401) {
-        console.log(`🔒 ${endpoint} - 需要认证 (状态码: ${response.status})`);
-      } else if (response.status === 404) {
-        console.log(`❌ ${endpoint} - 未找到 (状态码: ${response.status})`);
-      } else {
-        console.log(`⚠️ ${endpoint} - 其他错误 (状态码: ${response.status})`);
+      // 如果需要认证，添加token（这里需要实际的token）
+      if (endpoint.auth) {
+        config.headers.Authorization = 'Bearer YOUR_TOKEN_HERE';
       }
+      
+      const response = await axios(config);
+      console.log(`✅ ${endpoint.method} ${endpoint.path}: ${response.status}`);
     } catch (error) {
-      console.log(`❌ ${endpoint} - 请求失败: ${error.message}`);
+      const status = error.response?.status || 'Network Error';
+      const message = error.response?.data?.error?.message || error.message;
+      console.log(`❌ ${endpoint.method} ${endpoint.path}: ${status} - ${message}`);
     }
-    console.log('');
   }
-
-  console.log('🎯 API端点测试完成');
 }
 
-// 运行测试
-testAPIEndpoints().catch(console.error); 
+testEndpoints();

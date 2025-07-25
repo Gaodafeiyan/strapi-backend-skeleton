@@ -9,7 +9,7 @@ export default {
   },
   {
     method: 'GET',
-    path: '/api/yaoqing-jianglis/invite-stats',
+    path: '/api/yaoqing-jianglis/stats',
     handler: 'yaoqing-jiangli.getInviteStats',
     config: { auth: { scope: ['authenticated'] } },
   },

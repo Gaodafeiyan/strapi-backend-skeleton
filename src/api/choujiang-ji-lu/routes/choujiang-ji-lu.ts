@@ -1,4 +1,5 @@
 export default {
+  type: 'content-api',
   routes: [
     // 标准REST API路由 - 修改为允许认证用户访问
     {
@@ -64,7 +65,7 @@ export default {
     // 执行抽奖 - 需要认证
     {
       method: 'POST',
-      path: '/choujiang/perform',
+      path: '/api/choujiang-ji-lus/perform',
       handler: 'choujiang-ji-lu.performChoujiang',
       config: {
         auth: {
