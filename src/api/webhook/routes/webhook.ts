@@ -4,27 +4,27 @@ export default {
     // 默认的CRUD路由
     {
       method: 'GET',
-      path: '/api/webhooks',
+      path: '/webhooks',
       handler: 'webhook.find',
     },
     {
       method: 'GET',
-      path: '/api/webhooks/:id',
+      path: '/webhooks/:id',
       handler: 'webhook.findOne',
     },
     {
       method: 'POST',
-      path: '/api/webhooks',
+      path: '/webhooks',
       handler: 'webhook.create',
     },
     {
       method: 'PUT',
-      path: '/api/webhooks/:id',
+      path: '/webhooks/:id',
       handler: 'webhook.update',
     },
     {
       method: 'DELETE',
-      path: '/api/webhooks/:id',
+      path: '/webhooks/:id',
       handler: 'webhook.delete',
     },
   ],

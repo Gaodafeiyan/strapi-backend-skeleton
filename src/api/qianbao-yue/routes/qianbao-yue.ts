@@ -4,33 +4,33 @@ export default {
     // 默认的CRUD路由
     {
       method: 'GET',
-      path: '/api/qianbao-yues',
+      path: '/qianbao-yues',
       handler: 'qianbao-yue.find',
     },
     {
       method: 'GET',
-      path: '/api/qianbao-yues/:id',
+      path: '/qianbao-yues/:id',
       handler: 'qianbao-yue.findOne',
     },
     {
       method: 'POST',
-      path: '/api/qianbao-yues',
+      path: '/qianbao-yues',
       handler: 'qianbao-yue.create',
     },
     {
       method: 'PUT',
-      path: '/api/qianbao-yues/:id',
+      path: '/qianbao-yues/:id',
       handler: 'qianbao-yue.update',
     },
     {
       method: 'DELETE',
-      path: '/api/qianbao-yues/:id',
+      path: '/qianbao-yues/:id',
       handler: 'qianbao-yue.delete',
     },
     // 自定义路由
     {
       method: 'GET',
-      path: '/api/qianbao-yues/user-wallet',
+      path: '/qianbao-yues/user-wallet',
       handler: 'qianbao-yue.getUserWallet',
       config: {
         auth: {
@@ -42,7 +42,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/api/qianbao-yues/token-balances',
+      path: '/qianbao-yues/token-balances',
       handler: 'qianbao-yue.getTokenBalances',
       config: {
         auth: {
@@ -54,7 +54,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/api/qianbao-yues/token-reward-records',
+      path: '/qianbao-yues/token-reward-records',
       handler: 'qianbao-yue.getTokenRewardRecords',
       config: {
         auth: {
