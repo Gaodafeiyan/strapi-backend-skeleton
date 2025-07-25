@@ -1,0 +1,5 @@
+[33mb680ee0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m  修复后端API问题 - 完整修复版本
+[33mfedcbc2[m 🔧 修复TypeScript错误: 修正抽奖奖品控制器字段名称
+[33mbabeca1[m  修复webhook错误: 添加content-types定义和完善webhook功能
+[33m8fcf3d8[m 🔧 简化Webhook路由 - 只保留handleTransaction方法
+[33m31c5107[m  简化Webhook路由 - 只保留handleTransaction方法
