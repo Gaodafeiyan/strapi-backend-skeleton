@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "webhooks",
+  "info": {
+    "singularName": "webhook",
+    "pluralName": "webhooks",
+    "displayName": "Webhook",
+    "description": "Webhook for handling external transactions"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "txHash": {
+      "type": "string",
+      "required": true
+    },
+    "status": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "string",
+      "required": true
+    },
+    "processed": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+} 
