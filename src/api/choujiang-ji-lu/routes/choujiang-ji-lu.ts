@@ -1,5 +1,66 @@
 export default {
   routes: [
+    // 标准REST API路由
+    {
+      method: 'GET',
+      path: '/api/choujiang-ji-lus',
+      handler: 'choujiang-ji-lu.find',
+      config: {
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
+      }
+    },
+    {
+      method: 'GET',
+      path: '/api/choujiang-ji-lus/:id',
+      handler: 'choujiang-ji-lu.findOne',
+      config: {
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
+      }
+    },
+    {
+      method: 'POST',
+      path: '/api/choujiang-ji-lus',
+      handler: 'choujiang-ji-lu.create',
+      config: {
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
+      }
+    },
+    {
+      method: 'PUT',
+      path: '/api/choujiang-ji-lus/:id',
+      handler: 'choujiang-ji-lu.update',
+      config: {
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
+      }
+    },
+    {
+      method: 'DELETE',
+      path: '/api/choujiang-ji-lus/:id',
+      handler: 'choujiang-ji-lu.delete',
+      config: {
+        auth: {
+          scope: ['authenticated'],
+        },
+        policies: [],
+        middlewares: [],
+      }
+    },
     // 执行抽奖 - 需要认证
     {
       method: 'POST',
