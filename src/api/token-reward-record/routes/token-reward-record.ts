@@ -3,7 +3,7 @@ export default {
   routes: [
   {
     method: 'GET',
-    path: '/api/token-reward-records/my-rewards',
+    path: '/token-reward-records/my-rewards',
     handler: 'token-reward-record.getMyRewards',
     config: { auth: { scope: ['authenticated'] } },
   },

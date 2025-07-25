@@ -3,7 +3,7 @@ export default {
   routes: [
   {
     method: 'GET',
-    path: '/api/notices/active',
+    path: '/notices/active',
     handler: 'notice.getActiveNotices',
     config: { auth: false },
   },

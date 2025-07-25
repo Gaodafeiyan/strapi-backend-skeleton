@@ -3,13 +3,13 @@ export default {
   routes: [
   {
     method: 'GET',
-    path: '/api/yaoqing-jianglis/my-invites',
+    path: '/yaoqing-jianglis/my-invites',
     handler: 'yaoqing-jiangli.getMyInvites',
     config: { auth: { scope: ['authenticated'] } },
   },
   {
     method: 'GET',
-    path: '/api/yaoqing-jianglis/stats',
+    path: '/yaoqing-jianglis/stats',
     handler: 'yaoqing-jiangli.getInviteStats',
     config: { auth: { scope: ['authenticated'] } },
   },

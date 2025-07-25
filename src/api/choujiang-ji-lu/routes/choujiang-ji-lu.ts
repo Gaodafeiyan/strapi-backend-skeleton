@@ -65,7 +65,7 @@ export default {
     // 执行抽奖 - 需要认证
     {
       method: 'POST',
-      path: '/api/choujiang-ji-lus/perform',
+      path: '/choujiang-ji-lus/perform',
       handler: 'choujiang-ji-lu.performChoujiang',
       config: {
         auth: {
