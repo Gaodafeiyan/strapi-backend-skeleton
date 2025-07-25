@@ -3,7 +3,7 @@ export default {
   routes: [
     {
       method: 'POST',
-      path: '/api/auth/invite-register',
+      path: '/auth/invite-register',
       handler: 'auth.inviteRegister',
       config: { auth: false },
     },
