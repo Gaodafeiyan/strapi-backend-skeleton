@@ -1,6 +1,6 @@
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreController('api::notice.notice', ({ strapi }) => ({
+export default factories.createCoreController('api::notice.notice' as any, ({ strapi }) => ({
   // 继承默认的CRUD操作
 
   // 获取活跃公告
@@ -16,7 +16,7 @@ export default factories.createCoreController('api::notice.notice', ({ strapi })
   // 获取最新公告
   async getLatestNotices(ctx) {
     try {
-      const limit = parseInt(ctx.query.limit) || 5;
+      const limit = parseInt(ctx.query.limit as string) || 5;
       const notices = await strapi.service('api::notice.notice').getLatestNotices(limit);
       ctx.body = { data: notices };
     } catch (error) {
