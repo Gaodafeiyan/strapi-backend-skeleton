@@ -1,6 +1,18 @@
 export default {
   type: 'content-api',
   routes: [
+  {
+    method: 'GET',
+    path: '/api/yaoqing-jianglis/my-invites',
+    handler: 'yaoqing-jiangli.getMyInvites',
+    config: { auth: { scope: ['authenticated'] } },
+  },
+  {
+    method: 'GET',
+    path: '/api/yaoqing-jianglis/invite-stats',
+    handler: 'yaoqing-jiangli.getInviteStats',
+    config: { auth: { scope: ['authenticated'] } },
+  },
     {
       method: 'GET',
       path: '/yaoqing-jianglis',

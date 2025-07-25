@@ -1,6 +1,12 @@
 export default {
   type: 'content-api',
   routes: [
+  {
+    method: 'GET',
+    path: '/api/dinggou-jihuas/active',
+    handler: 'dinggou-jihua.getActivePlans',
+    config: { auth: false },
+  },
     {
       method: 'GET',
       path: '/dinggou-jihuas',

@@ -48,5 +48,29 @@ export default factories.createCoreController('api::ai-token.ai-token', ({ strap
     } catch (error) {
       ctx.throw(500, error.message);
     }
+  },
+
+  // 获取代币市场数据
+  async getMarketData(ctx) {
+    try {
+      const tokens = await strapi.service('api::ai-token.ai-token').getActiveTokens();
+      const prices = await strapi.service('api::ai-token.ai-token').getBatchTokenPrices();
+      
+      const marketData = tokens.map(token => ({
+        id: token.id,
+        name: token.name,
+        symbol: token.symbol,
+        price: prices[token.id] || 0.01,
+        weight: token.weight,
+        description: token.description,
+        logoUrl: token.logoUrl
+      }));
+      
+      ctx.body = {
+        data: marketData
+      };
+    } catch (error) {
+      ctx.throw(500, error.message);
+    }
   }
 })); 

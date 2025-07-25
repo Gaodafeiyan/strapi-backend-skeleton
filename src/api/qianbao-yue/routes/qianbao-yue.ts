@@ -3,32 +3,32 @@ export default {
   routes: [
     {
       method: 'GET',
-      path: '/qianbao-yues',
+      path: '/api/qianbao-yues',
       handler: 'qianbao-yue.find',
     },
     {
       method: 'GET',
-      path: '/qianbao-yues/:id',
+      path: '/api/qianbao-yues/:id',
       handler: 'qianbao-yue.findOne',
     },
     {
       method: 'POST',
-      path: '/qianbao-yues',
+      path: '/api/qianbao-yues',
       handler: 'qianbao-yue.create',
     },
     {
       method: 'PUT',
-      path: '/qianbao-yues/:id',
+      path: '/api/qianbao-yues/:id',
       handler: 'qianbao-yue.update',
     },
     {
       method: 'DELETE',
-      path: '/qianbao-yues/:id',
+      path: '/api/qianbao-yues/:id',
       handler: 'qianbao-yue.delete',
     },
     {
       method: 'GET',
-      path: '/qianbao-yues/user-wallet',
+      path: '/api/qianbao-yues/user-wallet',
       handler: 'qianbao-yue.getUserWallet',
       config: {
         auth: {
@@ -40,7 +40,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/qianbao-yues/token-balances',
+      path: '/api/qianbao-yues/token-balances',
       handler: 'qianbao-yue.getTokenBalances',
       config: {
         auth: {
@@ -52,7 +52,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/qianbao-yues/token-rewards',
+      path: '/api/qianbao-yues/token-reward-records',
       handler: 'qianbao-yue.getTokenRewardRecords',
       config: {
         auth: {

@@ -1,6 +1,12 @@
 export default {
   type: 'content-api',
   routes: [
+  {
+    method: 'GET',
+    path: '/api/notices/active',
+    handler: 'notice.getActiveNotices',
+    config: { auth: false },
+  },
     {
       method: 'GET',
       path: '/notices',

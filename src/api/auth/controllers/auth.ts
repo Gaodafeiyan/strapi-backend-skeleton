@@ -9,13 +9,19 @@ export default factories.createCoreController(
       const { username, email, password, inviteCode } = ctx.request.body;
 
       try {
+        
         // 输入验证和清理
         const cleanUsername = sanitizeInput(username);
         const cleanEmail = sanitizeInput(email);
         const cleanInviteCode = sanitizeInput(inviteCode);
         
-        if (!validateUsername(cleanUsername)) {
-          return ctx.badRequest('用户名至少3个字符，最多20个字符');
+        // 修复用户名长度验证 - 允许更短的用户名
+        if (!cleanUsername || cleanUsername.length < 2) {
+          return ctx.badRequest('用户名至少2个字符');
+        }
+        
+        if (cleanUsername.length > 30) {
+          return ctx.badRequest('用户名最多30个字符');
         }
         
         if (!validateEmail(cleanEmail)) {

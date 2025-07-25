@@ -1,6 +1,12 @@
 export default {
   type: 'content-api',
   routes: [
+  {
+    method: 'GET',
+    path: '/api/token-reward-records/my-rewards',
+    handler: 'token-reward-record.getMyRewards',
+    config: { auth: { scope: ['authenticated'] } },
+  },
     {
       method: 'GET',
       path: '/token-reward-records',

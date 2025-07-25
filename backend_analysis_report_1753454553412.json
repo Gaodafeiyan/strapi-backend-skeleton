@@ -1,0 +1,643 @@
+{
+  "timestamp": "2025-07-25T14:42:33.411Z",
+  "summary": {
+    "totalAPIs": 24,
+    "validAPIs": 2,
+    "invalidAPIs": 22,
+    "validRate": "8.33"
+  },
+  "issues": {
+    "missingControllers": 0,
+    "missingRoutes": 0,
+    "missingServices": 9,
+    "missingModels": 1
+  },
+  "apiDetails": [
+    {
+      "name": "admin-dashboard",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\admin-dashboard",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": false,
+      "hasModel": false,
+      "controllerMethods": [
+        "getSystemOverview",
+        "getUserManagement",
+        "getOrderManagement"
+      ],
+      "routes": [
+        "/admin-dashboards",
+        "/admin-dashboards/:id",
+        "/admin-dashboards",
+        "/admin-dashboards/:id",
+        "/admin-dashboards/:id",
+        "/admin-dashboard/overview",
+        "/admin-dashboard/users",
+        "/admin-dashboard/orders"
+      ],
+      "issues": [
+        "缺少服务目录",
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "ai-token",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\ai-token",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [
+        "getActiveTokens",
+        "getTokenPrice",
+        "getBatchPrices",
+        "initializeTokens"
+      ],
+      "routes": [
+        "/ai-tokens",
+        "/ai-tokens/active",
+        "/ai-tokens/:id/price",
+        "/ai-tokens/prices/batch",
+        "/ai-tokens/initialize"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "auth",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\auth",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": false,
+      "hasModel": false,
+      "controllerMethods": [
+        "inviteRegister"
+      ],
+      "routes": [
+        "/auth/invite-register"
+      ],
+      "issues": [
+        "缺少服务目录",
+        "缺少内容类型目录"
+      ]
+    },
+    {
+      "name": "cache",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\cache",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [],
+      "routes": [
+        "/caches",
+        "/caches/:id",
+        "/caches",
+        "/caches/:id",
+        "/caches/:id"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "choujiang-ji-lu",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\choujiang-ji-lu",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [
+        "performChoujiang",
+        "getUserChoujiangJihui",
+        "checkUserChoujiangJihui",
+        "getUserChoujiangRecords",
+        "claimPrize",
+        "getChoujiangPrizes",
+        "testCheckJihui"
+      ],
+      "routes": [
+        "/choujiang-ji-lus",
+        "/choujiang-ji-lus/:id",
+        "/choujiang-ji-lus",
+        "/choujiang-ji-lus/:id",
+        "/choujiang-ji-lus/:id",
+        "/choujiang/perform",
+        "/choujiang/jihui",
+        "/choujiang/check-jihui",
+        "/choujiang/records",
+        "/choujiang/claim-prize",
+        "/choujiang/prizes",
+        "/choujiang/test-check"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "choujiang-jiangpin",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\choujiang-jiangpin",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": false,
+      "hasModel": false,
+      "controllerMethods": [
+        "find",
+        "findOne",
+        "getActivePrizes"
+      ],
+      "routes": [
+        "/choujiang-jiangpins",
+        "/choujiang-jiangpins/:id",
+        "/choujiang-jiangpins",
+        "/choujiang-jiangpins/:id",
+        "/choujiang-jiangpins/:id"
+      ],
+      "issues": [
+        "缺少服务目录",
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "choujiang-jihui",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\choujiang-jihui",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [],
+      "routes": [
+        "/choujiang-jihuis",
+        "/choujiang-jihuis/:id",
+        "/choujiang-jihuis",
+        "/choujiang-jihuis/:id",
+        "/choujiang-jihuis/:id"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "dinggou-dingdan",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\dinggou-dingdan",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [
+        "createWithPlan",
+        "redeem"
+      ],
+      "routes": [
+        "/dinggou-dingdans",
+        "/dinggou-dingdans/:id",
+        "/dinggou-dingdans",
+        "/dinggou-dingdans/:id",
+        "/dinggou-dingdans/:id",
+        "/dinggou-dingdans/:id/redeem"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "dinggou-jihua",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\dinggou-jihua",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [],
+      "routes": [
+        "/dinggou-jihuas",
+        "/dinggou-jihuas/:id",
+        "/dinggou-jihuas",
+        "/dinggou-jihuas/:id",
+        "/dinggou-jihuas/:id"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "health",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\health",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": false,
+      "hasModel": false,
+      "controllerMethods": [
+        "check",
+        "getBusinessMetrics",
+        "detailed",
+        "checkDatabase",
+        "checkRedis",
+        "checkServices",
+        "checkEndpoints"
+      ],
+      "routes": [
+        "/health",
+        "/health/detailed"
+      ],
+      "issues": [
+        "缺少服务目录",
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "internal-message",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\internal-message",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": false,
+      "hasModel": false,
+      "controllerMethods": [
+        "sendMessage",
+        "sendBatchMessage",
+        "getUserMessages",
+        "markAsRead",
+        "markBatchAsRead",
+        "deleteMessage",
+        "getMessageStats"
+      ],
+      "routes": [
+        "/internal-messages/send",
+        "/internal-messages/send-batch",
+        "/internal-messages/user",
+        "/internal-messages/:id/read",
+        "/internal-messages/batch-read",
+        "/internal-messages/:id",
+        "/internal-messages/stats",
+        "/internal-messages",
+        "/internal-messages/:id",
+        "/internal-messages",
+        "/internal-messages/:id",
+        "/internal-messages/:id"
+      ],
+      "issues": [
+        "缺少服务目录",
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "notice",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\notice",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [
+        "getActiveNotices",
+        "getLatestNotices",
+        "find",
+        "findOne",
+        "create",
+        "update",
+        "delete"
+      ],
+      "routes": [
+        "/notices",
+        "/notices/:id",
+        "/notices",
+        "/notices/:id",
+        "/notices/:id"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "performance-monitor",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\performance-monitor",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": false,
+      "hasModel": false,
+      "controllerMethods": [
+        "getSystemMetrics",
+        "getErrorRate",
+        "getBusinessMetrics",
+        "getAlertConfig",
+        "updateAlertConfig"
+      ],
+      "routes": [
+        "/performance-monitors",
+        "/performance-monitors/:id",
+        "/performance-monitors",
+        "/performance-monitors/:id",
+        "/performance-monitors/:id",
+        "/performance-monitor/system-metrics",
+        "/performance-monitor/error-rate",
+        "/performance-monitor/business-metrics",
+        "/performance-monitor/alert-config",
+        "/performance-monitor/alert-config"
+      ],
+      "issues": [
+        "缺少服务目录",
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "qianbao-chongzhi",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\qianbao-chongzhi",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": false,
+      "hasModel": false,
+      "controllerMethods": [
+        "create",
+        "getDepositAddress",
+        "getAllAddresses",
+        "rotateAddresses",
+        "generateAddresses",
+        "find",
+        "createRecharge",
+        "confirmRecharge"
+      ],
+      "routes": [
+        "/qianbao-chongzhis/deposit-address",
+        "/qianbao-chongzhis/:id/confirm",
+        "/qianbao-chongzhis",
+        "/qianbao-chongzhis/:id",
+        "/qianbao-chongzhis",
+        "/qianbao-chongzhis/:id",
+        "/qianbao-chongzhis/:id"
+      ],
+      "issues": [
+        "缺少服务目录",
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "qianbao-tixian",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\qianbao-tixian",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [
+        "create",
+        "find",
+        "findOne",
+        "update",
+        "createWithdrawal",
+        "broadcastWithdrawal"
+      ],
+      "routes": [
+        "/qianbao-tixians",
+        "/qianbao-tixians/:id",
+        "/qianbao-tixians",
+        "/qianbao-tixians/:id",
+        "/qianbao-tixians/:id",
+        "/qianbao-tixians/:id/broadcast"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "qianbao-yue",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\qianbao-yue",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [
+        "getTokenBalances",
+        "getUserWallet",
+        "getTokenRewardRecords"
+      ],
+      "routes": [
+        "/qianbao-yues",
+        "/qianbao-yues/:id",
+        "/qianbao-yues",
+        "/qianbao-yues/:id",
+        "/qianbao-yues/:id",
+        "/qianbao-yues/user-wallet",
+        "/qianbao-yues/token-balances",
+        "/qianbao-yues/token-rewards"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "queue",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\queue",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": false,
+      "hasModel": true,
+      "controllerMethods": [
+        "getStatus",
+        "clean",
+        "pause",
+        "resume",
+        "getDetails"
+      ],
+      "routes": [
+        "/queues",
+        "/queues/:id",
+        "/queues",
+        "/queues/:id",
+        "/queues/:id",
+        "/queues/status",
+        "/queues/clean",
+        "/queues/pause",
+        "/queues/resume",
+        "/queues/details"
+      ],
+      "issues": [
+        "缺少服务目录"
+      ]
+    },
+    {
+      "name": "shop-cart",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\shop-cart",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [
+        "create",
+        "addToCart",
+        "updateQuantity",
+        "removeFromCart",
+        "toggleSelected",
+        "toggleAllSelected",
+        "myCart",
+        "clearCart",
+        "cartStats"
+      ],
+      "routes": [
+        "/shop-carts",
+        "/shop-carts",
+        "/shop-carts/:id",
+        "/shop-carts/:id",
+        "/shop-carts/:id",
+        "/shop-carts/add-to-cart",
+        "/shop-carts/:id/quantity",
+        "/shop-carts/:id/remove",
+        "/shop-carts/:id/toggle-selected",
+        "/shop-carts/toggle-all-selected",
+        "/shop-carts/my/cart",
+        "/shop-carts/my/clear",
+        "/shop-carts/my/stats"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "shop-order",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\shop-order",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [
+        "create",
+        "pay",
+        "ship",
+        "confirmDelivery",
+        "cancel",
+        "myOrders",
+        "checkoutFromCart"
+      ],
+      "routes": [
+        "/shop-orders",
+        "/shop-orders",
+        "/shop-orders/:id",
+        "/shop-orders/:id",
+        "/shop-orders/:id",
+        "/shop-orders/:id/pay",
+        "/shop-orders/:id/ship",
+        "/shop-orders/:id/confirm-delivery",
+        "/shop-orders/:id/cancel",
+        "/shop-orders/my/orders",
+        "/shop-orders/checkout-from-cart"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "shop-product",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\shop-product",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": false,
+      "hasModel": false,
+      "controllerMethods": [
+        "find",
+        "create",
+        "update",
+        "delete",
+        "findOne",
+        "search",
+        "getHotProducts",
+        "getRecommendedProducts",
+        "getCategories",
+        "updateSales"
+      ],
+      "routes": [
+        "/shop-products/hot/list",
+        "/shop-products/recommend/list",
+        "/shop-products/search",
+        "/shop-products/categories",
+        "/shop-products/:id/sales",
+        "/shop-products",
+        "/shop-products",
+        "/shop-products/:id",
+        "/shop-products/:id",
+        "/shop-products/:id"
+      ],
+      "issues": [
+        "缺少服务目录",
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "token-reward-record",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\token-reward-record",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [],
+      "routes": [
+        "/token-reward-records",
+        "/token-reward-records/:id",
+        "/token-reward-records",
+        "/token-reward-records/:id",
+        "/token-reward-records/:id"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "wallet-address",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\wallet-address",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [
+        "find",
+        "findOne",
+        "getBestAddress",
+        "rotateAddresses",
+        "generateAddresses"
+      ],
+      "routes": [
+        "/wallet-addresses",
+        "/wallet-addresses/:id",
+        "/wallet-addresses",
+        "/wallet-addresses/:id",
+        "/wallet-addresses/:id",
+        "/wallet-addresses/best/:chain/:asset",
+        "/wallet-addresses/rotate",
+        "/wallet-addresses/generate"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    },
+    {
+      "name": "webhook",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\webhook",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": true,
+      "controllerMethods": [
+        "handleTransaction"
+      ],
+      "routes": [
+        "/webhook/transaction"
+      ],
+      "issues": []
+    },
+    {
+      "name": "yaoqing-jiangli",
+      "path": "C:\\Users\\admin\\StudioProjects\\strapi-backend-skeleton\\src\\api\\yaoqing-jiangli",
+      "hasController": true,
+      "hasRoutes": true,
+      "hasService": true,
+      "hasModel": false,
+      "controllerMethods": [],
+      "routes": [
+        "/yaoqing-jianglis",
+        "/yaoqing-jianglis/:id",
+        "/yaoqing-jianglis",
+        "/yaoqing-jianglis/:id",
+        "/yaoqing-jianglis/:id"
+      ],
+      "issues": [
+        "缺少schema.json文件"
+      ]
+    }
+  ]
+}
