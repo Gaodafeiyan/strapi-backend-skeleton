@@ -9,9 +9,9 @@ export default factories.createCoreController(
         const userId = ctx.state.user.id;
         
         const records = await strapi.entityService.findMany('api::token-reward-record.token-reward-record', {
-          filters: { yonghu: userId },
+          filters: { user: userId },
           sort: { createdAt: 'desc' },
-          populate: ['aiToken']
+          populate: ['token']
         });
         
         ctx.body = {
