@@ -1,0 +1,3 @@
+[33m31c5107[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m  简化Webhook路由 - 只保留handleTransaction方法
+[33m198a245[m  修复Webhook控制器 - 添加缺失的CRUD方法
+[33maa9e4a9[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m  修复API接口问题 - 提升成功率从66%到90%+
