@@ -84,5 +84,66 @@ export default {
         middlewares: [],
       },
     },
+    // 添加标准REST API路由
+    {
+      method: 'GET',
+      path: '/internal-messages',
+      handler: 'internal-message.find',
+      config: {
+        auth: {
+          scope: ['authenticated']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/internal-messages/:id',
+      handler: 'internal-message.findOne',
+      config: {
+        auth: {
+          scope: ['authenticated']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/internal-messages',
+      handler: 'internal-message.create',
+      config: {
+        auth: {
+          scope: ['authenticated']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/internal-messages/:id',
+      handler: 'internal-message.update',
+      config: {
+        auth: {
+          scope: ['authenticated']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/internal-messages/:id',
+      handler: 'internal-message.delete',
+      config: {
+        auth: {
+          scope: ['authenticated']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
   ],
 }; 

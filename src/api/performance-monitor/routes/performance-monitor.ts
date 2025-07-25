@@ -3,6 +3,66 @@ export default {
   routes: [
     {
       method: 'GET',
+      path: '/performance-monitors',
+      handler: 'performance-monitor.find',
+      config: {
+        auth: {
+          scope: ['admin']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/performance-monitors/:id',
+      handler: 'performance-monitor.findOne',
+      config: {
+        auth: {
+          scope: ['admin']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/performance-monitors',
+      handler: 'performance-monitor.create',
+      config: {
+        auth: {
+          scope: ['admin']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/performance-monitors/:id',
+      handler: 'performance-monitor.update',
+      config: {
+        auth: {
+          scope: ['admin']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/performance-monitors/:id',
+      handler: 'performance-monitor.delete',
+      config: {
+        auth: {
+          scope: ['admin']
+        },
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
       path: '/performance-monitor/system-metrics',
       handler: 'performance-monitor.getSystemMetrics',
       config: {

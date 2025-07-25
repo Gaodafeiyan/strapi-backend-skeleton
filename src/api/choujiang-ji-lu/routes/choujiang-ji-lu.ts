@@ -1,6 +1,6 @@
 export default {
   routes: [
-    // 标准REST API路由
+    // 标准REST API路由 - 修改为允许认证用户访问
     {
       method: 'GET',
       path: '/choujiang-ji-lus',
