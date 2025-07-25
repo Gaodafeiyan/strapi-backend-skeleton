@@ -61,8 +61,8 @@ export default factories.createCoreController('api::choujiang-jiangpin.choujiang
       const prizes = await strapi.entityService.findMany(
         'api::choujiang-jiangpin.choujiang-jiangpin',
         {
-          filters: { status: 'active' },
-          sort: { priority: 'desc' }
+          filters: { kaiQi: true },
+          sort: { paiXuShunXu: 'desc' }
         }
       );
       
