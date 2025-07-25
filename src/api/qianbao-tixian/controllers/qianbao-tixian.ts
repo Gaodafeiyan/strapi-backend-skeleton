@@ -10,6 +10,20 @@ export default factories.createCoreController('api::qianbao-tixian.qianbao-tixia
       return ctx.unauthorized('用户未登录');
     }
     
+    // 验证data字段是否存在
+    if (!data) {
+      return ctx.badRequest('缺少data字段');
+    }
+    
+    // 验证必要字段
+    if (!data.usdtJine) {
+      return ctx.badRequest('缺少提现金额');
+    }
+    
+    if (!data.tixianAddress && !data.toAddress) {
+      return ctx.badRequest('缺少提现地址');
+    }
+    
     try {
       // 使用队列服务创建提现
       const withdrawal = await strapi.service('api::qianbao-tixian.qianbao-tixian').requestWithdraw(

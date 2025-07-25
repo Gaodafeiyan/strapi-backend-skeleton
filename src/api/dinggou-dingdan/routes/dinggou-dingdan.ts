@@ -3,17 +3,17 @@ export default {
   routes: [
     {
       method: 'GET',
-      path: '/dinggou-dingdans',
+      path: '/api/dinggou-dingdans',
       handler: 'dinggou-dingdan.find',
     },
     {
       method: 'GET',
-      path: '/dinggou-dingdans/:id',
+      path: '/api/dinggou-dingdans/:id',
       handler: 'dinggou-dingdan.findOne',
     },
     {
       method: 'POST',
-      path: '/dinggou-dingdans',
+      path: '/api/dinggou-dingdans',
       handler: 'dinggou-dingdan.createWithPlan',
       config: {
         auth: {
@@ -25,17 +25,17 @@ export default {
     },
     {
       method: 'PUT',
-      path: '/dinggou-dingdans/:id',
+      path: '/api/dinggou-dingdans/:id',
       handler: 'dinggou-dingdan.update',
     },
     {
       method: 'DELETE',
-      path: '/dinggou-dingdans/:id',
+      path: '/api/dinggou-dingdans/:id',
       handler: 'dinggou-dingdan.delete',
     },
     {
       method: 'POST',
-      path: '/dinggou-dingdans/:id/redeem',
+      path: '/api/dinggou-dingdans/:id/redeem',
       handler: 'dinggou-dingdan.redeem',
       config: {
         auth: {

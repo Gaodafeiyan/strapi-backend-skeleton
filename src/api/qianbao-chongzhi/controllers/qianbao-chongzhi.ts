@@ -5,6 +5,20 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
   async create(ctx) {
     const { data } = ctx.request.body;
     
+    // 验证data字段是否存在
+    if (!data) {
+      return ctx.badRequest('缺少data字段');
+    }
+    
+    // 验证必要字段
+    if (!data.usdtJine) {
+      return ctx.badRequest('缺少充值金额');
+    }
+    
+    if (!data.yonghu) {
+      return ctx.badRequest('缺少用户ID');
+    }
+    
     try {
       const recharge = await strapi.entityService.create('api::qianbao-chongzhi.qianbao-chongzhi' as any, {
         data: {
