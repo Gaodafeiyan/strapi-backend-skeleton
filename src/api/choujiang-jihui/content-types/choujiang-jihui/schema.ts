@@ -8,7 +8,7 @@ const ChoujiangJihuiSchema = {
   },
   options: { draftAndPublish: false },
   attributes: {
-    yonghu: { 
+    user: { 
       type: 'relation', 
       relation: 'manyToOne',
       target: 'plugin::users-permissions.user'

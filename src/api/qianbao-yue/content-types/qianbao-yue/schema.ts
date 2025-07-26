@@ -11,7 +11,7 @@ const QianbaoSchema = {
       default: '{}',
       description: 'AI代币余额JSON格式 {tokenId: balance}'
     },
-    yonghu  : { type: 'relation', relation: 'oneToOne',
+    user  : { type: 'relation', relation: 'oneToOne',
                 target: 'plugin::users-permissions.user', inversedBy: 'qianbao' },
 
   },

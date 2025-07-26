@@ -14,7 +14,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
       // 2. 创建提现记录
       const withdrawal = await strapi.entityService.create('api::qianbao-tixian.qianbao-tixian', {
         data: {
-          yonghu: userId,
+          user: userId,
           amount: amountStr,  // 使用string类型
           to_address: toAddress,
           status: 'pending',
@@ -80,11 +80,11 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
 
       // 返还用户余额（addBalance内部已经处理事务）
       await strapi.service('api::qianbao-yue.qianbao-yue').addBalance(
-        (withdrawal as any).yonghu.id,
+        (withdrawal as any).user.id,
         (withdrawal as any).amount.toString()
       );
 
-      console.log(`💰 提现失败，余额已返还: ID=${withdrawId}, 用户=${(withdrawal as any).yonghu.id}, 金额=${(withdrawal as any).amount}`);
+      console.log(`💰 提现失败，余额已返还: ID=${withdrawId}, 用户=${(withdrawal as any).user.id}, 金额=${(withdrawal as any).amount}`);
 
       return withdrawal;
     } catch (error) {
@@ -97,10 +97,10 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
   async getUserWithdrawals(userId: number, limit: number = 20, offset: number = 0) {
     try {
       const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
-        filters: { yonghu: userId } as any,
+        filters: { user: userId } as any,
         sort: { createdAt: 'desc' },
         pagination: { limit, start: offset },
-        populate: ['yonghu'],
+        populate: ['user'] as any,
       });
 
       return withdrawals;
@@ -116,7 +116,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
       const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
         filters: { status: 'pending' } as any,
         sort: { createdAt: 'asc' },
-        populate: ['yonghu'],
+        populate: ['user'] as any,
       });
 
       return withdrawals;
@@ -132,7 +132,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
       const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
         filters: { status: 'processing' } as any,
         sort: { createdAt: 'asc' },
-        populate: ['yonghu'],
+        populate: ['user'] as any,
       });
 
       return withdrawals;
@@ -158,7 +158,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
         data: { status: 'processing' } as any
       });
 
-      console.log(`📡 提现已广播: ID=${withdrawId}, 用户=${(withdrawal as any).yonghu.id}, 金额=${(withdrawal as any).amount}`);
+      console.log(`📡 提现已广播: ID=${withdrawId}, 用户=${(withdrawal as any).user.id}, 金额=${(withdrawal as any).amount}`);
 
       return withdrawal;
     } catch (error) {

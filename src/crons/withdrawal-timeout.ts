@@ -1,67 +1,75 @@
 export default {
-  // 每10分钟执行一次
-  cron: '*/10 * * * *',
-  
+  cron: '0 */6 * * *', // 每6小时执行一次
   async handler({ strapi }) {
     try {
-      console.log('开始执行提现超时检查任务...');
+      console.log('🕐 开始执行提现超时检查...');
+
+      // 查找所有超过24小时的待处理提现
+      const timeoutDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
       
-      // 计算30分钟前的时间
-      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-      
-      // 查找broadcasted状态超过30分钟的提现记录
-      const timeoutWithdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
+      const overdueWithdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
         filters: {
-          status: 'processing',
-          updatedAt: {
-            $lt: thirtyMinutesAgo
+          status: 'pending',
+          createdAt: {
+            $lt: timeoutDate
           }
-        },
-        populate: ['yonghu']
+        } as any,
+        populate: ['user']
       });
 
-      console.log(`找到 ${timeoutWithdrawals.length} 条超时提现记录`);
+      console.log(`📊 找到 ${overdueWithdrawals.length} 个超时提现`);
 
-      let failedCount = 0;
-      
-      // 处理每条超时记录
-      for (const withdrawal of timeoutWithdrawals) {
+      for (const withdrawal of overdueWithdrawals) {
         try {
-          // 更新状态为失败
+          console.log(`⏰ 处理超时提现: ID=${withdrawal.id}, 用户=${(withdrawal as any).user?.id}, 金额=${withdrawal.amount}`);
+
+          // 更新提现状态为失败
           await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian', withdrawal.id, {
-            data: { status: 'failed' }
+            data: {
+              status: 'failed'
+            } as any
           });
 
-          // 返还用户余额
-          await strapi.service('api::qianbao-yue.qianbao-yue').addBalance(
-            (withdrawal as any).yonghu.id, 
-            (withdrawal as any).amount.toString()
-          );
+          // 退还用户余额
+          const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
+            filters: { user: (withdrawal as any).user?.id } as any
+          });
+          
+          if (wallets.length > 0) {
+            const wallet = wallets[0];
+            const currentBalance = parseFloat(wallet.usdtYue || '0');
+            const refundAmount = parseFloat(withdrawal.amount);
+            const newBalance = currentBalance + refundAmount;
 
-          failedCount++;
-          console.log(`提现超时处理成功: ID=${withdrawal.id}, 用户=${(withdrawal as any).yonghu.id}, 金额=${(withdrawal as any).amount}`);
+            await strapi.entityService.update('api::qianbao-yue.qianbao-yue', wallet.id, {
+              data: {
+                usdtYue: newBalance.toString()
+              }
+            });
+
+            console.log(`💰 已退还余额: 用户=${(withdrawal as any).user?.id}, 金额=${refundAmount}, 新余额=${newBalance}`);
+          }
+
+          // 发送通知给用户
+          try {
+            await strapi.service('api::notification.notification').sendInAppMessage(
+              (withdrawal as any).user?.id,
+              '提现超时',
+              `您的提现申请已超时，金额 ${withdrawal.amount} USDT 已退还到您的钱包`,
+              'warning'
+            );
+          } catch (notifyError) {
+            console.error('发送通知失败:', notifyError);
+          }
+
         } catch (error) {
-          console.error(`处理超时提现失败: ID=${withdrawal.id}, 错误=${error instanceof Error ? error.message : '未知错误'}`);
+          console.error(`❌ 处理超时提现失败: ID=${withdrawal.id}`, error);
         }
       }
 
-      console.log(`提现超时检查任务完成: 成功处理 ${failedCount} 条记录`);
-      
-      // 返回处理结果
-      return {
-        success: true,
-        totalFound: timeoutWithdrawals.length,
-        processedCount: failedCount,
-        timestamp: new Date().toISOString()
-      };
-      
+      console.log('✅ 提现超时检查完成');
     } catch (error) {
-      console.error('提现超时检查任务执行失败:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : '未知错误',
-        timestamp: new Date().toISOString()
-      };
+      console.error('❌ 提现超时检查失败:', error);
     }
   }
 }; 

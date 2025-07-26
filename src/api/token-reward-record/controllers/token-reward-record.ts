@@ -50,15 +50,15 @@ export default factories.createCoreController(
             user: userId,
             token: tokenId,
             amount: amount.toString(),
-            reason: reason || '系统赠送',
-            type: type, // reward, invite, investment, etc.
-            status: 'completed'
-          }
+            usdtValue: '0',
+            tokenPrice: '0',
+            createdAt: new Date()
+          } as any
         });
 
         // 更新用户钱包中的代币余额
         const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-          filters: { yonghu: userId }
+          filters: { user: userId } as any
         });
         
         let wallet = wallets[0];
@@ -69,13 +69,13 @@ export default factories.createCoreController(
               usdtYue: '0',
               aiYue: '0',
               aiTokenBalances: '{}',
-              yonghu: userId
-            }
+              user: userId
+            } as any
           });
         }
 
         // 更新代币余额
-        const currentBalances = JSON.parse(wallet.aiTokenBalances || '{}');
+        const currentBalances = JSON.parse(String(wallet.aiTokenBalances || '{}'));
         const currentBalance = new Decimal(currentBalances[tokenId] || 0);
         const newBalance = currentBalance.plus(amount);
         currentBalances[tokenId] = newBalance.toString();
@@ -150,17 +150,17 @@ export default factories.createCoreController(
             user: userId,
             token: tokenId,
             amount: tokenAmount.toFixed(8),
-            usdt_value: usdtValue,
-            token_price: tokenPrice,
+            usdtValue: usdtValue,
+            tokenPrice: tokenPrice,
             reason: reason || 'USDT价值赠送',
             type: type,
             status: 'completed'
-          }
+          } as any
         });
 
         // 更新用户钱包中的代币余额
         const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-          filters: { yonghu: userId }
+          filters: { user: userId }
         });
         
         let wallet = wallets[0];
@@ -171,13 +171,13 @@ export default factories.createCoreController(
               usdtYue: '0',
               aiYue: '0',
               aiTokenBalances: '{}',
-              yonghu: userId
+              user: userId
             }
           });
         }
 
         // 更新代币余额
-        const currentBalances = JSON.parse(wallet.aiTokenBalances || '{}');
+        const currentBalances = JSON.parse(String(wallet.aiTokenBalances || '{}'));
         const currentBalance = new Decimal(currentBalances[tokenId] || 0);
         const newBalance = currentBalance.plus(tokenAmount);
         currentBalances[tokenId] = newBalance.toFixed(8);
@@ -288,17 +288,17 @@ export default factories.createCoreController(
                 user: userId,
                 token: tokenId,
                 amount: tokenAmount.toFixed(8),
-                usdt_value: usdtValue,
-                token_price: tokenPrice,
+                usdtValue: usdtValue,
+                tokenPrice: tokenPrice,
                 reason: reason || '批量USDT价值赠送',
                 type: type,
                 status: 'completed'
-              }
+              } as any
             });
 
             // 更新用户钱包
             const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-              filters: { yonghu: userId }
+              filters: { user: userId }
             });
             
             let wallet = wallets[0];
@@ -308,13 +308,13 @@ export default factories.createCoreController(
                   usdtYue: '0',
                   aiYue: '0',
                   aiTokenBalances: '{}',
-                  yonghu: userId
+                  user: userId
                 }
               });
             }
 
             // 更新代币余额
-            const currentBalances = JSON.parse(wallet.aiTokenBalances || '{}');
+            const currentBalances = JSON.parse(String(wallet.aiTokenBalances || '{}'));
             const currentBalance = new Decimal(currentBalances[tokenId] || 0);
             const newBalance = currentBalance.plus(tokenAmount);
             currentBalances[tokenId] = newBalance.toFixed(8);
@@ -411,12 +411,12 @@ export default factories.createCoreController(
                 reason: reason || '批量赠送',
                 type: type,
                 status: 'completed'
-              }
+              } as any
             });
 
             // 更新用户钱包
             const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-              filters: { yonghu: userId }
+              filters: { user: userId }
             });
             
             let wallet = wallets[0];
@@ -426,13 +426,13 @@ export default factories.createCoreController(
                   usdtYue: '0',
                   aiYue: '0',
                   aiTokenBalances: '{}',
-                  yonghu: userId
+                  user: userId
                 }
               });
             }
 
             // 更新代币余额
-            const currentBalances = JSON.parse(wallet.aiTokenBalances || '{}');
+            const currentBalances = JSON.parse(String(wallet.aiTokenBalances || '{}'));
             const currentBalance = new Decimal(currentBalances[tokenId] || 0);
             const newBalance = currentBalance.plus(amount);
             currentBalances[tokenId] = newBalance.toString();

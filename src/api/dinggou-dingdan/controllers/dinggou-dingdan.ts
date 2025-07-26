@@ -48,14 +48,14 @@ export default factories.createCoreController(
         const order = await strapi.entityService.findOne(
           'api::dinggou-dingdan.dinggou-dingdan',
           Number(id),
-          { populate: ['yonghu'] }
+          { populate: ['user'] }
         ) as any;
         
         if (!order) {
           return ctx.notFound('订单不存在');
         }
         
-        if (order.yonghu.id !== userId) {
+        if (order.user.id !== userId) {
           return ctx.forbidden('无权操作此订单');
         }
         
@@ -77,5 +77,55 @@ export default factories.createCoreController(
         ctx.throw(500, errorMessage);
       }
     },
+
+    // 获取我的投资订单
+    async getMyInvestments(ctx) {
+      try {
+        const userId = ctx.state.user.id;
+        const { page = 1, pageSize = 10 } = ctx.query;
+        
+        const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
+          filters: { user: userId },
+          sort: { createdAt: 'desc' },
+          populate: ['user'],
+          pagination: {
+            page: parseInt(String(page)),
+            pageSize: parseInt(String(pageSize))
+          }
+        });
+        
+        ctx.body = {
+          data: orders
+        };
+      } catch (error) {
+        ctx.throw(500, error.message);
+      }
+    },
+
+    // 获取订单详情
+    async getOrderDetails(ctx) {
+      try {
+        const { id } = ctx.params;
+        const userId = ctx.state.user.id;
+        
+        const order = await strapi.entityService.findOne('api::dinggou-dingdan.dinggou-dingdan', id, {
+          populate: ['user']
+        });
+        
+        if (!order) {
+          return ctx.notFound('订单不存在');
+        }
+        
+        if ((order as any).user.id !== userId) {
+          return ctx.forbidden('无权查看此订单');
+        }
+        
+        ctx.body = {
+          data: order
+        };
+      } catch (error) {
+        ctx.throw(500, error.message);
+      }
+    }
   })
 ); 

@@ -4,7 +4,7 @@ const DingdanSchema = {
   info: { singularName: 'dinggou-dingdan', pluralName: 'dinggou-dingdans', displayName: '认购订单' },
   options: { draftAndPublish: false },
   attributes: {
-    yonghu        : { type: 'relation', relation: 'manyToOne', target: 'plugin::users-permissions.user' },
+    user        : { type: 'relation', relation: 'manyToOne', target: 'plugin::users-permissions.user' },
     jihua         : { type: 'relation', relation: 'manyToOne', target: 'api::dinggou-jihua.dinggou-jihua', inversedBy: 'dingdanList' },
     jiangli       : { type: 'relation', relation: 'oneToOne', target: 'api::yaoqing-jiangli.yaoqing-jiangli' },
     // 标准字段名
