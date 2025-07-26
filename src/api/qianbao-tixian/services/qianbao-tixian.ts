@@ -97,7 +97,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
   async getUserWithdrawals(userId: number, limit: number = 20, offset: number = 0) {
     try {
       const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
-        filters: { yonghu: userId },
+        filters: { yonghu: userId } as any,
         sort: { createdAt: 'desc' },
         pagination: { limit, start: offset },
         populate: ['yonghu'],
