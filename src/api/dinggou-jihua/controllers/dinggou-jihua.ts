@@ -2,136 +2,67 @@ import { factories } from '@strapi/strapi';
 import Decimal from 'decimal.js';
 
 export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua', ({ strapi }) => ({
-  // 继承默认的CRUD操作
-
-  // 获取活跃的投资计划
-  async getActivePlans(ctx) {
-    try {
-      const plans = await strapi.entityService.findMany('api::dinggou-jihua.dinggou-jihua', {
-        filters: { status: 'active' },
-        sort: { createdAt: 'desc' }
-      });
-      
-      ctx.body = { data: plans };
-    } catch (error) {
-      ctx.throw(500, error.message);
-    }
-  },
-
-  // 创建投资计划
-  async createPlan(ctx) {
-    try {
-      const { data } = ctx.request.body;
-      
-      if (!data) {
-        return ctx.badRequest('缺少data字段');
-      }
-
-      const { name, amount, yield_rate, cycle_days, max_slots, description } = data;
-
-      if (!name || !amount || !yield_rate || !cycle_days) {
-        return ctx.badRequest('缺少必要字段');
-      }
-
-      const plan = await strapi.entityService.create('api::dinggou-jihua.dinggou-jihua', {
-        data: {
-          name,
-          amount,
-          yield_rate,
-          cycle_days,
-          max_slots: max_slots || 100,
-          current_slots: 0,
-          status: 'active',
-          description: description || ''
-        }
-      });
-
-      ctx.body = { data: plan };
-    } catch (error) {
-      ctx.throw(500, error.message);
-    }
-  },
-
   // 投资认购计划
   async invest(ctx) {
     try {
       const { planId } = ctx.params;
-      const { investmentAmount } = ctx.request.body;
+      const { amount } = ctx.request.body;
       const userId = ctx.state.user.id;
 
-      if (!investmentAmount) {
-        return ctx.badRequest('缺少投资金额');
+      // 验证投资金额
+      if (!amount || parseFloat(amount) <= 0) {
+        return ctx.badRequest('投资金额必须大于0');
       }
 
-      // 验证投资计划
+      // 获取计划信息
       const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
-        return ctx.notFound('投资计划不存在');
+        return ctx.notFound('认购计划不存在');
       }
 
-      if (plan.status !== 'active') {
-        return ctx.badRequest('投资计划已关闭');
+      // 检查计划状态
+      if (!(plan as any).kaiqi) {
+        return ctx.badRequest('认购计划已暂停');
       }
 
-      if (plan.current_slots >= plan.max_slots) {
-        return ctx.badRequest('投资计划已满额');
-      }
-
-      // 验证用户钱包余额
-      const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
+      // 检查用户钱包余额
+      const wallet = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
         filters: { yonghu: userId }
       });
-      
-      let wallet = wallets[0];
-      if (!wallet) {
+
+      if (!wallet || wallet.length === 0) {
         return ctx.badRequest('用户钱包不存在');
       }
 
-      const walletBalance = new Decimal(wallet.usdtYue || 0);
-      const investmentAmountDecimal = new Decimal(investmentAmount);
-      
-      if (walletBalance.lessThan(investmentAmountDecimal)) {
+      const userWallet = wallet[0];
+      const investmentAmount = new Decimal(amount);
+      const walletBalance = new Decimal((userWallet as any).usdtYue || 0);
+
+      if (walletBalance.lessThan(investmentAmount)) {
         return ctx.badRequest('钱包余额不足');
       }
-
-      // 扣除钱包余额
-      const newBalance = walletBalance.minus(investmentAmountDecimal);
-      await strapi.entityService.update('api::qianbao-yue.qianbao-yue', wallet.id, {
-        data: {
-          usdtYue: newBalance.toString()
-        }
-      });
 
       // 创建投资订单
       const order = await strapi.entityService.create('api::dinggou-dingdan.dinggou-dingdan', {
         data: {
-          jihua: planId,
           yonghu: userId,
-          touziJinE: investmentAmount,
-          zhuangtai: 'active',
-          touziShiJian: new Date(),
-          jieshuShiJian: new Date(Date.now() + plan.cycle_days * 24 * 60 * 60 * 1000),
-          yuJiShouYi: new Decimal(investmentAmount).mul(plan.yield_rate).toString()
-        }
+          jihua: planId,
+          amount: investmentAmount.toString(),
+          principal: investmentAmount.toString(),
+          yield_rate: (plan as any).jingtaiBili,
+          cycle_days: (plan as any).zhouQiTian,
+          start_at: new Date(),
+          end_at: new Date(Date.now() + (plan as any).zhouQiTian * 24 * 60 * 60 * 1000),
+          status: 'pending'
+        } as any
       });
 
-      // 更新计划当前投资人数
-      await strapi.entityService.update('api::dinggou-jihua.dinggou-jihua', planId, {
+      // 扣除钱包余额
+      await strapi.entityService.update('api::qianbao-yue.qianbao-yue', userWallet.id, {
         data: {
-          current_slots: plan.current_slots + 1
-        }
+          usdtYue: walletBalance.minus(investmentAmount).toString()
+        } as any
       });
-
-      // 发送投资成功通知
-      try {
-        await strapi.service('api::notification.notification').notifyInvestmentSuccess(
-          userId,
-          order.id,
-          investmentAmount
-        );
-      } catch (notifyError) {
-        console.error('发送通知失败:', notifyError);
-      }
 
       ctx.body = {
         success: true,
@@ -150,74 +81,86 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const { orderId } = ctx.params;
       const userId = ctx.state.user.id;
 
-      // 查找投资订单
+      // 获取订单信息
       const order = await strapi.entityService.findOne('api::dinggou-dingdan.dinggou-dingdan', orderId, {
-        populate: ['jihua']
+        populate: ['yonghu', 'jihua']
       });
 
       if (!order) {
-        return ctx.notFound('投资订单不存在');
+        return ctx.notFound('订单不存在');
       }
 
-      if (order.yonghu !== userId) {
+      // 验证订单所有者
+      if ((order as any).yonghu.id !== userId) {
         return ctx.forbidden('无权操作此订单');
       }
 
-      if (order.zhuangtai !== 'redeemable') {
-        return ctx.badRequest('订单尚未到期，无法赎回');
+      // 检查订单状态
+      if ((order as any).status !== 'finished') {
+        return ctx.badRequest('订单尚未完成，无法赎回');
       }
 
       // 计算收益
-      const investmentAmount = new Decimal(order.touziJinE);
-      const yieldRate = new Decimal(order.jihua.yield_rate);
-      const totalReturn = investmentAmount.mul(yieldRate).plus(investmentAmount);
+      const investmentAmount = new Decimal((order as any).amount);
+      const yieldRate = new Decimal((order as any).jihua.jingtaiBili);
+      const cycleDays = (order as any).cycle_days;
+      
+      // 计算静态收益
+      const staticYield = investmentAmount.mul(yieldRate).mul(cycleDays).div(365);
+      
+      // 计算AI代币收益（如果有）
+      const aiTokenYield = new Decimal(0); // 这里可以根据实际AI代币逻辑计算
+      
+      const totalYield = staticYield.plus(aiTokenYield);
+      const totalPayout = investmentAmount.plus(totalYield);
 
-      // 更新用户钱包
-      const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
+      // 更新钱包余额
+      const wallet = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
         filters: { yonghu: userId }
       });
-      
-      let wallet = wallets[0];
-      if (!wallet) {
-        return ctx.badRequest('用户钱包不存在');
+
+      if (wallet && wallet.length > 0) {
+        const userWallet = wallet[0];
+        const currentBalance = new Decimal((userWallet as any).usdtYue || 0);
+        
+        await strapi.entityService.update('api::qianbao-yue.qianbao-yue', userWallet.id, {
+          data: {
+            usdtYue: currentBalance.plus(totalPayout).toString()
+          } as any
+        });
       }
-
-      const currentBalance = new Decimal(wallet.usdtYue || 0);
-      const newBalance = currentBalance.plus(totalReturn);
-
-      await strapi.entityService.update('api::qianbao-yue.qianbao-yue', wallet.id, {
-        data: {
-          usdtYue: newBalance.toString()
-        }
-      });
 
       // 更新订单状态
       await strapi.entityService.update('api::dinggou-dingdan.dinggou-dingdan', orderId, {
         data: {
-          zhuangtai: 'completed',
-          shouYi: totalReturn.minus(investmentAmount).toString(),
-          huiShouShiJian: new Date()
-        }
+          status: 'completed',
+          redeemed_at: new Date(),
+          payout_amount: totalPayout.toString()
+        } as any
       });
 
-      // 发送赎回成功通知
-      try {
-        await strapi.service('api::notification.notification').sendInAppMessage(
-          userId,
-          '投资赎回成功',
-          `您的投资已赎回，获得收益：${totalReturn.minus(investmentAmount)} USDT`,
-          'success'
-        );
-      } catch (notifyError) {
-        console.error('发送通知失败:', notifyError);
+      // 创建AI代币奖励记录（如果有AI代币收益）
+      if (aiTokenYield.greaterThan(0)) {
+        await strapi.service('api::token-reward-record.token-reward-record').create({
+          data: {
+            yonghu: userId,
+            token_type: 'ai_token',
+            amount: aiTokenYield.toString(),
+            reason: '投资赎回AI代币奖励',
+            status: 'completed'
+          }
+        });
       }
 
       ctx.body = {
         success: true,
         data: {
-          order: order,
-          totalReturn: totalReturn.toString(),
-          profit: totalReturn.minus(investmentAmount).toString()
+          orderId,
+          investmentAmount: investmentAmount.toString(),
+          staticYield: staticYield.toString(),
+          aiTokenYield: aiTokenYield.toString(),
+          totalYield: totalYield.toString(),
+          totalPayout: totalPayout.toString()
         },
         message: '赎回成功'
       };
@@ -227,44 +170,53 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
     }
   },
 
-  // 获取投资计划统计
+  // 获取计划统计信息
   async getPlanStats(ctx) {
     try {
       const { planId } = ctx.params;
 
+      // 获取计划信息
       const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
-        return ctx.notFound('投资计划不存在');
+        return ctx.notFound('认购计划不存在');
       }
 
       // 获取该计划的所有订单
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { jihua: planId }
+        filters: { jihua: planId },
+        populate: ['yonghu']
       });
 
+      // 计算统计数据
       const totalInvestment = orders.reduce((sum, order) => {
-        return sum + parseFloat(order.touziJinE || 0);
+        return sum + parseFloat((order as any).amount || 0);
       }, 0);
 
-      const activeOrders = orders.filter(order => order.zhuangtai === 'active');
-      const completedOrders = orders.filter(order => order.zhuangtai === 'completed');
+      const activeOrders = orders.filter(order => (order as any).status === 'active');
+      const completedOrders = orders.filter(order => (order as any).status === 'completed');
 
-      const totalProfit = completedOrders.reduce((sum, order) => {
-        return sum + parseFloat(order.shouYi || 0);
+      const totalYield = completedOrders.reduce((sum, order) => {
+        return sum + parseFloat((order as any).payout_amount || 0);
       }, 0);
 
       ctx.body = {
+        success: true,
         data: {
-          plan: plan,
+          planId,
+          planName: (plan as any).jihuaCode,
           totalInvestment,
-          totalOrders: orders.length,
-          activeOrders: activeOrders.length,
-          completedOrders: completedOrders.length,
-          totalProfit
+          totalParticipants: orders.length,
+          activeParticipants: activeOrders.length,
+          completedParticipants: completedOrders.length,
+          totalYield,
+          maxSlots: 100, // 默认值
+          currentSlots: orders.length,
+          availableSlots: 100 - orders.length
         }
       };
     } catch (error) {
-      ctx.throw(500, error.message);
+      console.error('获取计划统计失败:', error);
+      ctx.throw(500, `获取计划统计失败: ${error.message}`);
     }
   },
 
@@ -272,68 +224,78 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
   async getMyInvestments(ctx) {
     try {
       const userId = ctx.state.user.id;
+      const { page = 1, pageSize = 10 } = ctx.query;
 
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
         filters: { yonghu: userId },
-        sort: { createdAt: 'desc' },
-        populate: ['jihua']
+        populate: ['jihua'],
+        pagination: {
+          page: parseInt(page),
+          pageSize: parseInt(pageSize)
+        },
+        sort: { createdAt: 'desc' }
       });
 
       ctx.body = {
-        data: orders
+        success: true,
+        data: orders,
+        pagination: {
+          page: parseInt(page),
+          pageSize: parseInt(pageSize),
+          total: orders.length
+        }
       };
     } catch (error) {
-      ctx.throw(500, error.message);
+      console.error('获取我的投资失败:', error);
+      ctx.throw(500, `获取我的投资失败: ${error.message}`);
     }
   },
 
-  // 赠送AI代币给计划参与者
+  // 批量给计划参与者赠送AI代币
   async giveTokenToPlanParticipants(ctx) {
     try {
       const { planId } = ctx.params;
       const { tokenId, amount, reason = '计划奖励' } = ctx.request.body;
 
+      // 验证参数
       if (!tokenId || !amount) {
-        return ctx.badRequest('缺少必要参数');
+        return ctx.badRequest('代币ID和数量不能为空');
       }
 
-      // 验证投资计划
+      // 获取计划信息
       const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
-        return ctx.notFound('投资计划不存在');
+        return ctx.notFound('认购计划不存在');
       }
 
-      // 获取该计划的所有参与者
+      // 获取该计划的所有订单
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
         filters: { jihua: planId },
         populate: ['yonghu']
       });
 
       const results = [];
-      
       for (const order of orders) {
         try {
-          // 使用AI代币赠送服务
           await strapi.service('api::token-reward-record.token-reward-record').giveTokenReward({
-            userId: order.yonghu.id,
+            userId: (order as any).yonghu.id,
             tokenId: tokenId,
             amount: amount,
-            reason: `${reason} - 计划: ${plan.name}`,
+            reason: `${reason} - 计划: ${(plan as any).jihuaCode}`,
             type: 'plan_reward'
           });
-
-          results.push({
-            userId: order.yonghu.id,
-            username: order.yonghu.username,
-            success: true,
-            message: '赠送成功'
+          results.push({ 
+            userId: (order as any).yonghu.id, 
+            username: String((order as any).yonghu.username), 
+            success: true, 
+            message: '赠送成功' 
           });
         } catch (error) {
-          results.push({
-            userId: order.yonghu.id,
-            username: order.yonghu.username,
-            success: false,
-            error: error.message
+          results.push({ 
+            userId: (order as any).yonghu.id, 
+            username: String((order as any).yonghu.username), 
+            success: false, 
+            error: error.message 
           });
         }
       }
@@ -342,7 +304,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
         success: true,
         data: {
           planId,
-          planName: plan.name,
+          planName: (plan as any).jihuaCode,
           totalParticipants: orders.length,
           results
         },
@@ -354,53 +316,51 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
     }
   },
 
-  // 赠送抽奖次数给计划参与者
+  // 批量给计划参与者赠送抽奖次数
   async giveLotteryChancesToPlanParticipants(ctx) {
     try {
       const { planId } = ctx.params;
-      const { jiangpinId, count = 1, reason = '计划奖励' } = ctx.request.body;
+      const { jiangpinId, count, reason = '计划奖励' } = ctx.request.body;
 
+      // 验证参数
       if (!jiangpinId || !count) {
-        return ctx.badRequest('缺少必要参数');
+        return ctx.badRequest('奖品ID和数量不能为空');
       }
 
-      // 验证投资计划
+      // 获取计划信息
       const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
-        return ctx.notFound('投资计划不存在');
+        return ctx.notFound('认购计划不存在');
       }
 
-      // 获取该计划的所有参与者
+      // 获取该计划的所有订单
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
         filters: { jihua: planId },
         populate: ['yonghu']
       });
 
       const results = [];
-      
       for (const order of orders) {
         try {
-          // 使用抽奖机会赠送服务
           await strapi.service('api::choujiang-jihui.choujiang-jihui').giveChance({
-            userId: order.yonghu.id,
+            userId: (order as any).yonghu.id,
             jiangpinId: jiangpinId,
             count: count,
-            reason: `${reason} - 计划: ${plan.name}`,
+            reason: `${reason} - 计划: ${(plan as any).jihuaCode}`,
             type: 'plan_reward'
           });
-
-          results.push({
-            userId: order.yonghu.id,
-            username: order.yonghu.username,
-            success: true,
-            message: '赠送成功'
+          results.push({ 
+            userId: (order as any).yonghu.id, 
+            username: (order as any).yonghu.username, 
+            success: true, 
+            message: '赠送成功' 
           });
         } catch (error) {
-          results.push({
-            userId: order.yonghu.id,
-            username: order.yonghu.username,
-            success: false,
-            error: error.message
+          results.push({ 
+            userId: (order as any).yonghu.id, 
+            username: (order as any).yonghu.username, 
+            success: false, 
+            error: error.message 
           });
         }
       }
@@ -409,7 +369,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
         success: true,
         data: {
           planId,
-          planName: plan.name,
+          planName: (plan as any).jihuaCode,
           totalParticipants: orders.length,
           results
         },
@@ -427,40 +387,50 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const { planId } = ctx.params;
       const { page = 1, pageSize = 20 } = ctx.query;
 
-      // 验证投资计划
+      // 获取计划信息
       const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
-        return ctx.notFound('投资计划不存在');
+        return ctx.notFound('认购计划不存在');
       }
 
       // 获取该计划的参与者
-      const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
+      const participants = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
         filters: { jihua: planId },
         populate: ['yonghu'],
-        sort: { createdAt: 'desc' },
-        limit: parseInt(pageSize as string),
-        offset: (parseInt(page as string) - 1) * parseInt(pageSize as string)
+        pagination: {
+          page: parseInt(page),
+          pageSize: parseInt(pageSize)
+        },
+        sort: { createdAt: 'desc' }
       });
 
-      const total = await strapi.entityService.count('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { jihua: planId }
-      });
+      // 格式化参与者信息
+      const formattedParticipants = participants.map(order => ({
+        userId: (order as any).yonghu.id,
+        username: (order as any).yonghu.username,
+        email: (order as any).yonghu.email,
+        investmentAmount: (order as any).amount,
+        investmentDate: (order as any).createdAt,
+        status: (order as any).status,
+        orderId: order.id
+      }));
 
       ctx.body = {
         success: true,
         data: {
-          plan: plan,
-          participants: orders,
+          planId,
+          planName: (plan as any).jihuaCode,
+          participants: formattedParticipants,
           pagination: {
-            page: parseInt(page as string),
-            pageSize: parseInt(pageSize as string),
-            total,
-            totalPages: Math.ceil(total / parseInt(pageSize as string))
+            page: parseInt(page),
+            pageSize: parseInt(pageSize),
+            total: participants.length
           }
         }
       };
     } catch (error) {
-      ctx.throw(500, error.message);
+      console.error('获取参与者列表失败:', error);
+      ctx.throw(500, `获取参与者列表失败: ${error.message}`);
     }
   }
 })); 
