@@ -160,7 +160,7 @@ async function calculateBusinessMetrics(strapi: any, startTime: Date, endTime: D
         $gte: startTime,
         $lte: endTime
       },
-      zhuangtai: 'success'
+      status: 'completed'
     }
   });
   
@@ -171,7 +171,7 @@ async function calculateBusinessMetrics(strapi: any, startTime: Date, endTime: D
         $gte: startTime,
         $lte: endTime
       },
-      zhuangtai: 'success'
+      status: 'completed'
     }
   });
   

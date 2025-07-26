@@ -21,7 +21,7 @@ export default factories.createCoreService('api::dinggou-dingdan.dinggou-dingdan
           throw new Error('投资计划不存在');
         }
         
-        if (!jihua.kaiqi) {
+        if (!(jihua as any).kaiqi) {
           throw new Error('该投资计划已关闭');
         }
 
@@ -123,7 +123,7 @@ export default factories.createCoreService('api::dinggou-dingdan.dinggou-dingdan
       // 如果订单状态是 running 但已过期，自动标记为 finished
       if (order.status === 'running' && isOrderExpired && !force && !testMode) {
         await strapi.entityService.update('api::dinggou-dingdan.dinggou-dingdan', orderId, {
-          data: { status: 'finished' }
+          data: { status: 'finished' } as any
         });
         throw new Error('订单已到期，请重新点击赎回');
       }
@@ -144,16 +144,16 @@ export default factories.createCoreService('api::dinggou-dingdan.dinggou-dingdan
       
       if (isOrderExpired || force || testMode) {
         // 正常到期或强制赎回：按计划比例计算
-        staticUSDT = new Decimal(order.amount).mul(jihua.jingtaiBili).div(100).toFixed(2);
-        aiQty = new Decimal(order.amount).mul(jihua.aiBili).div(100).toFixed(8);
+        staticUSDT = new Decimal(order.amount).mul((jihua as any).jingtaiBili).div(100).toFixed(2);
+        aiQty = new Decimal(order.amount).mul((jihua as any).aiBili).div(100).toFixed(8);
       } else {
         // 未到期赎回：按实际时间比例计算
         const totalMs = endTime.getTime() - startTime.getTime();
         const actualMs = now.getTime() - startTime.getTime();
         const ratio = Math.max(0, actualMs / totalMs);
         
-        staticUSDT = new Decimal(order.amount).mul(jihua.jingtaiBili).div(100).mul(ratio).toFixed(2);
-        aiQty = new Decimal(order.amount).mul(jihua.aiBili).div(100).mul(ratio).toFixed(8);
+        staticUSDT = new Decimal(order.amount).mul((jihua as any).jingtaiBili).div(100).mul(ratio).toFixed(2);
+        aiQty = new Decimal(order.amount).mul((jihua as any).aiBili).div(100).mul(ratio).toFixed(8);
       }
 
       // AI代币相关变量
@@ -175,7 +175,7 @@ export default factories.createCoreService('api::dinggou-dingdan.dinggou-dingdan
               tokenPrice = await strapi.service('api::ai-token.ai-token').getTokenPrice(selectedToken.id);
               
               // 计算AI代币数量和USDT价值
-              aiUsdtValue = new Decimal(order.amount).mul(jihua.aiBili).div(100).toFixed(2);
+              aiUsdtValue = new Decimal(order.amount).mul((jihua as any).aiBili).div(100).toFixed(2);
               aiTokenAmount = new Decimal(aiUsdtValue).div(tokenPrice).toFixed(8);
             } catch (tokenError) {
               console.error('AI代币处理失败:', tokenError);

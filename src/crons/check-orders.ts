@@ -16,12 +16,12 @@ export default {
           'api::dinggou-dingdan.dinggou-dingdan',
           {
             filters: { 
-              zhuangtai: 'active', 
-              jieshuShiJian: { $lte: new Date() } 
-            },
+              status: 'active', 
+              end_at: { $lte: new Date() } 
+            } as any,
             start: offset,
             limit: batchSize,
-            sort: { jieshuShiJian: 'asc' }
+            sort: { end_at: 'asc' }
           }
         );
         
@@ -38,7 +38,7 @@ export default {
             await strapi.entityService.update(
               'api::dinggou-dingdan.dinggou-dingdan',
               order.id,
-              { data: { zhuangtai: 'redeemable' } }
+              { data: { status: 'redeemable' } as any }
             );
             console.log(`✅ 订单 ${order.id} 已标记为可赎回状态`);
             totalProcessed++;

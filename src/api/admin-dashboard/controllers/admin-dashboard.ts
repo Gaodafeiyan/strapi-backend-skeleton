@@ -39,11 +39,11 @@ async function getOrderStats(strapi: any) {
   });
   
   const pendingOrders = await strapi.db.query('api::dinggou-dingdan.dinggou-dingdan').count({
-    where: { zhuangtai: 'pending' }
+    where: { status: 'pending' }
   });
   
   const runningOrders = await strapi.db.query('api::dinggou-dingdan.dinggou-dingdan').count({
-    where: { zhuangtai: 'running' }
+    where: { status: 'running' }
   });
 
   return {
@@ -71,7 +71,7 @@ async function getFinancialStats(strapi: any) {
       createdAt: {
         $gte: new Date(new Date().setHours(0, 0, 0, 0))
       },
-      zhuangtai: 'success'
+      status: 'success'
     }
   });
   
@@ -81,7 +81,7 @@ async function getFinancialStats(strapi: any) {
       createdAt: {
         $gte: new Date(new Date().setHours(0, 0, 0, 0))
       },
-      zhuangtai: 'success'
+      status: 'success'
     }
   });
 
@@ -152,7 +152,7 @@ async function getRecentActivities(strapi: any) {
   
   // 最近的订单
   const recentOrders = await strapi.db.query('api::dinggou-dingdan.dinggou-dingdan').findMany({
-    select: ['id', 'benjinUSDT', 'zhuangtai', 'createdAt'],
+    select: ['id', 'benjinUSDT', 'status', 'createdAt'],
     populate: ['yonghu'],
     orderBy: { createdAt: 'desc' },
     limit: 5
@@ -289,7 +289,7 @@ export default factories.createCoreController('api::admin-dashboard.admin-dashbo
       const filters: any = {};
       
       if (status) {
-        filters.zhuangtai = status;
+        filters.status = status;
       }
       
       if (userId) {
@@ -298,7 +298,7 @@ export default factories.createCoreController('api::admin-dashboard.admin-dashbo
       
       const orders = await strapi.db.query('api::dinggou-dingdan.dinggou-dingdan').findMany({
         where: filters,
-        select: ['id', 'benjinUSDT', 'zhuangtai', 'createdAt', 'jingtaiShouyi', 'aiShuliang'],
+        select: ['id', 'benjinUSDT', 'status', 'createdAt', 'jingtaiShouyi', 'aiShuliang'],
         populate: ['yonghu', 'jihua'],
         orderBy: { createdAt: 'desc' },
         limit: parseInt(pageSize as string),
