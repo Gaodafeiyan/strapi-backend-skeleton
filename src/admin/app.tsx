@@ -10,13 +10,15 @@ export default {
   bootstrap(app: StrapiApp) {
     console.log('Strapi Admin App Bootstrap');
     
+    // 暂时注释掉所有自定义功能，确保基本功能正常
+    // 后续可以根据需要逐步添加
+    
     // 监听内容类型变化
-    app.subscribe((event) => {
-      if (event.type === 'ContentManager/ListView/CHANGE_LIST_LAYOUT') {
-        // 当列表视图改变时
-        console.log('List view changed');
-      }
-    });
+    // app.subscribe((event) => {
+    //   if (event.type === 'ContentManager/ListView/CHANGE_LIST_LAYOUT') {
+    //     console.log('List view changed');
+    //   }
+    // });
 
     // 添加自定义菜单项（如果需要）
     // app.addMenuLink({
