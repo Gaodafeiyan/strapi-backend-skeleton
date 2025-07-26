@@ -7,7 +7,7 @@ const YonghuLife = {
       
       // 检查是否已存在钱包
       const existingWallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-        filters: { yonghu: result.id }
+        filters: { user: result.id } as any
       });
       
       if (existingWallets.length > 0) {
@@ -21,8 +21,8 @@ const YonghuLife = {
           usdtYue: '0',
           aiYue: '0',
           aiTokenBalances: '{}',
-          yonghu: result.id
-        }
+          user: result.id
+        } as any
       });
       
       console.log('✅ 用户钱包创建成功:', {

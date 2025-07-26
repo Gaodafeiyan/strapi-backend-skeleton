@@ -27,7 +27,7 @@ export default factories.createCoreService(
         }
 
         // 计算投资周期和收益
-        const { amount: planAmount, zhouQiTian } = jihua;
+        const { zhouQiTian } = jihua;
         const startTime = new Date();
         const endTime = new Date(startTime.getTime() + zhouQiTian * 24 * 60 * 60 * 1000);
 

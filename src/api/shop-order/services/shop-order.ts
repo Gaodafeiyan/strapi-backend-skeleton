@@ -35,7 +35,7 @@ export default factories.createCoreService(
       // 检查用户钱包余额
       const wallets = await strapi.entityService.findMany(
         'api::qianbao-yue.qianbao-yue',
-        { filters: { yonghu: { id: userId } } }
+        { filters: { user: { id: userId } } as any }
       ) as any[];
       
       if (!wallets || wallets.length === 0) {
@@ -143,7 +143,7 @@ export default factories.createCoreService(
       // 检查钱包余额
       const wallets = await strapi.entityService.findMany(
         'api::qianbao-yue.qianbao-yue',
-        { filters: { yonghu: { id: userId } } }
+        { filters: { user: { id: userId } } as any }
       ) as any[];
       
       if (!wallets || wallets.length === 0) {

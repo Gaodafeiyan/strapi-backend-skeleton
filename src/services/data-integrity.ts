@@ -1,7 +1,7 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreService(
-  'api::data-integrity.data-integrity',
+  'api::qianbao-yue.qianbao-yue',
   ({ strapi }) => ({
     // 检查用户数据完整性
     async checkUserDataIntegrity(userId: number) {

@@ -5,7 +5,7 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
 
   // 自定义方法可以在这里添加
   async createRecharge(ctx) {
-    const { tx_hash, amount, yonghu } = ctx.request.body;
+    const { tx_hash, amount, user } = ctx.request.body;
     
     try {
       const recharge = await strapi.entityService.create('api::qianbao-chongzhi.qianbao-chongzhi', {
@@ -13,8 +13,8 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
           tx_hash,
           amount,
           status: 'pending',
-          yonghu
-        }
+          user
+        } as any
       });
       
       ctx.body = { data: recharge };
@@ -34,13 +34,13 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
         return ctx.notFound('充值记录不存在');
       }
       
-      if (recharge.status === 'confirmed') {
+      if ((recharge as any).status === 'completed') {
         return ctx.badRequest('充值已确认');
       }
       
       // 更新状态为成功
       await strapi.entityService.update('api::qianbao-chongzhi.qianbao-chongzhi', id, {
-        data: { status: 'confirmed' }
+        data: { status: 'completed' } as any
       });
       
       ctx.body = { data: { message: '充值确认成功' } };

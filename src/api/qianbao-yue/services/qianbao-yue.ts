@@ -122,7 +122,7 @@ export default factories.createCoreService(
           });
         }
 
-        const currentBalances = JSON.parse(wallet.aiTokenBalances || '{}');
+        const currentBalances = JSON.parse(String(wallet.aiTokenBalances || '{}'));
         const currentBalance = new Decimal(currentBalances[tokenId] || '0');
         const newBalance = currentBalance.plus(amount).toString();
         currentBalances[tokenId] = newBalance;

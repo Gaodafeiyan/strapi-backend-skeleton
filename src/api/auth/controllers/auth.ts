@@ -1,5 +1,4 @@
 import { factories } from '@strapi/strapi';
-import { generateInviteCode } from '../../../../utils/invite';
 import { validateEmail, validateUsername, validatePassword, validateInviteCode, sanitizeInput } from '../../../../utils/validation';
 
 export default factories.createCoreController(
@@ -16,7 +15,7 @@ export default factories.createCoreController(
 
         // 验证邀请码
         const inviteUser = await strapi.entityService.findMany('plugin::users-permissions.user', {
-          filters: { inviteCode }
+          filters: { inviteCode } as any
         });
 
         if (inviteUser.length === 0) {

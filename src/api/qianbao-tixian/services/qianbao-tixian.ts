@@ -66,7 +66,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
   async handleWithdrawFailure(withdrawId: number) {
     try {
       const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian', withdrawId, {
-        populate: ['yonghu']
+        populate: ['user']
       });
 
       if (!withdrawal) {
@@ -146,7 +146,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
   async broadcastWithdrawal(withdrawId: number) {
     try {
       const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian', withdrawId, {
-        populate: ['yonghu']
+        populate: ['user']
       });
 
       if (!withdrawal) {
