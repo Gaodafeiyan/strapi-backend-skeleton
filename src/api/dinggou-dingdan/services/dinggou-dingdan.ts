@@ -25,7 +25,7 @@ export default factories.createCoreService('api::dinggou-dingdan.dinggou-dingdan
           throw new Error('该投资计划已关闭');
         }
 
-        const { amount, cycle_days } = jihua;
+        const { amount, zhouQiTian } = jihua;
 
         // 验证用户是否存在
         const user = await trx.query('plugin::users-permissions.user').findOne({
@@ -62,7 +62,7 @@ export default factories.createCoreService('api::dinggou-dingdan.dinggou-dingdan
 
         // ② 写订单 - 使用UTC时间
         const startTime = getCurrentUTCTime();
-        const endTime = addDays(startTime, cycle_days);
+        const endTime = addDays(startTime, zhouQiTian);
         
         const order = await trx.query('api::dinggou-dingdan.dinggou-dingdan').create({
           data: {
@@ -70,8 +70,8 @@ export default factories.createCoreService('api::dinggou-dingdan.dinggou-dingdan
             start_at: startTime,
             end_at: endTime,
             principal: amount,
-            yield_rate: jihua.yield_rate,
-            cycle_days: cycle_days,
+            yield_rate: (jihua as any).jingtaiBili,
+            cycle_days: zhouQiTian,
             yonghu: userId,
             jihua: jihuaId,
             status: 'pending',
