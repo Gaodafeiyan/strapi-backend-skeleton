@@ -1,5 +1,6 @@
 import { factories } from '@strapi/strapi';
 import Decimal from 'decimal.js';
+import { DinggouJihua, DinggouDingdan } from '../../../types/api';
 
 export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua', ({ strapi }) => ({
   // 投资认购计划
@@ -15,19 +16,19 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       }
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
 
       // 检查计划状态
-      if (!(plan as any).kaiqi) {
+      if (!plan.kaiqi) {
         return ctx.badRequest('认购计划已暂停');
       }
 
       // 检查用户钱包余额
       const wallet = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-        filters: { user: userId } as any
+        filters: { user: userId }
       });
 
       if (!wallet || wallet.length === 0) {
@@ -36,7 +37,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       const userWallet = wallet[0];
       const investmentAmount = new Decimal(amount);
-      const walletBalance = new Decimal((userWallet as any).usdtYue || 0);
+      const walletBalance = new Decimal(userWallet.usdtYue || 0);
 
       if (walletBalance.lessThan(investmentAmount)) {
         return ctx.badRequest('钱包余额不足');
@@ -49,19 +50,19 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
           jihua: planId,
           amount: investmentAmount.toString(),
           principal: investmentAmount.toString(),
-          yield_rate: (plan as any).jingtaiBili,
-          cycle_days: (plan as any).zhouQiTian,
+          yield_rate: plan.jingtaiBili,
+          cycle_days: plan.zhouQiTian,
           start_at: new Date(),
-          end_at: new Date(Date.now() + (plan as any).zhouQiTian * 24 * 60 * 60 * 1000),
+          end_at: new Date(Date.now() + plan.zhouQiTian * 24 * 60 * 60 * 1000),
           status: 'pending'
-        } as any
-      });
+        }
+      }) as DinggouDingdan;
 
       // 扣除钱包余额
       await strapi.entityService.update('api::qianbao-yue.qianbao-yue', userWallet.id, {
         data: {
           usdtYue: walletBalance.minus(investmentAmount).toString()
-        } as any
+        }
       });
 
       ctx.body = {
@@ -83,27 +84,27 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 获取订单信息
       const order = await strapi.entityService.findOne('api::dinggou-dingdan.dinggou-dingdan', orderId, {
-        populate: ['user', 'jihua'] as any
-      });
+        populate: ['user', 'jihua']
+      }) as DinggouDingdan & { user: any; jihua: DinggouJihua };
 
       if (!order) {
         return ctx.notFound('订单不存在');
       }
 
       // 验证订单所有者
-      if ((order as any).user.id !== userId) {
+      if (order.user.id !== userId) {
         return ctx.forbidden('无权操作此订单');
       }
 
       // 检查订单状态
-      if ((order as any).status !== 'finished') {
+      if (order.status !== 'finished') {
         return ctx.badRequest('订单尚未完成，无法赎回');
       }
 
       // 计算收益
-      const investmentAmount = new Decimal((order as any).amount);
-      const yieldRate = new Decimal((order as any).jihua.jingtaiBili);
-      const cycleDays = (order as any).cycle_days;
+      const investmentAmount = new Decimal(order.amount);
+      const yieldRate = new Decimal(order.jihua.jingtaiBili);
+      const cycleDays = order.cycleDays;
       
       // 计算静态收益
       const staticYield = investmentAmount.mul(yieldRate).mul(cycleDays).div(365);
@@ -116,17 +117,17 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 更新钱包余额
       const wallet = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-        filters: { user: userId } as any
+        filters: { user: userId }
       });
 
       if (wallet && wallet.length > 0) {
         const userWallet = wallet[0];
-        const currentBalance = new Decimal((userWallet as any).usdtYue || 0);
+        const currentBalance = new Decimal(userWallet.usdtYue || 0);
         
         await strapi.entityService.update('api::qianbao-yue.qianbao-yue', userWallet.id, {
           data: {
             usdtYue: currentBalance.plus(totalPayout).toString()
-          } as any
+          }
         });
       }
 
@@ -136,7 +137,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
           status: 'completed',
           redeemed_at: new Date(),
           payout_amount: totalPayout.toString()
-        } as any
+        }
       });
 
       // 创建AI代币奖励记录（如果有AI代币收益）
@@ -176,7 +177,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const { planId } = ctx.params;
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
@@ -185,25 +186,25 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
         filters: { jihua: planId },
         populate: ['user']
-      });
+      }) as (DinggouDingdan & { user: any })[];
 
       // 计算统计数据
       const totalInvestment = orders.reduce((sum, order) => {
-        return sum + parseFloat((order as any).amount || 0);
+        return sum + parseFloat(order.amount || 0);
       }, 0);
 
-      const activeOrders = orders.filter(order => (order as any).status === 'active');
-      const completedOrders = orders.filter(order => (order as any).status === 'completed');
+      const activeOrders = orders.filter(order => order.status === 'active');
+      const completedOrders = orders.filter(order => order.status === 'completed');
 
       const totalYield = completedOrders.reduce((sum, order) => {
-        return sum + parseFloat((order as any).payout_amount || 0);
+        return sum + parseFloat(order.payoutAmount || 0);
       }, 0);
 
       ctx.body = {
         success: true,
         data: {
           planId,
-          planName: (plan as any).jihuaCode,
+          planName: plan.jihuaCode,
           totalInvestment,
           totalParticipants: orders.length,
           activeParticipants: activeOrders.length,
@@ -234,7 +235,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
           pageSize: parseInt(String(pageSize))
         },
         sort: { createdAt: 'desc' }
-      });
+      }) as (DinggouDingdan & { jihua: DinggouJihua })[];
 
       ctx.body = {
         success: true,
@@ -263,7 +264,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       }
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
@@ -272,28 +273,28 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
         filters: { jihua: planId },
         populate: ['user']
-      });
+      }) as (DinggouDingdan & { user: any })[];
 
       const results = [];
       for (const order of orders) {
         try {
           await strapi.service('api::token-reward-record.token-reward-record').giveTokenReward({
-            userId: (order as any).user.id,
+            userId: order.user.id,
             tokenId: tokenId,
             amount: amount,
-            reason: `${reason} - 计划: ${(plan as any).jihuaCode}`,
+            reason: `${reason} - 计划: ${plan.jihuaCode}`,
             type: 'plan_reward'
           });
           results.push({ 
-            userId: (order as any).user.id, 
-            username: String((order as any).user.username), 
+            userId: order.user.id, 
+            username: String(order.user.username), 
             success: true, 
             message: '赠送成功' 
           });
         } catch (error) {
           results.push({ 
-            userId: (order as any).user.id, 
-            username: String((order as any).user.username), 
+            userId: order.user.id, 
+            username: String(order.user.username), 
             success: false, 
             error: error.message 
           });
@@ -304,7 +305,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
         success: true,
         data: {
           planId,
-          planName: (plan as any).jihuaCode,
+          planName: plan.jihuaCode,
           totalParticipants: orders.length,
           results
         },
@@ -328,7 +329,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       }
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
@@ -337,28 +338,28 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
         filters: { jihua: planId },
         populate: ['user']
-      });
+      }) as (DinggouDingdan & { user: any })[];
 
       const results = [];
       for (const order of orders) {
         try {
           await strapi.service('api::choujiang-jihui.choujiang-jihui').giveChance({
-            userId: (order as any).user.id,
+            userId: order.user.id,
             jiangpinId: jiangpinId,
             count: count,
-            reason: `${reason} - 计划: ${(plan as any).jihuaCode}`,
+            reason: `${reason} - 计划: ${plan.jihuaCode}`,
             type: 'plan_reward'
           });
           results.push({ 
-            userId: (order as any).user.id, 
-            username: (order as any).user.username, 
+            userId: order.user.id, 
+            username: order.user.username, 
             success: true, 
             message: '赠送成功' 
           });
         } catch (error) {
           results.push({ 
-            userId: (order as any).user.id, 
-            username: (order as any).user.username, 
+            userId: order.user.id, 
+            username: order.user.username, 
             success: false, 
             error: error.message 
           });
@@ -369,7 +370,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
         success: true,
         data: {
           planId,
-          planName: (plan as any).jihuaCode,
+          planName: plan.jihuaCode,
           totalParticipants: orders.length,
           results
         },
@@ -388,7 +389,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const { page = 1, pageSize = 20 } = ctx.query;
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
@@ -402,16 +403,16 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
           pageSize: parseInt(String(pageSize))
         },
         sort: { createdAt: 'desc' }
-      });
+      }) as (DinggouDingdan & { user: any })[];
 
       // 格式化参与者信息
       const formattedParticipants = participants.map(order => ({
-        userId: (order as any).user.id,
-        username: (order as any).user.username,
-        email: (order as any).user.email,
-        investmentAmount: (order as any).amount,
-        investmentDate: (order as any).createdAt,
-        status: (order as any).status,
+        userId: order.user.id,
+        username: order.user.username,
+        email: order.user.email,
+        investmentAmount: order.amount,
+        investmentDate: order.createdAt,
+        status: order.status,
         orderId: order.id
       }));
 
@@ -419,7 +420,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
         success: true,
         data: {
           planId,
-          planName: (plan as any).jihuaCode,
+          planName: plan.jihuaCode,
           participants: formattedParticipants,
           pagination: {
             page: parseInt(String(page)),

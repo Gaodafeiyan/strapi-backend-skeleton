@@ -16,7 +16,7 @@ const DingdanSchema = {
     end_at        : { type: 'datetime', required: true },
     redeemed_at   : { type: 'datetime' },
     payout_amount : { type: 'decimal' },
-    status        : { type: 'enumeration', enum: ['pending', 'running', 'finished', 'cancelled'], default: 'pending' },
+    status        : { type: 'enumeration', enum: ['pending', 'running', 'finished', 'cancelled', 'redeemable'], default: 'pending' },
   },
 };
 export default DingdanSchema;

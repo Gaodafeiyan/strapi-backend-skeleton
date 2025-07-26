@@ -18,7 +18,7 @@ export default {
             filters: { 
               status: 'running', 
               end_at: { $lte: new Date() } 
-            } as any,
+            },
             start: offset,
             limit: batchSize,
             sort: { end_at: 'asc' }
@@ -38,9 +38,9 @@ export default {
             await strapi.entityService.update(
               'api::dinggou-dingdan.dinggou-dingdan',
               order.id,
-              { data: { status: 'redeemable' } as any }
+              { data: { status: 'finished' } }
             );
-            console.log(`✅ 订单 ${order.id} 已标记为可赎回状态`);
+            console.log(`✅ 订单 ${order.id} 已标记为完成状态`);
             totalProcessed++;
           } catch (error) {
             console.error(`❌ 订单 ${order.id} 标记失败:`, error instanceof Error ? error.message : '未知错误');

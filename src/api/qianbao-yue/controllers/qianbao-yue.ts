@@ -1,5 +1,6 @@
 import { factories } from '@strapi/strapi';
 import Decimal from 'decimal.js';
+import { QianbaoYue } from '../../../types/api';
 
 export default factories.createCoreController(
   'api::qianbao-yue.qianbao-yue',
@@ -24,7 +25,7 @@ export default factories.createCoreController(
           filters: { user: userId }
         });
         
-        let wallet = wallets[0];
+        let wallet = wallets[0] as QianbaoYue;
 
         // 如果钱包不存在，自动创建
         if (!wallet) {
@@ -37,7 +38,7 @@ export default factories.createCoreController(
                 aiTokenBalances: '{}',
                 user: userId
               }
-            });
+            }) as QianbaoYue;
             console.log('✅ 钱包创建成功:', wallet.id);
           } catch (createError) {
             console.error('❌ 创建钱包失败:', createError);
@@ -46,7 +47,7 @@ export default factories.createCoreController(
           }
         }
 
-        const tokenBalances = JSON.parse((wallet as any).aiTokenBalances || '{}');
+        const tokenBalances = JSON.parse(wallet.aiTokenBalances || '{}');
         
         // 获取所有代币信息
         const tokens = await strapi.service('api::ai-token.ai-token').getActiveTokens();
@@ -73,7 +74,7 @@ export default factories.createCoreController(
               balance: balance.toFixed(8),
               price: price.toFixed(8),
               value: value,
-              logo: token.logoUrl,
+              logo: token.logo_url,
               description: token.description
             };
           })
@@ -95,10 +96,10 @@ export default factories.createCoreController(
         const userId = ctx.state.user.id;
         
         const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-          filters: { user: userId } as any
+          filters: { user: userId }
         });
         
-        let wallet = wallets[0];
+        let wallet = wallets[0] as QianbaoYue;
         if (!wallet) {
           // 如果钱包不存在，创建钱包
           wallet = await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
@@ -107,8 +108,8 @@ export default factories.createCoreController(
               aiYue: '0',
               aiTokenBalances: '{}',
               user: userId
-            } as any
-          });
+            }
+          }) as QianbaoYue;
         }
         
         ctx.body = {
@@ -126,10 +127,10 @@ export default factories.createCoreController(
         const { usdtYue, aiYue, aiTokenBalances } = ctx.request.body;
         
         const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-          filters: { user: userId } as any
+          filters: { user: userId }
         });
         
-        let wallet = wallets[0];
+        let wallet = wallets[0] as QianbaoYue;
         if (!wallet) {
           // 如果钱包不存在，创建钱包
           wallet = await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
@@ -138,12 +139,12 @@ export default factories.createCoreController(
               aiYue: '0',
               aiTokenBalances: '{}',
               user: userId
-            } as any
-          });
+            }
+          }) as QianbaoYue;
         }
 
         // 更新钱包余额
-        const updateData: any = {};
+        const updateData: Partial<QianbaoYue> = {};
         if (usdtYue !== undefined) updateData.usdtYue = usdtYue;
         if (aiYue !== undefined) updateData.aiYue = aiYue;
         if (aiTokenBalances !== undefined) updateData.aiTokenBalances = aiTokenBalances;
@@ -181,10 +182,10 @@ export default factories.createCoreController(
 
         // 查找或创建钱包
         const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-          filters: { user: data.user } as any
+          filters: { user: data.user }
         });
         
-        let wallet = wallets[0];
+        let wallet = wallets[0] as QianbaoYue;
         if (!wallet) {
           wallet = await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
             data: {
@@ -192,12 +193,12 @@ export default factories.createCoreController(
               aiYue: '0',
               aiTokenBalances: '{}',
               user: data.user
-            } as any
-          });
+            }
+          }) as QianbaoYue;
         }
 
         // 更新钱包余额
-        const updateData: any = {};
+        const updateData: Partial<QianbaoYue> = {};
         if (data.usdtYue !== undefined) {
           const currentUsdt = parseFloat(wallet.usdtYue || '0');
           updateData.usdtYue = (currentUsdt + parseFloat(data.usdtYue)).toString();
