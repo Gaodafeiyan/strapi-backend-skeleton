@@ -8,7 +8,9 @@ export default [
     handler: 'qianbao-chongzhi.createRecharge',
     config: {
       policies: [],
-      auth: true,
+      auth: {
+        scope: ['authenticated'],
+      },
     },
   },
   {
@@ -17,7 +19,9 @@ export default [
     handler: 'qianbao-chongzhi.confirmRecharge',
     config: {
       policies: [],
-      auth: true,
+      auth: {
+        scope: ['authenticated'],
+      },
     },
   },
 ]; 
