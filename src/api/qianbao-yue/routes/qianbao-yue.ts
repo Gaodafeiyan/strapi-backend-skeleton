@@ -30,6 +30,16 @@ export default {
     // 自定义路由
     {
       method: 'GET',
+      path: '/qianbao-yues/test',
+      handler: 'qianbao-yue.testConnection',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
       path: '/qianbao-yues/user-wallet',
       handler: 'qianbao-yue.getUserWallet',
       config: {

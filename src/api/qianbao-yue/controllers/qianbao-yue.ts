@@ -6,6 +6,15 @@ export default factories.createCoreController(
   ({ strapi }) => ({
     // 继承默认的CRUD操作
 
+    // 测试连接方法
+    async testConnection(ctx) {
+      ctx.body = {
+        success: true,
+        message: '钱包API连接正常',
+        timestamp: new Date().toISOString()
+      };
+    },
+
     // 获取用户代币余额
     async getTokenBalances(ctx) {
       try {
@@ -15,10 +24,26 @@ export default factories.createCoreController(
           filters: { yonghu: userId }
         });
         
-        const wallet = wallets[0];
+        let wallet = wallets[0];
 
+        // 如果钱包不存在，自动创建
         if (!wallet) {
-          ctx.throw(404, '钱包不存在');
+          console.log('用户钱包不存在，自动创建...');
+          try {
+            wallet = await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
+              data: {
+                usdtYue: '0',
+                aiYue: '0',
+                aiTokenBalances: '{}',
+                yonghu: userId
+              }
+            });
+            console.log('✅ 钱包创建成功:', wallet.id);
+          } catch (createError) {
+            console.error('❌ 创建钱包失败:', createError);
+            ctx.throw(500, '创建钱包失败');
+            return;
+          }
         }
 
         const tokenBalances = JSON.parse((wallet as any).aiTokenBalances || '{}');
@@ -55,18 +80,24 @@ export default factories.createCoreController(
         );
 
         ctx.body = {
+          success: true,
           data: balancesWithValue
         };
       } catch (error) {
-        ctx.throw(500, error.message);
+        console.error('获取代币余额失败:', error);
+        ctx.throw(500, `获取代币余额失败: ${error.message}`);
       }
     },
 
     // 获取用户钱包
     async getUserWallet(ctx) {
       try {
+        // 检查用户是否已登录
+        if (!ctx.state.user) {
+          return ctx.unauthorized('用户未登录');
+        }
+
         const userId = ctx.state.user.id;
-        
         console.log('获取用户钱包，用户ID:', userId);
         
         const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
@@ -75,14 +106,13 @@ export default factories.createCoreController(
         
         console.log('查询到的钱包数量:', wallets.length);
         
-        const wallet = wallets[0];
+        let wallet = wallets[0];
 
+        // 如果钱包不存在，自动创建
         if (!wallet) {
-          console.log('用户钱包不存在，尝试创建钱包...');
-          
-          // 尝试创建钱包
+          console.log('用户钱包不存在，自动创建...');
           try {
-            const newWallet = await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
+            wallet = await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
               data: {
                 usdtYue: '0',
                 aiYue: '0',
@@ -91,20 +121,22 @@ export default factories.createCoreController(
               }
             });
             
-            console.log('✅ 钱包创建成功:', newWallet.id);
-            ctx.body = { data: newWallet };
+            console.log('✅ 钱包创建成功:', wallet.id);
           } catch (createError) {
             console.error('❌ 创建钱包失败:', createError);
-            ctx.throw(404, '钱包不存在且无法创建');
+            ctx.throw(500, '创建钱包失败');
+            return;
           }
-          return;
         }
 
         console.log('✅ 找到用户钱包:', wallet.id);
-        ctx.body = { data: wallet };
+        ctx.body = { 
+          success: true,
+          data: wallet 
+        };
       } catch (error) {
         console.error('获取用户钱包失败:', error);
-        ctx.throw(500, error.message);
+        ctx.throw(500, `获取钱包失败: ${error.message}`);
       }
     },
 
@@ -115,10 +147,12 @@ export default factories.createCoreController(
         const records = await strapi.service('api::token-reward-record.token-reward-record').getUserTokenRewards(userId);
         
         ctx.body = {
+          success: true,
           data: records
         };
       } catch (error) {
-        ctx.throw(500, error.message);
+        console.error('获取代币奖励记录失败:', error);
+        ctx.throw(500, `获取代币奖励记录失败: ${error.message}`);
       }
     },
 
@@ -161,8 +195,12 @@ export default factories.createCoreController(
           }
         });
         
-        ctx.body = { data: wallet };
+        ctx.body = { 
+          success: true,
+          data: wallet 
+        };
       } catch (error) {
+        console.error('创建钱包失败:', error);
         ctx.throw(500, `创建钱包失败: ${error.message}`);
       }
     },

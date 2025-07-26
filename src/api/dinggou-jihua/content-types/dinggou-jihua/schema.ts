@@ -5,7 +5,6 @@ const JihuaSchema = {
   options: { draftAndPublish: false },
   attributes: {
     name          : { type: 'string', required: true },
-    amount        : { type: 'decimal', required: true },
     max_slots     : { type: 'integer', default: 100 },
     current_slots : { type: 'integer', default: 0 },
     start_date    : { type: 'datetime' },

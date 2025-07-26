@@ -13,11 +13,33 @@ const ChoujiangJihuiSchema = {
       relation: 'manyToOne',
       target: 'plugin::users-permissions.user'
     },
+    jiangpin: { 
+      type: 'relation', 
+      relation: 'manyToOne',
+      target: 'api::choujiang-jiangpin.choujiang-jiangpin' 
+    },
     dingdan: { 
       type: 'relation', 
       relation: 'manyToOne',
       target: 'api::dinggou-dingdan.dinggou-dingdan' 
     },
+    reason: { 
+      type: 'string' 
+    }, // 赠送原因
+    type: { 
+      type: 'enumeration', 
+      enum: ['reward', 'invite', 'investment_redeem', 'system'], 
+      default: 'reward' 
+    }, // 赠送类型
+    status: { 
+      type: 'enumeration', 
+      enum: ['available', 'used', 'expired'], 
+      default: 'available' 
+    }, // 状态：可用/已使用/已过期
+    used: { 
+      type: 'boolean', 
+      default: false 
+    }, // 是否已使用
     zongCiShu: { 
       type: 'integer', 
       required: true, 

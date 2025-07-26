@@ -6,6 +6,11 @@
 export default (config: any, { strapi }: any) => {
   return async (ctx: any, next: any) => {
     try {
+      // 允许测试接口无需认证
+      if (ctx.path.includes('/test')) {
+        return await next();
+      }
+
       // 检查用户是否已认证
       if (!ctx.state.user) {
         return ctx.unauthorized('用户未登录');
