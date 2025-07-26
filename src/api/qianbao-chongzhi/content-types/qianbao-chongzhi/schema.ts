@@ -12,10 +12,8 @@ const ChongzhiSchema = {
     to_address    : { type: 'string' },
     block_number  : { type: 'biginteger' },
     confirmed_at  : { type: 'datetime' },
-    yonghu        : { type: 'relation', relation: 'manyToOne',
-                      target: 'plugin::users-permissions.user', inversedBy: 'chongzhiRecords' },
-    wallet_address: { type: 'relation', relation: 'manyToOne',
-                      target: 'api::wallet-address.wallet-address' },
+    yonghu        : { type: 'relation', relation: 'manyToOne', target: 'plugin::users-permissions.user' },
+    wallet_address: { type: 'relation', relation: 'manyToOne', target: 'api::wallet-address.wallet-address' },
   },
 };
 export default ChongzhiSchema;

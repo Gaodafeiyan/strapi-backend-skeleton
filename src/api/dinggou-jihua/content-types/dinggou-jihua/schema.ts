@@ -14,8 +14,7 @@ const JihuaSchema = {
     start_date    : { type: 'datetime' },
     end_date      : { type: 'datetime' },
     description   : { type: 'text' },
-    dingdanList   : { type: 'relation', relation: 'oneToMany',
-                      target: 'api::dinggou-dingdan.dinggou-dingdan', mappedBy: 'jihua' },
+    dingdanList   : { type: 'relation', relation: 'oneToMany', target: 'api::dinggou-dingdan.dinggou-dingdan' },
   },
 };
 export default JihuaSchema;

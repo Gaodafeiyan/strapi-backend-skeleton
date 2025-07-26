@@ -12,10 +12,8 @@ const TixianSchema = {
     from_address  : { type: 'string' },
     block_number  : { type: 'biginteger' },
     completed_at  : { type: 'datetime' },
-    yonghu        : { type: 'relation', relation: 'manyToOne',
-                      target: 'plugin::users-permissions.user', inversedBy: 'tixianRecords' },
-    wallet_address: { type: 'relation', relation: 'manyToOne',
-                      target: 'api::wallet-address.wallet-address' },
+    yonghu        : { type: 'relation', relation: 'manyToOne', target: 'plugin::users-permissions.user' },
+    wallet_address: { type: 'relation', relation: 'manyToOne', target: 'api::wallet-address.wallet-address' },
   },
 };
 export default TixianSchema;
