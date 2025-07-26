@@ -120,7 +120,7 @@ export default factories.createCoreController(
       } catch (error) {
         ctx.throw(500, error.message);
       }
-    }
+    },
 
     // 重写create方法，添加数据验证
     async create(ctx) {

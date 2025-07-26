@@ -23,7 +23,7 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
       const recharge = await strapi.entityService.create('api::qianbao-chongzhi.qianbao-chongzhi' as any, {
         data: {
           ...data,
-          zhuangtai: 'pending'
+          status: 'pending'
         }
       });
       
@@ -182,14 +182,14 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
 
   // 自定义方法可以在这里添加
   async createRecharge(ctx) {
-    const { txHash, usdtJine, yonghu } = ctx.request.body;
+    const { tx_hash, usdtJine, yonghu } = ctx.request.body;
     
     try {
       const recharge = await strapi.entityService.create('api::qianbao-chongzhi.qianbao-chongzhi', {
         data: {
-          txHash,
+          tx_hash,
           usdtJine,
-          zhuangtai: 'pending',
+          status: 'pending',
           yonghu
         }
       });
@@ -212,13 +212,13 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
         return ctx.notFound('充值记录不存在');
       }
       
-      if (recharge.zhuangtai === 'success') {
+      if (recharge.status === 'success') {
         return ctx.badRequest('充值已确认');
       }
       
       // 更新状态为成功
       await strapi.entityService.update('api::qianbao-chongzhi.qianbao-chongzhi', id, {
-        data: { zhuangtai: 'success' }
+        data: { status: 'success' }
       });
       
       // 增加用户余额
