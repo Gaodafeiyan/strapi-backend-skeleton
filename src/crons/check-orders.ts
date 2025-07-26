@@ -16,7 +16,7 @@ export default {
           'api::dinggou-dingdan.dinggou-dingdan',
           {
             filters: { 
-              status: 'active', 
+              status: 'running', 
               end_at: { $lte: new Date() } 
             } as any,
             start: offset,

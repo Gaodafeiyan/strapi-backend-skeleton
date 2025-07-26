@@ -240,6 +240,19 @@ export default factories.createCoreService('api::dinggou-dingdan.dinggou-dingdan
               });
             }
 
+            // ⑤ 自动触发推荐奖励（如果用户有推荐人）
+            try {
+              await strapi.service('api::yaoqing-jiangli.yaoqing-jiangli').createReferralReward({
+                orderId: orderId,
+                userId: order.yonghu.id,
+                amount: staticUSDT,
+                type: 'investment_complete'
+              });
+            } catch (referralError) {
+              console.error('推荐奖励创建失败:', referralError);
+              // 推荐奖励失败不影响主流程
+            }
+
             return {
               success: true,
               staticUSDT,
