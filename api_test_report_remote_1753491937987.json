@@ -1,0 +1,42 @@
+{
+  "timestamp": "2025-07-26T01:05:37.987Z",
+  "server": "http://118.107.4.158:1337",
+  "testUser": "testuser_1753491932089",
+  "results": {
+    "total": 49,
+    "passed": 27,
+    "failed": 22,
+    "skipped": 0,
+    "errors": [
+      "API根路径: 404 Not Found",
+      "角色列表: 404 Not Found",
+      "获取用户钱包: 404 Not Found",
+      "获取代币余额: 404 Not Found",
+      "获取代币赠送记录: 404 Not Found",
+      "创建钱包地址: 400 - {\"data\":null,\"error\":{\"status\":400,\"name\":\"BadRequestError\",\"message\":\"链类型不能为空\",\"details\":{}}}",
+      "获取充值记录: 404 Not Found",
+      "创建充值订单: 405 - \"Method Not Allowed\"",
+      "获取充值地址: 404 Not Found",
+      "创建提现订单: 400 - {\"data\":null,\"error\":{\"status\":400,\"name\":\"BadRequestError\",\"message\":\"缺少提现地址\",\"details\":{}}}",
+      "创建认购计划: 400 - {\"error\":\"数据验证失败\",\"message\":\"Invalid key price\",\"details\":{\"key\":\"price\",\"source\":\"body\"}}",
+      "创建认购订单: 400 - {\"error\":\"数据验证失败\",\"message\":\"Invalid key jihuaId\",\"details\":{\"key\":\"jihuaId\",\"source\":\"body\"}}",
+      "获取我的邀请记录: 403 - {\"data\":null,\"error\":{\"status\":403,\"name\":\"ForbiddenError\",\"message\":\"Forbidden\",\"details\":{}}}",
+      "获取邀请统计: 404 Not Found",
+      "获取抽奖记录: 403 - {\"data\":null,\"error\":{\"status\":403,\"name\":\"ForbiddenError\",\"message\":\"Forbidden\",\"details\":{}}}",
+      "执行抽奖: 405 - \"Method Not Allowed\"",
+      "批量获取价格: 404 Not Found",
+      "获取我的奖励记录: 403 - {\"data\":null,\"error\":{\"status\":403,\"name\":\"ForbiddenError\",\"message\":\"Forbidden\",\"details\":{}}}",
+      "获取内部消息: 403 - {\"data\":null,\"error\":{\"status\":403,\"name\":\"ForbiddenError\",\"message\":\"Forbidden\",\"details\":{}}}",
+      "获取管理面板数据: 403 - {\"data\":null,\"error\":{\"status\":403,\"name\":\"ForbiddenError\",\"message\":\"Forbidden\",\"details\":{}}}",
+      "获取性能监控数据: 403 - {\"data\":null,\"error\":{\"status\":403,\"name\":\"ForbiddenError\",\"message\":\"Forbidden\",\"details\":{}}}",
+      "获取队列状态: 403 - {\"data\":null,\"error\":{\"status\":403,\"name\":\"ForbiddenError\",\"message\":\"Forbidden\",\"details\":{}}}"
+    ]
+  },
+  "summary": {
+    "total": 49,
+    "passed": 27,
+    "failed": 22,
+    "skipped": 0,
+    "successRate": "55.10"
+  }
+}
