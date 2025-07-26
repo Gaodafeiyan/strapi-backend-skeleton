@@ -3,7 +3,33 @@ import { factories } from '@strapi/strapi';
 export default {
   type: 'content-api',
   routes: [
-    // 只保留实际存在的自定义方法
+    // 默认的CRUD路由
+    {
+      method: 'GET',
+      path: '/qianbao-chongzhis',
+      handler: 'qianbao-chongzhi.find',
+    },
+    {
+      method: 'GET',
+      path: '/qianbao-chongzhis/:id',
+      handler: 'qianbao-chongzhi.findOne',
+    },
+    {
+      method: 'POST',
+      path: '/qianbao-chongzhis',
+      handler: 'qianbao-chongzhi.create',
+    },
+    {
+      method: 'PUT',
+      path: '/qianbao-chongzhis/:id',
+      handler: 'qianbao-chongzhi.update',
+    },
+    {
+      method: 'DELETE',
+      path: '/qianbao-chongzhis/:id',
+      handler: 'qianbao-chongzhi.delete',
+    },
+    // 自定义方法
     {
       method: 'POST',
       path: '/qianbao-chongzhis/create-recharge',
