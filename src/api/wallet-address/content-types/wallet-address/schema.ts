@@ -28,9 +28,9 @@ export default {
     },
     chain: {
       type: 'enumeration',
-      enum: ['BSC', 'ETH', 'TRON'],
+      enum: ['ethereum', 'bsc', 'tron', 'polygon', 'arbitrum'],  // 修复枚举值
       required: true,
-      default: 'BSC',
+      default: 'ethereum',
     },
     asset: {
       type: 'enumeration',
@@ -76,4 +76,4 @@ export default {
       type: 'json',
     },
   },
-}; 
+};

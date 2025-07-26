@@ -4,6 +4,15 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
   // 获取所有活跃的代币
   async getActiveTokens() {
     try {
+      // 检查ai_tokens表是否存在
+      const tableExists = await strapi.db.connection.raw(`
+        SELECT COUNT(*) as count FROM information_schema.tables 
+        WHERE table_schema = DATABASE() AND table_name = 'ai_tokens'
+      `);
+      if (tableExists[0][0].count === 0) {
+        console.log('ai_tokens 表不存在，返回空数组');
+        return [];
+      }
       const result = await strapi.db.connection.raw(`
         SELECT * FROM ai_tokens 
         WHERE is_active = true 
@@ -13,12 +22,7 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
       return result[0] || []; // 确保返回数组
     } catch (error) {
       console.error('获取活跃代币失败:', error);
-      // 如果表不存在，返回空数组而不是抛出错误
-      if (error.message.includes('Table') && error.message.includes('doesn\'t exist')) {
-        console.log('ai_tokens 表不存在，返回空数组');
-        return [];
-      }
-      throw error;
+      return [];
     }
   },
 
@@ -167,19 +171,22 @@ export default factories.createCoreService('api::ai-token.ai-token', ({ strapi }
 
   // 批量获取代币价格（用于缓存）
   async getBatchTokenPrices() {
-    const tokens = await this.getActiveTokens();
-    const prices: { [key: number]: number } = {};
-    
-    for (const token of tokens) {
-      try {
-        prices[token.id] = await this.getTokenPrice(parseInt(token.id as string));
-      } catch (error) {
-        console.error(`获取代币 ${token.name} 价格失败:`, error);
-        prices[token.id] = 0.01; // 默认价格
+    try {
+      const tokens = await this.getActiveTokens();
+      const prices = {};
+      for (const token of tokens) {
+        try {
+          prices[token.id] = await this.getTokenPrice(parseInt(token.id as string));
+        } catch (error) {
+          console.error(`获取代币 ${token.name} 价格失败:`, error);
+          prices[token.id] = 0.01;
+        }
       }
+      return prices;
+    } catch (error) {
+      console.error('批量获取代币价格失败:', error);
+      return {};
     }
-    
-    return prices;
   },
 
   // 初始化代币数据

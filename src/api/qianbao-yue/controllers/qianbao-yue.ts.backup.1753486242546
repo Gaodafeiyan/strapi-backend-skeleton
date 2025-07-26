@@ -121,50 +121,5 @@ export default factories.createCoreController(
         ctx.throw(500, error.message);
       }
     }
-
-    // 重写create方法，添加数据验证
-    async create(ctx) {
-      try {
-        const { data } = ctx.request.body;
-        
-        // 验证data字段
-        if (!data) {
-          return ctx.badRequest('缺少data字段');
-        }
-        
-        // 验证用户ID
-        if (!data.yonghu) {
-          return ctx.badRequest('缺少用户ID');
-        }
-        
-        // 验证用户是否存在
-        const user = await strapi.entityService.findOne('plugin::users-permissions.user', data.yonghu);
-        if (!user) {
-          return ctx.badRequest('用户不存在');
-        }
-        
-        // 检查用户是否已有钱包
-        const existingWallet = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-          filters: { yonghu: data.yonghu }
-        });
-        
-        if (existingWallet.length > 0) {
-          return ctx.badRequest('用户已存在钱包');
-        }
-        
-        const wallet = await strapi.entityService.create('api::qianbao-yue.qianbao-yue', {
-          data: {
-            usdtYue: data.usdtYue || '0',
-            aiYue: data.aiYue || '0',
-            aiTokenBalances: data.aiTokenBalances || '{}',
-            yonghu: data.yonghu
-          }
-        });
-        
-        ctx.body = { data: wallet };
-      } catch (error) {
-        ctx.throw(500, `创建钱包失败: ${error.message}`);
-      }
-    },
   })
 ); 

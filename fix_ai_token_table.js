@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const path = require('path');
 
 // 数据库文件路径
@@ -30,47 +30,30 @@ INSERT OR IGNORE INTO ai_tokens (name, symbol, description, weight, is_active) V
 `;
 
 async function fixAITokenTable() {
-  return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database(dbPath, (err) => {
-      if (err) {
-        console.error('❌ 连接数据库失败:', err.message);
-        reject(err);
-        return;
-      }
-      console.log('✅ 成功连接到数据库');
-    });
+  try {
+    console.log('🔧 开始修复AI代币表...');
+    
+    // 连接数据库
+    const db = new Database(dbPath);
+    console.log('✅ 成功连接到数据库');
 
     // 创建表
-    db.run(createTableSQL, (err) => {
-      if (err) {
-        console.error('❌ 创建表失败:', err.message);
-        reject(err);
-        return;
-      }
-      console.log('✅ AI代币表创建成功');
-    });
+    db.exec(createTableSQL);
+    console.log('✅ AI代币表创建成功');
 
     // 插入数据
-    db.run(insertDataSQL, (err) => {
-      if (err) {
-        console.error('❌ 插入数据失败:', err.message);
-        reject(err);
-        return;
-      }
-      console.log('✅ 示例数据插入成功');
-    });
+    db.exec(insertDataSQL);
+    console.log('✅ 示例数据插入成功');
 
     // 关闭数据库连接
-    db.close((err) => {
-      if (err) {
-        console.error('❌ 关闭数据库失败:', err.message);
-        reject(err);
-        return;
-      }
-      console.log('✅ 数据库连接已关闭');
-      resolve();
-    });
-  });
+    db.close();
+    console.log('✅ 数据库连接已关闭');
+    
+    console.log('🎉 AI代币表修复完成！');
+  } catch (error) {
+    console.error('❌ 修复失败:', error);
+    throw error;
+  }
 }
 
 // 运行修复

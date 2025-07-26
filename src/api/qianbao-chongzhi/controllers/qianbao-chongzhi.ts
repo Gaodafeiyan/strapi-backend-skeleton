@@ -161,6 +161,25 @@ export default factories.createCoreController('api::qianbao-chongzhi.qianbao-cho
     }
   },
 
+  async findOne(ctx) {
+    try {
+      const { id } = ctx.params;
+      if (!id) {
+        return ctx.badRequest('缺少充值记录ID');
+      }
+      const recharge = await strapi.entityService.findOne('api::qianbao-chongzhi.qianbao-chongzhi', id, {
+        populate: ['yonghu']
+      });
+      if (!recharge) {
+        return ctx.notFound('充值记录不存在');
+      }
+      ctx.body = { data: recharge };
+    } catch (error) {
+      console.error('查询充值记录失败:', error);
+      ctx.throw(500, `查询充值记录失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  },
+
   // 自定义方法可以在这里添加
   async createRecharge(ctx) {
     const { txHash, usdtJine, yonghu } = ctx.request.body;

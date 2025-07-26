@@ -42,6 +42,16 @@ export default {
       },
     },
     {
+      method: 'GET',
+      path: '/ai-tokens/market-data',
+      handler: 'ai-token.getMarketData',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
       method: 'POST',
       path: '/ai-tokens/initialize',
       handler: 'ai-token.initializeTokens',
@@ -54,4 +64,4 @@ export default {
       },
     },
   ],
-}; 
+};

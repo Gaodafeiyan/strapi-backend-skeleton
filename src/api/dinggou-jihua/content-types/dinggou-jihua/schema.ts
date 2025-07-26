@@ -4,15 +4,18 @@ const JihuaSchema = {
   info: { singularName: 'dinggou-jihua', pluralName: 'dinggou-jihuas', displayName: '认购计划' },
   options: { draftAndPublish: false },
   attributes: {
-    jihuaCode   : { type: 'string',  required: true, unique: true },   // PLAN500 …
-    benjinUSDT  : { type: 'string', required: true, default: '0' },    // 500 / 1000 …
-    zhouQiTian  : { type: 'integer', required: true, default: 15 },    // 15 / 20 …
-    jingtaiBili : { type: 'string', required: true, default: '0' },    // 6 / 7 …
-    aiBili      : { type: 'string', required: true, default: '0' },    // 3 / 4 …
-    choujiangCi : { type: 'integer',  default: 3 },
-    kaiqi       : { type: 'boolean',  default: true },
-    dingdanList : { type: 'relation', relation: 'oneToMany',
-                    target: 'api::dinggou-dingdan.dinggou-dingdan', mappedBy: 'jihua' },
+    name          : { type: 'string', required: true },
+    amount        : { type: 'decimal', required: true },  // 修复字段名
+    yield_rate    : { type: 'decimal', required: true },
+    cycle_days    : { type: 'integer', required: true },
+    max_slots     : { type: 'integer', default: 100 },
+    current_slots : { type: 'integer', default: 0 },
+    status        : { type: 'enumeration', enum: ['active', 'inactive'], default: 'active' },
+    start_date    : { type: 'datetime' },
+    end_date      : { type: 'datetime' },
+    description   : { type: 'text' },
+    dingdanList   : { type: 'relation', relation: 'oneToMany',
+                      target: 'api::dinggou-dingdan.dinggou-dingdan', mappedBy: 'jihua' },
   },
 };
-export default JihuaSchema; 
+export default JihuaSchema;

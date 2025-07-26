@@ -46,7 +46,7 @@ export default factories.createCoreController('api::notice.notice' as any, ({ st
   async findOne(ctx) {
     try {
       const { id } = ctx.params;
-      const notice = await strapi.entityService.findOne('api::notice.notice', id);
+      const notice = await strapi.entityService.findOne('api::notice.notice' as any, id);
       
       if (!notice) {
         return ctx.notFound('通知不存在');
@@ -61,7 +61,7 @@ export default factories.createCoreController('api::notice.notice' as any, ({ st
   // 创建通知
   async create(ctx) {
     try {
-      const notice = await strapi.entityService.create('api::notice.notice', {
+      const notice = await strapi.entityService.create('api::notice.notice' as any, {
         data: ctx.request.body,
       });
       
@@ -75,7 +75,7 @@ export default factories.createCoreController('api::notice.notice' as any, ({ st
   async update(ctx) {
     try {
       const { id } = ctx.params;
-      const notice = await strapi.entityService.update('api::notice.notice', id, {
+      const notice = await strapi.entityService.update('api::notice.notice' as any, id, {
         data: ctx.request.body,
       });
       
@@ -89,7 +89,7 @@ export default factories.createCoreController('api::notice.notice' as any, ({ st
   async delete(ctx) {
     try {
       const { id } = ctx.params;
-      await strapi.entityService.delete('api::notice.notice', id);
+      await strapi.entityService.delete('api::notice.notice' as any, id);
       
       ctx.body = { message: '通知删除成功' };
     } catch (error) {
