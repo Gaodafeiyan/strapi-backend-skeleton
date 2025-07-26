@@ -1,6 +1,6 @@
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreService('api::data-integrity.data-integrity', ({ strapi }) => ({
+export default ({ strapi }) => ({
   // 验证数据是否存在
   async validateDataExists(entityType: any, id: number) {
     try {
@@ -33,7 +33,7 @@ export default factories.createCoreService('api::data-integrity.data-integrity',
   async ensureUserWalletExists(userId: number) {
     try {
       const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-        filters: { yonghu: { $eq: userId } }
+        filters: { yonghu: userId }
       });
       
       if (wallets.length > 0) {
@@ -55,4 +55,4 @@ export default factories.createCoreService('api::data-integrity.data-integrity',
       throw new Error(`确保用户钱包存在失败: ${error.message}`);
     }
   }
-}));
+});
