@@ -28,7 +28,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 检查用户钱包余额
       const wallet = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-        filters: { user: userId }
+        filters: { 'user.id': userId }
       });
 
       if (!wallet || wallet.length === 0) {
@@ -117,7 +117,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 更新钱包余额
       const wallet = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-        filters: { user: userId }
+        filters: { 'user.id': userId }
       });
 
       if (wallet && wallet.length > 0) {
@@ -134,7 +134,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       // 更新订单状态
       await strapi.entityService.update('api::dinggou-dingdan.dinggou-dingdan', orderId, {
         data: {
-          status: 'completed',
+          status: 'finished',
           redeemed_at: new Date(),
           payout_amount: totalPayout.toString()
         }
@@ -148,7 +148,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
             token_type: 'ai_token',
             amount: aiTokenYield.toString(),
             reason: '投资赎回AI代币奖励',
-            status: 'completed'
+            status: 'finished'
           }
         });
       }
@@ -184,7 +184,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 获取该计划的所有订单
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { jihua: planId },
+        filters: { 'jihua.id': planId },
         populate: ['user']
       }) as (DinggouDingdan & { user: any })[];
 
@@ -194,7 +194,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       }, 0);
 
       const activeOrders = orders.filter(order => order.status === 'active');
-      const completedOrders = orders.filter(order => order.status === 'completed');
+      const completedOrders = orders.filter(order => order.status === 'finished');
 
       const totalYield = completedOrders.reduce((sum, order) => {
         return sum + parseFloat(order.payoutAmount || 0);
@@ -228,7 +228,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const { page = 1, pageSize = 10 } = ctx.query;
 
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { user: userId },
+        filters: { 'user.id': userId },
         populate: ['jihua'],
         pagination: {
           page: parseInt(String(page)),
@@ -271,7 +271,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 获取该计划的所有订单
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { jihua: planId },
+        filters: { 'jihua.id': planId },
         populate: ['user']
       }) as (DinggouDingdan & { user: any })[];
 
@@ -336,7 +336,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 获取该计划的所有订单
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { jihua: planId },
+        filters: { 'jihua.id': planId },
         populate: ['user']
       }) as (DinggouDingdan & { user: any })[];
 
@@ -396,7 +396,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 获取该计划的参与者
       const participants = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { jihua: planId },
+        filters: { 'jihua.id': planId },
         populate: ['user'],
         pagination: {
           page: parseInt(String(page)),
