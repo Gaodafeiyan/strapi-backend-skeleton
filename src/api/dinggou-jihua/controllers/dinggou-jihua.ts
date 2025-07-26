@@ -1,6 +1,5 @@
 import { factories } from '@strapi/strapi';
 import Decimal from 'decimal.js';
-import { DinggouJihua, DinggouDingdan } from '../../../types/api';
 
 export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua', ({ strapi }) => ({
   // 投资认购计划
@@ -16,7 +15,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       }
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
@@ -28,7 +27,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 检查用户钱包余额
       const wallet = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-        filters: { 'user.id': userId }
+        filters: { user: userId }
       });
 
       if (!wallet || wallet.length === 0) {
@@ -56,7 +55,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
           end_at: new Date(Date.now() + plan.zhouQiTian * 24 * 60 * 60 * 1000),
           status: 'pending'
         }
-      }) as DinggouDingdan;
+      });
 
       // 扣除钱包余额
       await strapi.entityService.update('api::qianbao-yue.qianbao-yue', userWallet.id, {
@@ -85,7 +84,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       // 获取订单信息
       const order = await strapi.entityService.findOne('api::dinggou-dingdan.dinggou-dingdan', orderId, {
         populate: ['user', 'jihua']
-      }) as DinggouDingdan & { user: any; jihua: DinggouJihua };
+      });
 
       if (!order) {
         return ctx.notFound('订单不存在');
@@ -117,7 +116,7 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
 
       // 更新钱包余额
       const wallet = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-        filters: { 'user.id': userId }
+        filters: { user: userId }
       });
 
       if (wallet && wallet.length > 0) {
@@ -177,16 +176,16 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const { planId } = ctx.params;
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
 
       // 获取该计划的所有订单
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { 'jihua.id': planId },
+        filters: { jihua: planId },
         populate: ['user']
-      }) as (DinggouDingdan & { user: any })[];
+      });
 
       // 计算统计数据
       const totalInvestment = orders.reduce((sum, order) => {
@@ -228,14 +227,14 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const { page = 1, pageSize = 10 } = ctx.query;
 
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { 'user.id': userId },
+        filters: { user: userId },
         populate: ['jihua'],
         pagination: {
           page: parseInt(String(page)),
           pageSize: parseInt(String(pageSize))
         },
         sort: { createdAt: 'desc' }
-      }) as (DinggouDingdan & { jihua: DinggouJihua })[];
+      });
 
       ctx.body = {
         success: true,
@@ -264,16 +263,16 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       }
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
 
       // 获取该计划的所有订单
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { 'jihua.id': planId },
+        filters: { jihua: planId },
         populate: ['user']
-      }) as (DinggouDingdan & { user: any })[];
+      });
 
       const results = [];
       for (const order of orders) {
@@ -329,16 +328,16 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       }
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
 
       // 获取该计划的所有订单
       const orders = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { 'jihua.id': planId },
+        filters: { jihua: planId },
         populate: ['user']
-      }) as (DinggouDingdan & { user: any })[];
+      });
 
       const results = [];
       for (const order of orders) {
@@ -389,21 +388,21 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
       const { page = 1, pageSize = 20 } = ctx.query;
 
       // 获取计划信息
-      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId) as DinggouJihua;
+      const plan = await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
       if (!plan) {
         return ctx.notFound('认购计划不存在');
       }
 
       // 获取该计划的参与者
       const participants = await strapi.entityService.findMany('api::dinggou-dingdan.dinggou-dingdan', {
-        filters: { 'jihua.id': planId },
+        filters: { jihua: planId },
         populate: ['user'],
         pagination: {
           page: parseInt(String(page)),
           pageSize: parseInt(String(pageSize))
         },
         sort: { createdAt: 'desc' }
-      }) as (DinggouDingdan & { user: any })[];
+      });
 
       // 格式化参与者信息
       const formattedParticipants = participants.map(order => ({
