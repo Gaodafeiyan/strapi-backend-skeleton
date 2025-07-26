@@ -3,12 +3,6 @@ export default {
   routes: [
     // 自定义路由
     {
-      method: 'GET',
-      path: '/dinggou-jihuas/active',
-      handler: 'dinggou-jihua.getActivePlans',
-      config: { auth: false },
-    },
-    {
       method: 'POST',
       path: '/dinggou-jihuas/:planId/invest',
       handler: 'dinggou-jihua.invest',
