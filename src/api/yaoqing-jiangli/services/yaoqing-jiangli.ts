@@ -50,8 +50,8 @@ export default factories.createCoreService(
         const finishedOrders = await strapi.entityService.findMany(
           'api::dinggou-dingdan.dinggou-dingdan',
           {
-            filters: { yonghu: referrerId, zhuangtai: 'finished' },
-            fields: ['benjinUSDT'],
+            filters: { yonghu: referrerId, status: 'finished' },
+            fields: ['amount'],
             limit: -1,
           }
         ) as any[];
@@ -59,10 +59,10 @@ export default factories.createCoreService(
         console.log('上级已完成订单数量:', finishedOrders.length);
 
         const aPrincipal = finishedOrders.reduce(
-          (acc, o) => acc.plus(o.benjinUSDT || 0),
+          (acc, o) => acc.plus(o.amount || 0),
           new Decimal(0)
         );
-        const bPrincipal = new Decimal(order.benjinUSDT);
+        const bPrincipal = new Decimal(order.amount);
         const tier = getTier(aPrincipal.toNumber());
         const { static: rate, rebate } = RATE_TABLE[tier as keyof typeof RATE_TABLE];
 
