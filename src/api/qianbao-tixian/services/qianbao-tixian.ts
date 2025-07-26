@@ -2,22 +2,23 @@ import { factories } from '@strapi/strapi';
 import { addWithdrawSignJob, WithdrawJobData } from '../../../queues/withdraw';
 
 export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian', ({ strapi }) => ({
-  // 请求提现
+  // 创建提现请求
   async requestWithdraw(userId: number, amount: string | number, toAddress: string) {
-    const amountStr = amount.toString();
-    
     try {
+      const amountStr = amount.toString();
+      console.log(`📋 创建提现请求: 用户=${userId}, 金额=${amountStr}, 地址=${toAddress}`);
+
       // 1. 扣除用户余额（deductBalance内部已经处理事务）
       await strapi.service('api::qianbao-yue.qianbao-yue').deductBalance(userId, amountStr);
 
       // 2. 创建提现记录
-      const withdrawal = await strapi.entityService.create('api::qianbao-tixian.qianbao-tixian' as any, {
+      const withdrawal = await strapi.entityService.create('api::qianbao-tixian.qianbao-tixian', {
         data: {
           yonghu: userId,
           amount: amountStr,  // 使用string类型
           to_address: toAddress,
           status: 'pending',
-        }
+        } as any
       });
 
       // 3. 添加签名任务到队列
@@ -48,7 +49,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
         updateData.tx_hash = txHash;
       }
 
-      const withdrawal = await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian' as any, withdrawId, {
+      const withdrawal = await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian', withdrawId, {
         data: updateData,
       });
 
@@ -64,7 +65,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
   // 处理提现失败 - 返还余额
   async handleWithdrawFailure(withdrawId: number) {
     try {
-      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian' as any, withdrawId, {
+      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian', withdrawId, {
         populate: ['yonghu']
       });
 
@@ -73,8 +74,8 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
       }
 
       // 更新状态为失败
-      await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian' as any, withdrawId, {
-        data: { status: 'failed' }
+      await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian', withdrawId, {
+        data: { status: 'failed' } as any
       });
 
       // 返还用户余额（addBalance内部已经处理事务）
@@ -95,7 +96,7 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
   // 获取用户提现记录
   async getUserWithdrawals(userId: number, limit: number = 20, offset: number = 0) {
     try {
-      const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian' as any, {
+      const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
         filters: { yonghu: userId },
         sort: { createdAt: 'desc' },
         pagination: { limit, start: offset },
@@ -109,58 +110,56 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
     }
   },
 
-  // 获取待处理的提现
+  // 获取待处理的提现记录
   async getPendingWithdrawals() {
     try {
-      const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian' as any, {
-        filters: { status: 'pending' },
+      const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
+        filters: { status: 'pending' } as any,
         sort: { createdAt: 'asc' },
         populate: ['yonghu'],
       });
 
       return withdrawals;
     } catch (error) {
-      console.error('❌ 获取待处理提现失败:', error);
+      console.error('❌ 获取待处理提现记录失败:', error);
       throw error;
     }
   },
 
-  // 获取已广播的提现
+  // 获取已广播的提现记录
   async getBroadcastedWithdrawals() {
     try {
-      const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian' as any, {
-        filters: { status: 'broadcasted' },
+      const withdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
+        filters: { status: 'processing' } as any,
         sort: { createdAt: 'asc' },
         populate: ['yonghu'],
       });
 
       return withdrawals;
     } catch (error) {
-      console.error('❌ 获取已广播提现失败:', error);
+      console.error('❌ 获取已广播提现记录失败:', error);
       throw error;
     }
   },
 
-  // 广播提现
+  // 广播提现交易
   async broadcastWithdrawal(withdrawId: number) {
     try {
-      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian' as any, withdrawId);
-      
+      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian', withdrawId, {
+        populate: ['yonghu']
+      });
+
       if (!withdrawal) {
         throw new Error('提现记录不存在');
       }
-      
-      if (withdrawal.status !== 'pending') {
-        throw new Error('只能广播待处理的提现');
-      }
-      
-      // 更新状态为已广播
-      await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian' as any, withdrawId, {
-        data: { status: 'broadcasted' }
+
+      // 更新状态为处理中
+      await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian', withdrawId, {
+        data: { status: 'processing' } as any
       });
-      
-      console.log(`📡 提现已广播: ID=${withdrawId}`);
-      
+
+      console.log(`📡 提现已广播: ID=${withdrawId}, 用户=${(withdrawal as any).yonghu.id}, 金额=${(withdrawal as any).amount}`);
+
       return withdrawal;
     } catch (error) {
       console.error('❌ 广播提现失败:', error);
@@ -168,26 +167,27 @@ export default factories.createCoreService('api::qianbao-tixian.qianbao-tixian',
     }
   },
 
-  // 确认提现
-  async confirmWithdrawal(withdrawId: number) {
+  // 确认提现完成
+  async confirmWithdrawal(withdrawId: number, txHash: string, blockNumber?: number) {
     try {
-      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian' as any, withdrawId);
-      
+      const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian', withdrawId);
+
       if (!withdrawal) {
         throw new Error('提现记录不存在');
       }
-      
-      if (withdrawal.status !== 'pending') {
-        throw new Error('只能确认待处理的提现');
-      }
-      
-      // 更新状态为已完成
-      await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian' as any, withdrawId, {
-        data: { status: 'completed' }
+
+      // 更新状态为完成
+      await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian', withdrawId, {
+        data: { 
+          status: 'completed',
+          tx_hash: txHash,
+          block_number: blockNumber,
+          completed_at: new Date()
+        } as any
       });
-      
-      console.log(`✅ 提现已确认: ID=${withdrawId}`);
-      
+
+      console.log(`✅ 提现已确认: ID=${withdrawId}, 交易哈希=${txHash}`);
+
       return withdrawal;
     } catch (error) {
       console.error('❌ 确认提现失败:', error);

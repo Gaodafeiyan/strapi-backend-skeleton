@@ -12,7 +12,7 @@ export default {
       // 查找broadcasted状态超过30分钟的提现记录
       const timeoutWithdrawals = await strapi.entityService.findMany('api::qianbao-tixian.qianbao-tixian', {
         filters: {
-          zhuangtai: 'broadcasted',
+          status: 'processing',
           updatedAt: {
             $lt: thirtyMinutesAgo
           }
@@ -29,17 +29,17 @@ export default {
         try {
           // 更新状态为失败
           await strapi.entityService.update('api::qianbao-tixian.qianbao-tixian', withdrawal.id, {
-            data: { zhuangtai: 'failed' }
+            data: { status: 'failed' }
           });
 
           // 返还用户余额
           await strapi.service('api::qianbao-yue.qianbao-yue').addBalance(
             (withdrawal as any).yonghu.id, 
-            (withdrawal as any).usdtJine.toString()
+            (withdrawal as any).amount.toString()
           );
 
           failedCount++;
-          console.log(`提现超时处理成功: ID=${withdrawal.id}, 用户=${(withdrawal as any).yonghu.id}, 金额=${(withdrawal as any).usdtJine}`);
+          console.log(`提现超时处理成功: ID=${withdrawal.id}, 用户=${(withdrawal as any).yonghu.id}, 金额=${(withdrawal as any).amount}`);
         } catch (error) {
           console.error(`处理超时提现失败: ID=${withdrawal.id}, 错误=${error instanceof Error ? error.message : '未知错误'}`);
         }
