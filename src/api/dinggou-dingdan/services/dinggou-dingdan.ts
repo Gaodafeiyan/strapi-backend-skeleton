@@ -240,6 +240,25 @@ export default factories.createCoreService('api::dinggou-dingdan.dinggou-dingdan
               });
             }
 
+            // ⑤ 自动赠送抽奖次数（如果计划配置了抽奖次数）
+            try {
+              const lotteryChances = (jihua as any).lottery_chances || 0;
+              const lotteryPrizeId = (jihua as any).lottery_prize_id;
+              
+              if (lotteryChances > 0 && lotteryPrizeId) {
+                await strapi.service('api::choujiang-jihui.choujiang-jihui').giveChance({
+                  userId: order.yonghu.id,
+                  jiangpinId: lotteryPrizeId,  // 修正参数名
+                  count: lotteryChances,
+                  reason: `投资赎回奖励 - 计划: ${(jihua as any).jihuaCode || jihua.id}`,
+                  type: 'investment_redeem'
+                });
+              }
+            } catch (lotteryError) {
+              console.error('抽奖次数赠送失败:', lotteryError);
+              // 抽奖次数赠送失败不影响主流程
+            }
+
             // ⑤ 自动触发推荐奖励（如果用户有推荐人）
             try {
               await strapi.service('api::yaoqing-jiangli.yaoqing-jiangli').createReferralReward({
