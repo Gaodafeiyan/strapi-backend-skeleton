@@ -230,8 +230,8 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
         filters: { yonghu: userId },
         populate: ['jihua'],
         pagination: {
-          page: parseInt(page),
-          pageSize: parseInt(pageSize)
+          page: parseInt(String(page)),
+          pageSize: parseInt(String(pageSize))
         },
         sort: { createdAt: 'desc' }
       });
@@ -240,8 +240,8 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
         success: true,
         data: orders,
         pagination: {
-          page: parseInt(page),
-          pageSize: parseInt(pageSize),
+          page: parseInt(String(page)),
+          pageSize: parseInt(String(pageSize)),
           total: orders.length
         }
       };
@@ -398,8 +398,8 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
         filters: { jihua: planId },
         populate: ['yonghu'],
         pagination: {
-          page: parseInt(page),
-          pageSize: parseInt(pageSize)
+          page: parseInt(String(page)),
+          pageSize: parseInt(String(pageSize))
         },
         sort: { createdAt: 'desc' }
       });
@@ -422,8 +422,8 @@ export default factories.createCoreController('api::dinggou-jihua.dinggou-jihua'
           planName: (plan as any).jihuaCode,
           participants: formattedParticipants,
           pagination: {
-            page: parseInt(page),
-            pageSize: parseInt(pageSize),
+            page: parseInt(String(page)),
+            pageSize: parseInt(String(pageSize)),
             total: participants.length
           }
         }
