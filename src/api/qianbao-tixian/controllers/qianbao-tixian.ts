@@ -165,6 +165,38 @@ export default factories.createCoreController(
         console.error('处理提现失败:', error);
         ctx.throw(500, `处理提现失败: ${error.message}`);
       }
+    },
+
+    // 广播提现到区块链
+    async broadcastWithdrawal(ctx) {
+      try {
+        const { id } = ctx.params;
+        
+        const withdrawal = await strapi.entityService.findOne('api::qianbao-tixian.qianbao-tixian', id);
+        
+        if (!withdrawal) {
+          return ctx.notFound('提现记录不存在');
+        }
+
+        if ((withdrawal as any).status !== 'pending') {
+          return ctx.badRequest('只能广播待处理的提现');
+        }
+
+        // 这里可以添加实际的区块链广播逻辑
+        // 例如调用外部API或区块链服务
+        
+        ctx.body = {
+          success: true,
+          message: '提现广播成功',
+          data: {
+            withdrawal_id: id,
+            status: 'broadcasting'
+          }
+        };
+      } catch (error) {
+        console.error('广播提现失败:', error);
+        ctx.throw(500, `广播提现失败: ${error.message}`);
+      }
     }
   })
 ); 
