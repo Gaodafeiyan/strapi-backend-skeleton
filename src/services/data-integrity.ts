@@ -2,7 +2,7 @@ import { factories } from '@strapi/strapi';
 
 export default factories.createCoreService('api::data-integrity.data-integrity', ({ strapi }) => ({
   // 验证数据是否存在
-  async validateDataExists(entityType: string, id: number) {
+  async validateDataExists(entityType: any, id: number) {
     try {
       const entity = await strapi.entityService.findOne(entityType, id);
       if (!entity) {
@@ -16,24 +16,24 @@ export default factories.createCoreService('api::data-integrity.data-integrity',
 
   // 验证用户是否存在
   async validateUserExists(userId: number) {
-    return await this.validateDataExists('plugin::users-permissions.user', userId);
+    return await strapi.entityService.findOne('plugin::users-permissions.user', userId);
   },
 
   // 验证认购计划是否存在
   async validateDinggouPlanExists(planId: number) {
-    return await this.validateDataExists('api::dinggou-jihua.dinggou-jihua', planId);
+    return await strapi.entityService.findOne('api::dinggou-jihua.dinggou-jihua', planId);
   },
 
   // 验证钱包是否存在
   async validateWalletExists(walletId: number) {
-    return await this.validateDataExists('api::qianbao-yue.qianbao-yue', walletId);
+    return await strapi.entityService.findOne('api::qianbao-yue.qianbao-yue', walletId);
   },
 
   // 检查用户钱包是否存在，不存在则创建
   async ensureUserWalletExists(userId: number) {
     try {
       const wallets = await strapi.entityService.findMany('api::qianbao-yue.qianbao-yue', {
-        filters: { yonghu: userId }
+        filters: { yonghu: { $eq: userId } }
       });
       
       if (wallets.length > 0) {
